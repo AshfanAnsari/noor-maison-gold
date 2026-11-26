@@ -634,6 +634,51 @@
     .ord-sheet.open .panel{transform:translate(-50%,-50%);opacity:1}
   }
 
+  /* ---- entry offer popup (added 2026-11-27) ----
+     WHAT IT IS: a one-time-per-session card that appears on the home page
+     just after the opening loader settles, announcing Saba's free-gift
+     offers. Markup lives near the end of <body> (search "offerPop"); the
+     behaviour lives in the script right under that markup (search
+     "nm_offer_seen").
+     TO CHANGE THE OFFERS: edit only the two .offer-line sentences (and the
+     footer strip) in the markup — no CSS or JS change is needed. Keep the
+     wording simple and do not add prices: the site has no prices yet.
+     STYLE NOTES: cream card + foil-gold accents reuse the order-sheet
+     palette (#faf6ee panel, #8a6420 / #a37f2c golds, #3a2a12 ink) so the
+     popup feels like part of the site. z-index 130 sits above the sheets
+     (120) and tab bar (80), below nothing else once the loader (200) is
+     gone. On phones (<=560px) the side photo becomes a band across the
+     top of the card so the text column never gets squeezed. */
+  .offer-pop{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center;padding:16px}
+  .offer-pop.open{display:flex}
+  .offer-scrim{position:absolute;inset:0;background:rgba(20,14,6,.55);backdrop-filter:blur(3px)}
+  .offer-card{position:relative;width:min(680px,100%);max-height:88vh;overflow:hidden;background:#faf6ee;color:#1a1712;border:1px solid rgba(163,127,44,.5);border-radius:22px;box-shadow:0 30px 80px rgba(20,14,6,.45);display:flex;flex-direction:column;animation:offerIn .3s cubic-bezier(.22,1,.36,1)}
+  @keyframes offerIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+  .offer-x{position:absolute;top:10px;right:10px;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid rgba(58,42,18,.25);background:rgba(250,246,238,.92);color:#3a2a12;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .offer-body{display:flex;flex:1;min-height:0}
+  .offer-main{flex:1;padding:28px 26px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .offer-logo{width:150px;height:auto;display:block}
+  .offer-h{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,7vw,46px);letter-spacing:.05em;line-height:1.05;color:#3a2a12;margin-top:12px}
+  .offer-rule{display:block;width:44px;height:1px;margin-top:14px;background:linear-gradient(90deg,transparent,#8a6420,transparent)}
+  .offer-lines{margin-top:16px;display:flex;flex-direction:column;gap:11px}
+  .offer-line{font-size:15.5px;line-height:1.5;color:#3d382e}
+  .offer-line::before{content:"";display:inline-block;width:7px;height:7px;margin-right:9px;vertical-align:2px;transform:rotate(45deg);background:linear-gradient(135deg,#a37f2c,#e0c078)}
+  .offer-line b{color:#8a6420;font-weight:700}
+  .offer-visual{flex:0 0 34%;position:relative}
+  .offer-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .offer-foot{background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#2e2010;text-align:center;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:11px 12px}
+  @media (max-width:560px){
+    .offer-body{flex-direction:column}
+    .offer-visual{order:-1;flex:0 0 118px}
+    .offer-main{padding:20px 20px 18px}
+    .offer-logo{width:118px}
+  }
+  @media (max-height:500px){
+    .offer-logo{width:96px}
+    .offer-h{font-size:30px}
+    .offer-main{padding:16px 20px 14px}
+  }
+
   /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ---- */
   @media (max-width:760px){
     .tabbar{transition:transform .38s cubic-bezier(.22,1,.36,1)}
@@ -712,6 +757,10 @@
         <div class="nb-links">
           <a href="#collection">Collection</a>
           <a href="explore.html">Explore</a>
+          <!-- Nails link (added 2026-11-27): nails.html is a SHELL for now —
+               a coming-soon page in the Explore pattern. Nail products are
+               added later, when Saba's photos arrive. -->
+          <a href="nails.html">Nails</a>
         </div>
         <div class="nb-right">
           <button class="nb-search" id="searchBtn" aria-label="Search the collection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.8-3.8"/></svg></button>
@@ -1390,6 +1439,8 @@
   <nav class="tabbar" aria-label="Bottom">
     <a class="tab on" data-tab="home" href="#stage"><span class="sym" aria-hidden="true">S</span><span class="tl">Noor Maison</span></a>
     <a class="tab" data-tab="explore" href="explore.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M15.6 8.4l-2.1 4.9-4.9 2.1 2.1-4.9z"/></svg><span class="tl">Explore</span></a>
+    <!-- Nails tab (added 2026-11-27): nails.html is a shell for now; products later. -->
+    <a class="tab" data-tab="nails" href="nails.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5h4V9h-4z"/><path d="M9.4 9h5.2c1 1.3 1.6 2.8 1.6 4.4V18a2.9 2.9 0 0 1-2.9 2.9h-2.6A2.9 2.9 0 0 1 7.8 18v-4.6c0-1.6.6-3.1 1.6-4.4z"/></svg><span class="tl">Nails</span></a>
     <button type="button" class="tab" data-tab="cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 8h13.6l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H8.1a1.8 1.8 0 0 1-1.8-1.6z"/><path d="M8.6 10V6.8a3.4 3.4 0 0 1 6.8 0V10"/></svg><span class="tl">Cart</span></button>
     <button class="tab" data-tab="settings" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 8h8.4M18.8 8H20M4 16h2.6M13 16h7"/><circle cx="15.4" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg><span class="tl">Settings</span></button>
   </nav>
@@ -1447,6 +1498,85 @@
       <button type="button" class="ord-place ghost" id="pvClose">Close</button>
     </div>
   </div>
+  <!-- ===== Entry offer popup (added 2026-11-27) =====
+       Shown once per browser session, just after the loader settles (see
+       the script directly below). It only ANNOUNCES Saba's free-gift
+       offers — it takes no input and changes nothing about ordering.
+       The ₹999 line uses Saba's own wording from her Instagram post of
+       2026-11-20 (@noormaison_by_saba: "a FREE complimentary gift when
+       you shop above ₹999"); the ₹1,499 surprise-gift line is the user's.
+       TO CHANGE THE OFFERS: edit the two .offer-line sentences and the
+       .offer-foot strip here — nothing else needs touching.
+       Photos: assets/logo-mark-sm.webp is a web-weight copy of
+       logo/logo-mark.png (master untouched); assets/gift-box.webp is a
+       web-weight copy of her gift-box photo. Both ship automatically
+       through the normal assets/ pipeline in deploy/build_standalone.py. -->
+  <div class="offer-pop" id="offerPop" role="dialog" aria-modal="true" aria-label="Free gifts offer">
+    <div class="offer-scrim" data-offer-close></div>
+    <div class="offer-card">
+      <button type="button" class="offer-x" data-offer-close aria-label="Close offer">&times;</button>
+      <div class="offer-body">
+        <div class="offer-main">
+          <img class="offer-logo" src="assets/logo-mark-sm.webp" alt="Noor Maison by Saba">
+          <h2 class="offer-h">FREE GIFTS</h2>
+          <span class="offer-rule" aria-hidden="true"></span>
+          <div class="offer-lines">
+            <p class="offer-line">A free complimentary gift on orders above <b>&#8377;999</b></p>
+            <p class="offer-line">A surprise gift on orders above <b>&#8377;1,499</b></p>
+          </div>
+        </div>
+        <div class="offer-visual"><img src="assets/gift-box.webp" alt=""></div>
+      </div>
+      <p class="offer-foot">Premium Quality&nbsp;&nbsp;|&nbsp;&nbsp;Limited Time Offer</p>
+    </div>
+  </div>
+  <script>
+  /* Entry offer popup behaviour (added 2026-11-27).
+     - Shows ONCE per session: sessionStorage flag "nm_offer_seen" is set
+       the moment the popup opens, so in-session reloads and navigating
+       back to this page never show it again; a NEW session (browser
+       reopened / new tab session) sees it again. If sessionStorage is
+       blocked, the popup simply shows on each load — a safe fallback.
+     - Timing: it waits until the loader veil has fully left (dismissLoader
+       sets #loader to display:none at the end of its slide-up; reduced-
+       motion visitors get body.static instead), then waits ~400ms so the
+       hero gets a beat first.
+     - Closing: the x button, a tap on the dimmed backdrop, or Escape.
+       While open, body scroll is locked exactly like the order sheets
+       (document.body.style.overflow), and restored on close. */
+  (function(){
+    var pop = document.getElementById('offerPop'); if (!pop) return;
+    var FLAG = 'nm_offer_seen';
+    function seen(){ try { return !!sessionStorage.getItem(FLAG); } catch(e){ return false; } }
+    function mark(){ try { sessionStorage.setItem(FLAG, '1'); } catch(e){} }
+    function closePop(){
+      pop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function openPop(){
+      mark();
+      pop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      var x = pop.querySelector('.offer-x');
+      if (x && x.focus) x.focus({ preventScroll: true });
+    }
+    pop.querySelectorAll('[data-offer-close]').forEach(function(el){
+      el.addEventListener('click', closePop);
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && pop.classList.contains('open')) closePop();
+    });
+    if (seen()) return;
+    var loaderEl = document.getElementById('loader');
+    function loaderDone(){
+      return !loaderEl || loaderEl.style.display === 'none' || document.body.classList.contains('static');
+    }
+    (function wait(){
+      if (loaderDone()){ setTimeout(function(){ if (!seen()) openPop(); }, 400); }
+      else setTimeout(wait, 120);
+    })();
+  })();
+  </script>
   <script>
   (function(){
     var bar = document.querySelector('.tabbar'); if(!bar) return;
