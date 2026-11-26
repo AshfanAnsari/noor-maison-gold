@@ -628,6 +628,14 @@
     .ord-sheet.open{pointer-events:auto}
     .ord-sheet.open .panel{transform:translate(-50%,-50%);opacity:1}
   }
+
+  /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ---- */
+  @media (max-width:760px){
+    .tabbar{transition:transform .38s cubic-bezier(.22,1,.36,1)}
+    body.bar-hide .tabbar{transform:translateY(calc(100% + 18px + env(safe-area-inset-bottom)))}
+    .talk-fab{transition:bottom .38s cubic-bezier(.22,1,.36,1)}
+    body.bar-hide .talk-fab{bottom:calc(18px + env(safe-area-inset-bottom))}
+  }
 </style>
 </head>
 <body>
@@ -1406,6 +1414,21 @@
     else { box.innerHTML = all.map(function(o){ return '<div class="ord-item"><b>' + o.name + ' \u00d7 ' + o.qty + '</b><p>Order ID ' + o.oid + ' \u00b7 ' + new Date(o.when).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) + '<br>Status: Waiting for Saba to confirm</p></div>'; }).join(''); }
     listSheet.classList.add('open');
   };
+})();
+</script>
+
+<script>
+(function(){
+  var bar = document.querySelector('.tabbar');
+  if(!bar) return;
+  var refY = window.scrollY || 0, hidden = false;
+  function apply(){ document.body.classList.toggle('bar-hide', hidden); }
+  window.addEventListener('scroll', function(){
+    var y = window.scrollY || 0;
+    if(y <= 80){ if(hidden){ hidden = false; apply(); } refY = y; return; }
+    if(y - refY > 8){ if(!hidden){ hidden = true; apply(); } refY = y; }
+    else if(refY - y > 8){ if(hidden){ hidden = false; apply(); } refY = y; }
+  }, { passive: true });
 })();
 </script>
 </body>
