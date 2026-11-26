@@ -634,49 +634,69 @@
     .ord-sheet.open .panel{transform:translate(-50%,-50%);opacity:1}
   }
 
-  /* ---- entry offer popup (added 2026-11-27) ----
-     WHAT IT IS: a one-time-per-session card that appears on the home page
-     just after the opening loader settles, announcing Saba's free-gift
-     offers. Markup lives near the end of <body> (search "offerPop"); the
-     behaviour lives in the script right under that markup (search
-     "nm_offer_seen").
-     TO CHANGE THE OFFERS: edit only the two .offer-line sentences (and the
-     footer strip) in the markup — no CSS or JS change is needed. Keep the
-     wording simple and do not add prices: the site has no prices yet.
+  /* ---- entry offer cards carousel (added 2026-11-27, replaces the
+     static entry offer popup) ----
+     WHAT IT IS: once per session, just after the opening loader settles,
+     a card carousel announces Saba's five offers, one card each. It
+     auto-advances every ~3.5s in a seamless loop (the script clones the
+     first card onto the end of the track, so the wrap never jumps),
+     can be swiped / dragged, and closes fully via the x, the dimmed
+     backdrop or Escape. Markup lives near the end of <body> (search
+     "offerCards"); behaviour lives in the script right under it (search
+     "nm_offer_seen" — the same sessionStorage flag the old popup used,
+     so a visitor is never shown both versions in one session).
+     TO CHANGE THE OFFERS: edit only the .offer-slide blocks in the
+     markup (headline + line). If you add or remove a card, add or
+     remove one .offer-dot button to match — the loop clone is made by
+     the script, never write it in markup. Do not add product prices:
+     the site has no prices yet; these are offer thresholds only.
      STYLE NOTES: cream card + foil-gold accents reuse the order-sheet
-     palette (#faf6ee panel, #8a6420 / #a37f2c golds, #3a2a12 ink) so the
-     popup feels like part of the site. z-index 130 sits above the sheets
-     (120) and tab bar (80), below nothing else once the loader (200) is
-     gone. On phones (<=560px) the side photo becomes a band across the
-     top of the card so the text column never gets squeezed. */
+     palette (#faf6ee panel, #8a6420 / #a37f2c golds, #3a2a12 ink).
+     z-index 130 sits above the sheets (120) and tab bar (80); the
+     loader (200) is already gone when this opens. On phones (<=560px)
+     a card's photo becomes a band across its top so text never
+     squeezes. */
   .offer-pop{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center;padding:16px}
   .offer-pop.open{display:flex}
   .offer-scrim{position:absolute;inset:0;background:rgba(20,14,6,.55);backdrop-filter:blur(3px)}
   .offer-card{position:relative;width:min(680px,100%);max-height:88vh;overflow:hidden;background:#faf6ee;color:#1a1712;border:1px solid rgba(163,127,44,.5);border-radius:22px;box-shadow:0 30px 80px rgba(20,14,6,.45);display:flex;flex-direction:column;animation:offerIn .3s cubic-bezier(.22,1,.36,1)}
   @keyframes offerIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
-  .offer-x{position:absolute;top:10px;right:10px;z-index:2;width:44px;height:44px;border-radius:50%;border:1px solid rgba(58,42,18,.25);background:rgba(250,246,238,.92);color:#3a2a12;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .offer-body{display:flex;flex:1;min-height:0}
-  .offer-main{flex:1;padding:28px 26px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
-  .offer-logo{width:150px;height:auto;display:block}
-  .offer-h{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,7vw,46px);letter-spacing:.05em;line-height:1.05;color:#3a2a12;margin-top:12px}
+  .offer-x{position:absolute;top:10px;right:10px;z-index:3;width:44px;height:44px;border-radius:50%;border:1px solid rgba(58,42,18,.25);background:rgba(250,246,238,.92);color:#3a2a12;font-size:21px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .offer-head{padding:22px 26px 0;text-align:center}
+  .offer-logo{width:150px;height:auto;display:block;margin:0 auto}
+  .offer-viewport{overflow:hidden;flex:1;min-height:0;touch-action:pan-y;cursor:grab}
+  .offer-viewport.dragging{cursor:grabbing}
+  .offer-viewport img{-webkit-user-drag:none;user-select:none}
+  .offer-track{display:flex;height:100%;transition:transform .55s cubic-bezier(.22,1,.36,1)}
+  .offer-track.noanim{transition:none}
+  .offer-slide{flex:0 0 100%;min-width:0;display:flex;min-height:0}
+  .offer-main{flex:1;padding:18px 26px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .offer-gem{display:block;width:8px;height:8px;margin-bottom:16px;transform:rotate(45deg);background:linear-gradient(135deg,#a37f2c,#e0c078)}
+  .offer-h{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(32px,7vw,44px);letter-spacing:.05em;line-height:1.05;color:#3a2a12}
   .offer-rule{display:block;width:44px;height:1px;margin-top:14px;background:linear-gradient(90deg,transparent,#8a6420,transparent)}
-  .offer-lines{margin-top:16px;display:flex;flex-direction:column;gap:11px}
-  .offer-line{font-size:15.5px;line-height:1.5;color:#3d382e}
-  .offer-line::before{content:"";display:inline-block;width:7px;height:7px;margin-right:9px;vertical-align:2px;transform:rotate(45deg);background:linear-gradient(135deg,#a37f2c,#e0c078)}
+  .offer-line{margin-top:14px;font-size:15.5px;line-height:1.5;color:#3d382e}
   .offer-line b{color:#8a6420;font-weight:700}
   .offer-visual{flex:0 0 34%;position:relative}
   .offer-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  .offer-dots{display:flex;justify-content:center;align-items:center;gap:7px;padding:6px 0 14px}
+  .offer-dot{width:7px;height:10px;border-radius:99px;border:none;padding:0;background:rgba(138,100,32,.32);cursor:pointer;transition:width .35s ease,background .35s ease}
+  .offer-dot.on{width:22px;background:linear-gradient(90deg,#a37f2c,#e0c078)}
   .offer-foot{background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#2e2010;text-align:center;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:11px 12px}
   @media (max-width:560px){
-    .offer-body{flex-direction:column}
+    .offer-slide{flex-direction:column}
     .offer-visual{order:-1;flex:0 0 118px}
-    .offer-main{padding:20px 20px 18px}
+    .offer-main{padding:16px 20px 18px}
     .offer-logo{width:118px}
+    .offer-head{padding-top:18px}
   }
   @media (max-height:500px){
     .offer-logo{width:96px}
-    .offer-h{font-size:30px}
-    .offer-main{padding:16px 20px 14px}
+    .offer-h{font-size:29px}
+    .offer-main{padding:12px 20px 10px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .offer-card{animation:none}
+    .offer-track{transition:none}
   }
 
   /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ---- */
@@ -717,9 +737,36 @@
   .cta-alt{position:relative;margin-top:26px;font-size:14.5px;color:#57431f}
   .cta-alt a{color:#7c5a1e;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(124,90,30,.4)}
   @media (prefers-reduced-motion: reduce){ .cta-arc{display:none} }
+
+  /* ---------- offers marquee bar (all pages, added 2026-11-27) ----------
+     A thin ink bar at the very top of every page, repeating the current
+     offers in a seamless leftward loop. It is the FIRST element in <body>
+     (in-flow, not fixed) so it can never cover the floating pill navbar —
+     it simply scrolls away with the page. The track holds TWO identical
+     .mq-seq spans and animates to -50%, so the wrap point is invisible.
+     Style: ink bar + foil-gold text — a gold bar would blur into the
+     foil navbar below it (sub-pages) and the light-gold hero (home).
+     TO CHANGE THE OFFERS: edit the text inside BOTH .mq-seq spans in the
+     markup (keep them identical) — no CSS or JS change is needed.
+     Reduced-motion visitors get a still bar. */
+  .mq{background:#241a0c;color:#e6c87c;overflow:hidden;height:32px;display:flex;align-items:center;position:relative;z-index:55}
+  .mq-track{display:flex;flex:none;white-space:nowrap;will-change:transform;animation:mqScroll 28s linear infinite}
+  .mq-seq{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+  .mq-seq i{font-style:normal;color:#a37f2c;padding:0 .9em}
+  @keyframes mqScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion: reduce){ .mq-track{animation:none} }
 </style>
 </head>
 <body>
+  <!-- Offers marquee (all pages): the two .mq-seq spans must stay
+       IDENTICAL — the loop wraps at exactly one sequence width.
+       Offers text only; always edit both spans together. -->
+  <div class="mq" aria-label="Current offers">
+    <div class="mq-track" aria-hidden="true">
+      <span class="mq-seq">FREE SHIPPING ON ORDERS ABOVE &#8377;499 <i>&#10022;</i> FREE GOODIES <i>&#10022;</i> KOREAN IMPORTED <i>&#10022;</i> ANTI-TARNISH <i>&#10022;</i> FREE MIRROR ABOVE &#8377;999 <i>&#10022;</i> SURPRISE GIFT ABOVE &#8377;1,499 <i>&#10022;</i></span>
+      <span class="mq-seq">FREE SHIPPING ON ORDERS ABOVE &#8377;499 <i>&#10022;</i> FREE GOODIES <i>&#10022;</i> KOREAN IMPORTED <i>&#10022;</i> ANTI-TARNISH <i>&#10022;</i> FREE MIRROR ABOVE &#8377;999 <i>&#10022;</i> SURPRISE GIFT ABOVE &#8377;1,499 <i>&#10022;</i></span>
+    </div>
+  </div>
   <div id="loader" role="button" aria-label="Skip intro">
     <div class="ld-lock">
     <div class="ld-sym"><svg class="ld-symsvg" viewBox="40 -4 772 334" aria-hidden="true"><defs><linearGradient id="ldFoil" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c5a1e"/><stop offset=".35" stop-color="#a37f2c"/><stop offset=".5" stop-color="#e0c078"/><stop offset=".65" stop-color="#a37f2c"/><stop offset="1" stop-color="#7c5a1e"/></linearGradient></defs><g class="ld-symS" fill="none" stroke="url(#ldFoil)" stroke-linecap="round">
@@ -1498,58 +1545,152 @@
       <button type="button" class="ord-place ghost" id="pvClose">Close</button>
     </div>
   </div>
-  <!-- ===== Entry offer popup (added 2026-11-27) =====
+  <!-- ===== Entry offer cards carousel (added 2026-11-27, replaces the
+       static offer popup) =====
        Shown once per browser session, just after the loader settles (see
-       the script directly below). It only ANNOUNCES Saba's free-gift
-       offers — it takes no input and changes nothing about ordering.
-       The ₹999 line uses Saba's own wording from her Instagram post of
-       2026-11-20 (@noormaison_by_saba: "a FREE complimentary gift when
-       you shop above ₹999"); the ₹1,499 surprise-gift line is the user's.
-       TO CHANGE THE OFFERS: edit the two .offer-line sentences and the
-       .offer-foot strip here — nothing else needs touching.
+       the script directly below). Five cards, one offer each, rotating
+       on their own; it only ANNOUNCES the offers — it takes no input
+       and changes nothing about ordering.
+       The &#8377;999 mirror offer matches Saba's own announcement ("a
+       FREE complimentary gift when you shop above &#8377;999" — her
+       Instagram post of 2026-11-20, @noormaison_by_saba); free shipping
+       above &#8377;499, the surprise gift above &#8377;1,499, Korean
+       imported and anti-tarnish are the user's confirmed offers
+       (2026-11-27). All products are Korean imported; the jewellery is
+       anti-tarnish.
+       TO CHANGE THE OFFERS: edit the .offer-slide blocks here and keep
+       the .offer-dot count in step. The seamless-loop clone of the
+       first card is added by the script — never add it in markup.
        Photos: assets/logo-mark-sm.webp is a web-weight copy of
-       logo/logo-mark.png (master untouched); assets/gift-box.webp is a
-       web-weight copy of her gift-box photo. Both ship automatically
-       through the normal assets/ pipeline in deploy/build_standalone.py. -->
-  <div class="offer-pop" id="offerPop" role="dialog" aria-modal="true" aria-label="Free gifts offer">
+       logo/logo-mark.png and assets/gift-box.webp of her gift-box photo
+       (masters untouched); both ship automatically through the assets/
+       pipeline in deploy/build_standalone.py. -->
+  <div class="offer-pop" id="offerCards" role="dialog" aria-modal="true" aria-label="Current offers">
     <div class="offer-scrim" data-offer-close></div>
     <div class="offer-card">
-      <button type="button" class="offer-x" data-offer-close aria-label="Close offer">&times;</button>
-      <div class="offer-body">
-        <div class="offer-main">
-          <img class="offer-logo" src="assets/logo-mark-sm.webp" alt="Noor Maison by Saba">
-          <h2 class="offer-h">FREE GIFTS</h2>
-          <span class="offer-rule" aria-hidden="true"></span>
-          <div class="offer-lines">
-            <p class="offer-line">A free complimentary gift on orders above <b>&#8377;999</b></p>
-            <p class="offer-line">A surprise gift on orders above <b>&#8377;1,499</b></p>
-          </div>
+      <button type="button" class="offer-x" data-offer-close aria-label="Close offers">&times;</button>
+      <div class="offer-head">
+        <img class="offer-logo" src="assets/logo-mark-sm.webp" alt="Noor Maison by Saba">
+      </div>
+      <div class="offer-viewport" id="offerViewport">
+        <div class="offer-track" id="offerTrack">
+          <section class="offer-slide">
+            <div class="offer-main">
+              <span class="offer-gem" aria-hidden="true"></span>
+              <h2 class="offer-h">FREE SHIPPING</h2>
+              <span class="offer-rule" aria-hidden="true"></span>
+              <p class="offer-line">On all orders above <b>&#8377;499</b></p>
+            </div>
+          </section>
+          <section class="offer-slide">
+            <div class="offer-main">
+              <h2 class="offer-h">FREE MIRROR</h2>
+              <span class="offer-rule" aria-hidden="true"></span>
+              <p class="offer-line">On orders above <b>&#8377;999</b></p>
+            </div>
+            <div class="offer-visual"><img src="assets/gift-box.webp" alt="" style="object-position:50% 25%"></div>
+          </section>
+          <section class="offer-slide">
+            <div class="offer-main">
+              <h2 class="offer-h">A SURPRISE GIFT</h2>
+              <span class="offer-rule" aria-hidden="true"></span>
+              <p class="offer-line">On orders above <b>&#8377;1,499</b></p>
+            </div>
+            <div class="offer-visual"><img src="assets/gift-box.webp" alt="" style="object-position:50% 72%"></div>
+          </section>
+          <section class="offer-slide">
+            <div class="offer-main">
+              <span class="offer-gem" aria-hidden="true"></span>
+              <h2 class="offer-h">KOREAN IMPORTED</h2>
+              <span class="offer-rule" aria-hidden="true"></span>
+              <p class="offer-line">All our products</p>
+            </div>
+          </section>
+          <section class="offer-slide">
+            <div class="offer-main">
+              <span class="offer-gem" aria-hidden="true"></span>
+              <h2 class="offer-h">ANTI-TARNISH</h2>
+              <span class="offer-rule" aria-hidden="true"></span>
+              <p class="offer-line">Jewellery that stays bright</p>
+            </div>
+          </section>
         </div>
-        <div class="offer-visual"><img src="assets/gift-box.webp" alt=""></div>
+      </div>
+      <div class="offer-dots" id="offerDots" aria-label="Offer cards">
+        <button type="button" class="offer-dot on" data-go="0" aria-label="Offer card 1"></button>
+        <button type="button" class="offer-dot" data-go="1" aria-label="Offer card 2"></button>
+        <button type="button" class="offer-dot" data-go="2" aria-label="Offer card 3"></button>
+        <button type="button" class="offer-dot" data-go="3" aria-label="Offer card 4"></button>
+        <button type="button" class="offer-dot" data-go="4" aria-label="Offer card 5"></button>
       </div>
       <p class="offer-foot">Premium Quality&nbsp;&nbsp;|&nbsp;&nbsp;Limited Time Offer</p>
     </div>
   </div>
   <script>
-  /* Entry offer popup behaviour (added 2026-11-27).
-     - Shows ONCE per session: sessionStorage flag "nm_offer_seen" is set
-       the moment the popup opens, so in-session reloads and navigating
-       back to this page never show it again; a NEW session (browser
-       reopened / new tab session) sees it again. If sessionStorage is
-       blocked, the popup simply shows on each load — a safe fallback.
-     - Timing: it waits until the loader veil has fully left (dismissLoader
+  /* Entry offer cards behaviour (added 2026-11-27).
+     - Shows ONCE per session: sessionStorage flag "nm_offer_seen" (the
+       same flag the replaced static popup used) is set the moment the
+       carousel opens, so in-session reloads and navigating back never
+       reshow it; a NEW session sees it again. If sessionStorage is
+       blocked, it simply shows on each load — a safe fallback.
+     - Timing: waits until the loader veil has fully left (dismissLoader
        sets #loader to display:none at the end of its slide-up; reduced-
-       motion visitors get body.static instead), then waits ~400ms so the
-       hero gets a beat first.
-     - Closing: the x button, a tap on the dimmed backdrop, or Escape.
-       While open, body scroll is locked exactly like the order sheets
-       (document.body.style.overflow), and restored on close. */
+       motion visitors get body.static instead), then waits ~400ms so
+       the hero gets a beat first.
+     - Rotation: auto-advances every 3.5s. The track holds the five
+       cards plus a clone of the first (made here, not in markup);
+       stepping onto the clone and then snapping back to card 1 with
+       the transition off makes the loop seamless. Rotation pauses
+       while the visitor drags, while the tab is hidden, and stops for
+       good on close; reduced-motion visitors get no auto-rotation
+       (they can still swipe or tap the dots).
+     - Input: pointer drag/swipe on the viewport (touch + mouse), dot
+       buttons jump to a card; the x button, a tap on the dimmed
+       backdrop, or Escape close. While open, body scroll is locked
+       exactly like the order sheets (document.body.style.overflow)
+       and restored on close. */
   (function(){
-    var pop = document.getElementById('offerPop'); if (!pop) return;
+    var pop = document.getElementById('offerCards'); if (!pop) return;
     var FLAG = 'nm_offer_seen';
+    var viewport = document.getElementById('offerViewport');
+    var track = document.getElementById('offerTrack');
+    var dots = Array.prototype.slice.call(pop.querySelectorAll('.offer-dot'));
+    var N = dots.length; /* real card count — the dots mirror the cards */
+    /* seamless loop: clone the first card onto the end of the track */
+    var clone = track.children[0].cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    track.appendChild(clone);
+    var idx = 0, timer = null, dragging = false, snapPending = false;
+    var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function seen(){ try { return !!sessionStorage.getItem(FLAG); } catch(e){ return false; } }
     function mark(){ try { sessionStorage.setItem(FLAG, '1'); } catch(e){} }
+    function paint(){
+      track.style.transform = 'translateX(' + (-idx * 100) + '%)';
+      var real = ((idx % N) + N) % N;
+      dots.forEach(function(d, i){ d.classList.toggle('on', i === real); });
+    }
+    function snapHome(){ /* sitting on the clone: jump to real card 1 */
+      track.classList.add('noanim'); idx = 0; paint();
+      void track.offsetWidth; track.classList.remove('noanim');
+    }
+    function step(dir){
+      idx += dir;
+      paint();
+      if (idx === N){ /* landed on the clone: snap home once it settles */
+        setTimeout(function(){ if (dragging) { snapPending = true; } else { snapHome(); } }, 580);
+      } else if (idx < 0){ /* stepped back past card 1: jump via the clone */
+        track.classList.add('noanim'); idx = N; paint();
+        void track.offsetWidth; track.classList.remove('noanim');
+        idx = N - 1; paint();
+      }
+    }
+    function start(){
+      if (reduceMotion || timer || !pop.classList.contains('open')) return;
+      timer = setInterval(function(){ if (!document.hidden && !dragging) step(1); }, 3500);
+    }
+    function stop(){ if (timer){ clearInterval(timer); timer = null; } }
     function closePop(){
+      stop();
       pop.classList.remove('open');
       document.body.style.overflow = '';
     }
@@ -1559,6 +1700,7 @@
       document.body.style.overflow = 'hidden';
       var x = pop.querySelector('.offer-x');
       if (x && x.focus) x.focus({ preventScroll: true });
+      start();
     }
     pop.querySelectorAll('[data-offer-close]').forEach(function(el){
       el.addEventListener('click', closePop);
@@ -1566,6 +1708,38 @@
     document.addEventListener('keydown', function(e){
       if (e.key === 'Escape' && pop.classList.contains('open')) closePop();
     });
+    dots.forEach(function(d, i){
+      d.addEventListener('click', function(){ idx = i; paint(); });
+    });
+    /* drag / swipe — pointer events cover touch and mouse alike.
+       touch-action:pan-y (in the CSS) keeps vertical gestures native
+       and lets horizontal movement drive the track. */
+    var startX = 0, dx = 0;
+    viewport.addEventListener('pointerdown', function(e){
+      dragging = true; dx = 0; startX = e.clientX;
+      viewport.classList.add('dragging');
+      track.classList.add('noanim');
+      if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+      if (viewport.setPointerCapture){ try { viewport.setPointerCapture(e.pointerId); } catch(err){} }
+    });
+    viewport.addEventListener('pointermove', function(e){
+      if (!dragging) return;
+      dx = e.clientX - startX;
+      track.style.transform = 'translateX(calc(' + (-idx * 100) + '% + ' + dx + 'px))';
+    });
+    function endDrag(){
+      if (!dragging) return;
+      dragging = false;
+      viewport.classList.remove('dragging');
+      track.classList.remove('noanim');
+      if (snapPending){ snapPending = false; snapHome(); }
+      if (dx <= -50) step(1);
+      else if (dx >= 50) step(-1);
+      else paint();
+      dx = 0;
+    }
+    viewport.addEventListener('pointerup', endDrag);
+    viewport.addEventListener('pointercancel', endDrag);
     if (seen()) return;
     var loaderEl = document.getElementById('loader');
     function loaderDone(){
