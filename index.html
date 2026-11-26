@@ -639,6 +639,32 @@
     .talk-fab{transition:bottom .38s cubic-bezier(.22,1,.36,1)}
     body.bar-hide .talk-fab{bottom:calc(18px + env(safe-area-inset-bottom))}
   }
+
+  /* ---------- FAQ + closing CTA (portfolio sections, Noor gold language) ---------- */
+  .faq{max-width:880px;margin:0 auto;padding:96px 24px 8px;text-align:center}
+  .faq-eyebrow,.cta-eyebrow{font-size:11px;font-weight:700;letter-spacing:.34em;color:#6d5836;text-transform:uppercase}
+  .faq-h{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(38px,6vw,58px);line-height:1.05;color:#3a2a12;margin:14px 0 40px}
+  .faq-h em,.cta-h em{font-style:italic}
+  .faq-list{text-align:left;border-bottom:1px solid rgba(109,88,54,.28)}
+  .faq-item{border-top:1px solid rgba(109,88,54,.28)}
+  .faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;background:none;border:0;cursor:pointer;padding:22px 4px;font-family:'Manrope',sans-serif;font-size:16.5px;font-weight:600;color:#3a2a12;text-align:left}
+  .faq-ic{flex:none;width:26px;height:26px;border-radius:50%;border:1px solid rgba(109,88,54,.5);position:relative}
+  .faq-ic::before,.faq-ic::after{content:"";position:absolute;background:#6d5836;left:50%;top:50%}
+  .faq-ic::before{width:10px;height:1.6px;transform:translate(-50%,-50%)}
+  .faq-ic::after{width:1.6px;height:10px;transform:translate(-50%,-50%);transition:transform .35s ease}
+  .faq-item.open .faq-ic::after{transform:translate(-50%,-50%) rotate(90deg);opacity:0}
+  .faq-a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.4,0,.2,1)}
+  .faq-a>div{overflow:hidden}
+  .faq-a p{margin:0;padding:0 44px 24px 4px;font-size:15px;line-height:1.65;color:#57431f;max-width:640px}
+  .faq-item.open .faq-a{grid-template-rows:1fr}
+  .cta{position:relative;overflow:hidden;text-align:center;padding:110px 24px 96px}
+  .cta-arc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .cta-h{position:relative;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(40px,6.6vw,64px);line-height:1.06;color:#3a2a12;margin:16px 0 18px}
+  .cta-sub{position:relative;font-size:16px;line-height:1.6;color:#57431f;max-width:520px;margin:0 auto 34px}
+  .cta-btn{position:relative;display:inline-block;background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#3a2a12;font-weight:700;font-size:15px;letter-spacing:.02em;text-decoration:none;padding:16px 34px;border-radius:999px;box-shadow:0 12px 30px rgba(124,90,30,.35)}
+  .cta-alt{position:relative;margin-top:26px;font-size:14.5px;color:#57431f}
+  .cta-alt a{color:#7c5a1e;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(124,90,30,.4)}
+  @media (prefers-reduced-motion: reduce){ .cta-arc{display:none} }
 </style>
 </head>
 <body>
@@ -840,7 +866,49 @@
   
 
   
+
 </main>
+<section class="faq" id="faq">
+  <p class="faq-eyebrow rv">Questions</p>
+  <h2 class="faq-h rv">Asked, <em>answered.</em></h2>
+  <div class="faq-list rv">
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">How do I order?<span class="faq-ic"></span></button>
+      <div class="faq-a"><div><p>Tap <strong>ORDER</strong> on any piece, fill in your name, phone number and address, and place your order. You will get an Order ID — and Saba confirms every order herself.</p></div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">How do I pay?<span class="faq-ic"></span></button>
+      <div class="faq-a"><div><p>Payment is by UPI, after Saba confirms your order. Keep your Order ID ready — she will share the payment details with you herself.</p></div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Do I need an account?<span class="faq-ic"></span></button>
+      <div class="faq-a"><div><p>No account and no password. Your name and phone number are enough to place an order.</p></div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">What if a piece is out of stock?<span class="faq-ic"></span></button>
+      <div class="faq-a"><div><p>Some pieces are limited, and a piece marked <strong>Out of stock</strong> cannot be ordered right now. Talk to Saba — she will tell you when it is back.</p></div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Can I talk to Saba before ordering?<span class="faq-ic"></span></button>
+      <div class="faq-a"><div><p>Yes — tap <strong>Talk to Saba</strong> anywhere on this page and it opens her Instagram. Ask her anything about a piece before you decide.</p></div></div>
+    </div>
+  </div>
+</section>
+<section class="cta" id="visit">
+  <svg class="cta-arc" viewBox="0 0 1200 260" preserveAspectRatio="none" aria-hidden="true">
+    <path id="ctaPath" d="M-20,214 C300,64 820,24 1150,92" fill="none" stroke="rgba(109,88,54,.45)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 10"/>
+    <g opacity="0">
+      <path d="M0,-11 C1.6,-3.2 3.2,-1.6 11,0 C3.2,1.6 1.6,3.2 0,11 C-1.6,3.2 -3.2,1.6 -11,0 C-3.2,-1.6 -1.6,-3.2 0,-11 Z" fill="#a37f2c"/>
+      <animateMotion dur="7s" repeatCount="indefinite"><mpath href="#ctaPath"/></animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.12;0.88;1" dur="7s" repeatCount="indefinite"/>
+    </g>
+  </svg>
+  <p class="cta-eyebrow rv">Noor Maison · By Saba</p>
+  <h2 class="cta-h rv">Find the piece that<br>feels like <em>you.</em></h2>
+  <p class="cta-sub rv">Nine pieces, ready to order right here on the website — or talk to Saba first; she is happy to help you choose.</p>
+  <a class="cta-btn rv" href="#collection">See the Collection</a>
+  <p class="cta-alt rv">or <a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">talk to Saba on Instagram</a></p>
+</section>
 <footer class="foot">
     <p class="foot-c">© 2026 Noor Maison by Saba</p>
     <p class="foot-l"><a href="https://www.instagram.com/noormaison_by_saba" target="_blank" rel="noopener">Instagram @noormaison_by_saba</a><span class="dot" aria-hidden="true">·</span><a href="#collection">The Collection</a><span class="dot" aria-hidden="true">·</span><a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a></p>
@@ -1444,6 +1512,19 @@
     if(y - refY > 8){ if(!hidden){ hidden = true; apply(); } refY = y; }
     else if(refY - y > 8){ if(hidden){ hidden = false; apply(); } refY = y; }
   }, { passive: true });
+})();
+</script>
+
+<script>
+/* FAQ accordion */
+(function(){
+  document.querySelectorAll('.faq-item').forEach(function(item){
+    var btn = item.querySelector('.faq-q');
+    btn.addEventListener('click', function(){
+      var open = item.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
 })();
 </script>
 </body>
