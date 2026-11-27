@@ -378,6 +378,55 @@
   @media(max-width:760px){
     .pd-block{padding:19px 18px 21px;margin-top:12px}
   }
+
+  /* ================= FLIPKART-STYLE REBUILD — 2026-11-27 =================
+     User order: the product page takes Flipkart's layout — breadcrumb,
+     gallery + thumbnails on the left, buy box on the right with the
+     price the Flipkart way and the buttons inside the column — in the
+     Noor gold skin, not Flipkart blue. On phone the grid wrappers use
+     display:contents, so the page flows exactly as before and the
+     sticky Talk/Order bar stays. */
+  .pd-crumbs{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;font-size:12.5px;color:var(--muted,#6d5836);padding:2px 2px 10px;white-space:nowrap}
+  .pd-crumbs::-webkit-scrollbar{display:none}
+  .pd-crumbs a{color:#8a6420;text-decoration:none;font-weight:600}
+  .pd-crumbs .sep{opacity:.55}
+  .pd-crumbs .here{color:var(--ink,#3a2a12);font-weight:700;overflow:hidden;text-overflow:ellipsis}
+  /* wrappers are transparent on phone: children flow as before */
+  .pd-grid,.pd-galcol,.pd-buycol{display:contents}
+  .gal-thumbs{display:none}
+  .pd-buyacts{display:none}
+  .gal-nav{display:none}
+  @media(min-width:1024px){
+    .gal-nav{display:flex;align-items:center;justify-content:center;position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,253,246,.88);color:#6d4c12;box-shadow:0 4px 14px rgba(46,32,10,.22);cursor:pointer;opacity:0;transition:opacity .25s ease}
+    .pd-gal:hover .gal-nav,.gal-nav:focus-visible{opacity:1}
+    .gal-nav.prev{left:12px}
+    .gal-nav.next{right:12px}
+    .gal-nav svg{width:20px;height:20px}
+    .gal-nav[disabled]{opacity:0 !important;pointer-events:none}
+  }
+  @media(min-width:1024px){
+    .pd-sec{max-width:1180px}
+    .pd-grid{display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);gap:28px;align-items:start}
+    .pd-galcol{display:block;position:sticky;top:86px}
+    .pd-buycol{display:block}
+    .pd-buycol .pd-block:first-child{margin-top:0}
+    .pd-gal{max-width:100%;margin:0}
+    /* thumbnail strip: 56px thumbs, the active one ringed in gold */
+    .gal-thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+    .gal-thumbs::-webkit-scrollbar{display:none}
+    .gal-thumbs button{flex:0 0 auto;width:56px;height:56px;padding:0;border-radius:10px;overflow:hidden;border:2px solid rgba(122,90,32,.25);background:var(--paper,#fffdf6);cursor:pointer;position:relative}
+    .gal-thumbs button.on{border-color:#8a6420}
+    .gal-thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+    .gal-thumbs .tv-badge{position:absolute;right:3px;bottom:3px;background:rgba(30,20,8,.78);color:#ffe9b0;font-size:9px;font-weight:800;letter-spacing:.06em;padding:2px 5px;border-radius:6px}
+    /* the buy buttons inside the column (the phone sticky bar hides) */
+    .pd-buyacts{display:flex;gap:12px;margin-top:16px}
+    .pd-talk{flex:1;display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:14px;border:1.5px solid #8a6420;color:#7c5a1e;font-weight:700;font-size:16px;text-decoration:none;background:rgba(255,253,246,.6)}
+    .pd-orderbtn{flex:1;min-height:52px;border:none;border-radius:14px;background:linear-gradient(160deg,#a37f2c,#7c5a1e);color:#fff8e2;font-weight:800;font-size:16px;letter-spacing:.04em;cursor:pointer}
+    .pd-orderbtn[disabled]{opacity:.55;cursor:not-allowed}
+    .sticky-bar{display:none}
+    /* Flipkart price emphasis at desktop size */
+    .pd-price{font-size:40px}
+  }
 </style>
 <script>
 /* PAYMENT CONFIG — the ONE place to fill when Saba's details arrive.
@@ -443,6 +492,15 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
          then the product video(s). Heart = wishlist (localStorage
          nm_wishlist, this device only); share uses the system share sheet
          with a copy-link fallback. -->
+    <!-- 0 · BREADCRUMB (Flipkart rebuild, 2026-11-27): Home / Explore /
+         category / this piece — filled by the product script. -->
+    <nav class="pd-crumbs" id="pdCrumbs" aria-label="Breadcrumb"></nav>
+
+    <!-- Flipkart rebuild: on desktop the gallery and the buy column sit
+         side by side in .pd-grid; on phone the wrappers use
+         display:contents so the page flows exactly as before. -->
+    <div class="pd-grid">
+    <div class="pd-galcol">
     <div class="pd-gal">
       <div class="gal-track" id="galTrack"></div>
       <div class="gal-acts">
@@ -450,7 +508,16 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
         <button type="button" class="gal-act" id="shareBtn" aria-label="Share this piece"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="12" r="2.6"/><circle cx="17.5" cy="5.5" r="2.6"/><circle cx="17.5" cy="18.5" r="2.6"/><path d="M8.3 10.8l6.9-4M8.3 13.2l6.9 4"/></svg></button>
       </div>
       <div class="gal-dots" id="galDots"></div>
+      <!-- desktop prev/next arrows (mouse users cannot swipe the track);
+           phone keeps swipe + dots only -->
+      <button type="button" class="gal-nav prev" id="galPrev" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button type="button" class="gal-nav next" id="galNext" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
     </div>
+    <!-- thumbnail strip (desktop only): one thumb per slide, built by
+         the product script; tapping one scrolls the gallery to it -->
+    <div class="gal-thumbs" id="galThumbs"></div>
+    </div><!-- /pd-galcol -->
+    <div class="pd-buycol">
 
     <!-- 2 · TITLE + 3 · PRICE. The price row is Flipkart-structured but
          EMPTY on purpose: values are filled by the product script ONLY
@@ -489,6 +556,17 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8L12 4l8.5 4v8L12 20l-8.5-4z"/><path d="M3.5 8L12 12l8.5-4"/><path d="M12 12v8"/></svg><span>Saba packs and sends your order after she confirms it.</span></li>
       </ul>
     </div>
+
+    <!-- desktop buy buttons: same actions as the phone sticky bar
+         (Talk = her Instagram DM; Order carries id=pdOrderDesk and is
+         stamped with data-order by the product script, exactly like
+         pdOrder; the sticky bar itself hides on desktop) -->
+    <div class="pd-buyacts">
+      <a class="pd-talk" href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a>
+      <button type="button" class="pd-orderbtn" id="pdOrderDesk">Order</button>
+    </div>
+    </div><!-- /pd-buycol -->
+    </div><!-- /pd-grid -->
 
     <!-- 6 · SPECIFICATIONS: rows are built by the product script from
          known facts only (type, import, anti-tarnish, plus stones/finish
@@ -768,14 +846,25 @@ var PRODUCTS = {
   document.getElementById('pdName').textContent = name;
   document.getElementById('pdCat').textContent = cat + ' \u00B7 Noor Maison';
   document.getElementById('pdOrder').setAttribute('data-order', id);
+  /* the desktop buy-column Order button mirrors the sticky one */
+  document.getElementById('pdOrderDesk').setAttribute('data-order', id);
 
-  /* out of stock (home card says so): disable the sticky Order button
+  /* breadcrumb (Flipkart rebuild): Home / Explore / category / piece */
+  document.getElementById('pdCrumbs').innerHTML =
+    '<a href="index.html">Home</a><span class="sep">\u203A</span>' +
+    '<a href="explore.html">Explore</a><span class="sep">\u203A</span>' +
+    '<span>' + cat + '</span><span class="sep">\u203A</span>' +
+    '<span class="here">' + name + '</span>';
+
+  /* out of stock (home card says so): disable BOTH Order buttons
      so the piece cannot be ordered from its page either */
   if(data.oos){
-    var ob = document.getElementById('pdOrder');
-    ob.disabled = true;
-    ob.textContent = 'Out of stock';
-    ob.removeAttribute('data-order');
+    ['pdOrder', 'pdOrderDesk'].forEach(function(bid){
+      var ob = document.getElementById(bid);
+      ob.disabled = true;
+      ob.textContent = 'Out of stock';
+      ob.removeAttribute('data-order');
+    });
   }
 
   /* price row: fills ONLY when the product data carries real prices
@@ -797,10 +886,34 @@ var PRODUCTS = {
      tell the real piece from the styled catalogue photo at a glance —
      user order 2026-11-27, after "looks different" complaints. */
   var track = document.getElementById('galTrack'), dots = document.getElementById('galDots');
+  var thumbs = document.getElementById('galThumbs');
+  /* one thumbnail per slide (desktop strip): videos get the catalogue
+     photo as their thumb plus a VIDEO badge; tapping scrolls the
+     gallery to that slide — this is also the mouse user's way to
+     reach the originals, which a swipe-only track kept hidden */
+  function addThumb(node, idx){
+    var b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', 'Go to photo ' + (idx + 1));
+    var im = document.createElement('img');
+    im.src = node.tagName === 'VIDEO' ? catImg : node.src;
+    im.alt = ''; im.loading = 'lazy'; im.decoding = 'async';
+    b.appendChild(im);
+    if(node.tagName === 'VIDEO'){
+      var bd = document.createElement('span');
+      bd.className = 'tv-badge'; bd.textContent = 'VIDEO';
+      b.appendChild(bd);
+    }
+    if(idx === 0) b.className = 'on';
+    b.addEventListener('click', function(){
+      track.scrollTo({ left: idx * track.clientWidth }); /* instant on purpose: the track's mandatory snap fights smooth-scroll animation */
+    });
+    thumbs.appendChild(b);
+  }
   function addSlide(node, tag){
     var s = document.createElement('div'); s.className = 'gal-slide'; s.appendChild(node);
     if(tag){ var tg = document.createElement('span'); tg.className = 'gal-tag'; tg.textContent = tag; s.appendChild(tg); }
     track.appendChild(s);
+    addThumb(node, track.children.length - 1);
     var d = document.createElement('i'); if(!dots.children.length) d.className = 'on'; dots.appendChild(d);
   }
   var first = document.createElement('img');
@@ -817,6 +930,7 @@ var PRODUCTS = {
     addSlide(v, 'Saba\u2019s own video');
   });
   if(dots.children.length < 2) dots.hidden = true;
+  if(thumbs.children.length < 2) thumbs.remove();
 
   /* liquid-glass proof (user, 2026-11-27): the glass chrome trial
      runs on cat-9's gallery ONLY — see the .glass-proof CSS block */
@@ -868,9 +982,26 @@ var PRODUCTS = {
       dotTimer = null;
       var i = Math.round(track.scrollLeft / track.clientWidth);
       for(var k = 0; k < dots.children.length; k++) dots.children[k].className = k === i ? 'on' : '';
+      if(thumbs && thumbs.children) for(var t = 0; t < thumbs.children.length; t++) thumbs.children[t].className = t === i ? 'on' : '';
       if(i !== curSlide){ curSlide = i; fitStage(i); }
+      paintNav();
     }, 60);
   }, { passive: true });
+
+  /* desktop arrows: step one slide, greyed out at the ends */
+  var galPrev = document.getElementById('galPrev'), galNext = document.getElementById('galNext');
+  function paintNav(){
+    var last = track.children.length - 1;
+    galPrev.disabled = curSlide <= 0;
+    galNext.disabled = curSlide >= last;
+  }
+  function galStep(dir){
+    var n = Math.max(0, Math.min(track.children.length - 1, curSlide + dir));
+    track.scrollTo({ left: n * track.clientWidth });
+  }
+  galPrev.addEventListener('click', function(){ galStep(-1); });
+  galNext.addEventListener('click', function(){ galStep(1); });
+  paintNav();
 
   /* wishlist heart: localStorage nm_wishlist (array of product ids),
      this device only */
