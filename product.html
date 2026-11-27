@@ -15,6 +15,15 @@
 
 </style>
 <style>
+  /* cross-document view transitions (2026-11-27): opt-in only, so
+     leaving a product page for a tab-bar page can carry the shared
+     phone tab bar across the navigation (see the @view-transition
+     note in index.html). This page has no tab bar of its own, so
+     nothing else changes here. */
+  @view-transition{ navigation:auto }
+  @media (prefers-reduced-motion: reduce){
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation-duration:0s !important; animation-delay:0s !important }
+  }
   :root{
     --bg:#c8ae84; --ink:#3a2a12; --muted:#6d5836; --card:#f4e8cb;
     --paper:#fffdf6; --paper-ink:#2e2010; --paper-mut:#7a6743; --silk:#bfa06c;

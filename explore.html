@@ -162,6 +162,40 @@
   .sm-foot{display:flex;gap:18px;padding:9px 16px;border-top:1px solid rgba(58,42,18,.14);color:#6d5836;font-size:11px;letter-spacing:.06em}
   @media(max-width:760px){.sm-overlay{padding-top:7vh}}
 
+  /* ---------- cross-document view transitions (2026-11-27) ----------
+     Opting every page in lets the browser carry shared elements
+     across a navigation instead of tearing the page down and
+     rebuilding it. The one shared element that matters here is the
+     phone tab bar (next block down): it carries
+     view-transition-name: tabbar (phone widths only — the bar is
+     display:none on desktop), so on a tab tap the page underneath
+     swaps while THE SAME BAR stays on screen, and its GooeyNav pill
+     can be seen travelling to the new page's tab on arrival (the
+     tab-goo driver script does the travelling, on pagereveal).
+     The bar's own transition group never animates: the old
+     snapshot is dropped and the new one shown un-animated — the
+     bar's geometry is identical on every page, so it simply never
+     leaves the screen. The page content gets a short, quiet
+     cross-fade with a small rise (phone only; desktop keeps the
+     browser's default fade). Browsers without cross-document
+     view-transition support ignore all of this and navigate
+     exactly as before. Reduced motion: every view-transition
+     animation is switched off below, and the pill rests in place. */
+  @view-transition{ navigation:auto }
+  ::view-transition-group(tabbar){ animation:none }
+  ::view-transition-old(tabbar){ display:none }
+  ::view-transition-new(tabbar){ animation:none }
+  @media (max-width:760px){
+    .tabbar{ view-transition-name:tabbar }
+    ::view-transition-old(root){ animation:nm-vt-out .26s ease both }
+    ::view-transition-new(root){ animation:nm-vt-in .26s cubic-bezier(.22,1,.36,1) both }
+    @keyframes nm-vt-out{ to{ opacity:0 } }
+    @keyframes nm-vt-in{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
+  }
+  @media (prefers-reduced-motion: reduce){
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){ animation-duration:0s !important; animation-delay:0s !important }
+  }
+
   /* ---------- phone bottom tab bar + sheets (home pattern) ----------
      The tab bar itself is the shared component described in
      index.html (Flipkart pattern, gold skin, redesigned 2026-11-27):
@@ -170,6 +204,7 @@
      pages together. Bar height 62px + safe-area inset; the bar still
      auto-hides on scroll down (body.bar-hide). */
   .tabbar{display:none}
+  .tabgoo{display:none}
   .set-sheet{display:none}
   @media (max-width:760px){
     body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
@@ -179,11 +214,28 @@
     .tabbar .tab .tic{position:relative;display:block;line-height:0}
     .tabbar .tab svg{width:23px;height:23px;display:block}
     .tabbar .tab .tl{font-size:10.5px;font-weight:600;letter-spacing:.01em;line-height:1.15;white-space:nowrap}
-    .tabbar .tab.on{color:#8a6420;background:rgba(201,162,74,.14)}
+    .tabbar .tab.on{color:#8a6420}
     .tabbar .tab.on svg{fill:#c9a24a}
     .tabbar .tab.on .tl{font-weight:800;color:#8a6420}
     .tabbar .tab .bdg{position:absolute;top:-5px;right:-10px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#c9a24a;color:#2e2010;border:1.5px solid #fffdf6;font-size:9.5px;font-weight:800;line-height:13px;text-align:center}
     .tabbar .tab .bdg[hidden]{display:none}
+    /* GooeyNav pill behind the active tab — the phone twin of the
+       desktop nav's .goo (same #nm-goo SVG filter, same molten-gold
+       ball + lazy trailing blob, same droplet burst; see the
+       tab-goo scripts). It replaces the flat gold wash the active
+       tab used to carry: the pill IS the active tab's background
+       now. The tabs render above it (position + z-index below),
+       and the Cart badge rides inside its tab, so the badge stays
+       above the pill too. Parked pre-paint by the inline script
+       after the bar markup; driven by the tab-goo driver script.
+       Transform/opacity only. */
+    .tabbar .tab{position:relative;z-index:1}
+    .tabgoo{display:block;position:absolute;inset:0;z-index:0;pointer-events:none;filter:url(#nm-goo);visibility:hidden}
+    .tabgoo.ready{visibility:visible}
+    .tabgoo-ball,.tabgoo-blob{position:absolute;left:0;top:0;border-radius:999px;background:radial-gradient(120% 130% at 30% 20%,#e6c87c 0%,#a37f2c 45%,#7c5a1e 78%,#5d4517 100%);will-change:transform}
+    .tabgoo-ball{width:104px;height:32px;margin:-16px 0 0 -52px;box-shadow:inset 0 1px 2px rgba(255,246,218,.8),inset 0 -3px 6px rgba(46,32,16,.45)}
+    .tabgoo-blob{width:20px;height:20px;margin:-10px 0 0 -10px}
+    .tabgoo-p{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform,opacity}
     .set-sheet{display:block;position:fixed;inset:0;z-index:120;pointer-events:none}
     .set-sheet .scrim{position:absolute;inset:0;background:rgba(12,10,7,.45);opacity:0;transition:opacity .32s ease}
     .set-sheet .panel{position:absolute;left:0;right:0;bottom:0;background:#faf6ee;border-radius:22px 22px 0 0;padding:12px 18px calc(16px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .38s cubic-bezier(.22,1,.36,1);color:#1a1712;max-height:92vh;overflow-y:auto}
@@ -373,14 +425,61 @@
      2026-11-27): five equal icon+label tabs; the old logo-blob first
      tab is gone (the wordmark lives in the top navbar). The .on tab
      is this page. Cart's badge counts saved orders (nm_orders) and
-     is painted by the tab-bar script. -->
+     is painted by the tab-bar script. The .tabgoo span inside the bar is the GooeyNav pill's stage
+     (ball + trailing blob) — parked pre-paint by the inline
+     script right after the bar, driven by the tab-goo
+     driver further down. -->
 <nav class="tabbar" aria-label="Bottom">
+  <span class="tabgoo" aria-hidden="true"><span class="tabgoo-ball"></span><span class="tabgoo-blob"></span></span>
   <a class="tab" data-tab="home" href="index.html"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.6 11.4 12 4.9l7.4 6.5"/><path d="M6.3 9.9V19a1 1 0 0 0 1 1h9.4a1 1 0 0 0 1-1V9.9"/><path d="M9.9 20v-4.5h4.2V20"/></svg></span><span class="tl">Home</span></a>
   <a class="tab on" data-tab="explore" href="explore.html"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M15.6 8.4l-2.1 4.9-4.9 2.1 2.1-4.9z"/></svg></span><span class="tl">Explore</span></a>
   <a class="tab" data-tab="nails" href="nails.html"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5h4V9h-4z"/><path d="M9.4 9h5.2c1 1.3 1.6 2.8 1.6 4.4V18a2.9 2.9 0 0 1-2.9 2.9h-2.6A2.9 2.9 0 0 1 7.8 18v-4.6c0-1.6.6-3.1 1.6-4.4z"/></svg></span><span class="tl">Nails</span></a>
   <button type="button" class="tab" data-tab="cart"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 8h13.6l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H8.1a1.8 1.8 0 0 1-1.8-1.6z"/><path d="M8.6 10V6.8a3.4 3.4 0 0 1 6.8 0V10"/></svg><span class="bdg" hidden>0</span></span><span class="tl">Cart</span></button>
   <button class="tab" data-tab="settings" type="button" aria-haspopup="dialog"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 8h8.4M18.8 8H20M4 16h2.6M13 16h7"/><circle cx="15.4" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg></span><span class="tl">Settings</span></button>
 </nav>
+<script>
+/* Tab-goo parking — runs the moment the bar above has been parsed,
+   before first paint, so the GooeyNav pill never flashes at the
+   wrong tab and never flashes missing. It parks the ball + blob on
+   the tab this visit ARRIVED from (the travel start — the driver
+   script further down springs the pill home from there), or on
+   this page's own tab when there is no page tab to come from:
+   first visit, arrival from a product page, or the same tab.
+   Where we came from is read from the Navigation API's activation
+   entry (exact, back button included), falling back to
+   document.referrer. Geometry is pure arithmetic here — the five
+   tabs are equal, so a tab's centre is its index over the bar's
+   width; the driver re-measures exactly before travelling. The
+   pill stays visibility:hidden until parked (.ready). Reduced
+   motion: always parked on this page's own tab. */
+(function(){
+  var bar = document.querySelector('.tabbar'); if(!bar) return;
+  var goo = bar.querySelector('.tabgoo'); if(!goo) return;
+  var tabs = bar.querySelectorAll('.tab'), active = -1, i;
+  for(i = 0; i < tabs.length; i++){ if(tabs[i].classList.contains('on')) active = i; }
+  if(active < 0) return;
+  function tabOf(url){
+    var f = (url || '').split('?')[0].split('#')[0].split('/').pop();
+    if(f === '' || f === 'index.html') return 'home';
+    if(f === 'explore.html') return 'explore';
+    if(f === 'nails.html') return 'nails';
+    return null;
+  }
+  var from = null;
+  try { var act = window.navigation && navigation.activation; if(act && act.from) from = tabOf(act.from.url); } catch(e){}
+  if(!from) from = tabOf(document.referrer);
+  var start = active;
+  if(from){ for(i = 0; i < tabs.length; i++){ if(tabs[i].dataset.tab === from) start = i; } }
+  window.__tabgooFrom = (start !== active) ? tabs[start].dataset.tab : null;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ window.__tabgooFrom = null; start = active; }
+  var W = bar.clientWidth || window.innerWidth;
+  var cx = 2 + (start + 0.5) * (W - 4) / 5, cy = 31;
+  var tf = 'translate(' + cx.toFixed(1) + 'px,' + cy + 'px)';
+  goo.querySelector('.tabgoo-ball').style.transform = tf + ' scale(' + (((W - 4) / 5 - 8) / 104).toFixed(3) + ',' + (44 / 32).toFixed(3) + ')';
+  goo.querySelector('.tabgoo-blob').style.transform = tf;
+  goo.classList.add('ready');
+})();
+</script>
 
 <div class="set-sheet" id="setSheet" role="dialog" aria-modal="true" aria-label="Settings">
   <div class="scrim" data-close></div>
@@ -753,6 +852,125 @@
       location.href = 'product.html?p=' + ph.dataset.preview;
     });
   });
+})();
+</script>
+
+<script>
+/* Tab-goo driver — the GooeyNav pill for the phone tab bar.
+   The same animation as the desktop nav's ball, moved to the bar:
+   a molten-gold ball (104x32 layout size, transform-scaled to the
+   tab) rests BEHIND the active tab's icon + label; a smaller blob
+   chases it on a lazier spring, and the shared #nm-goo SVG filter
+   melts the two together so the pill stretches like liquid while
+   it moves; a burst of gold droplets fires when it lands. The
+   springs are the desktop ones, unchanged: position 170/19, scale
+   210/17, blob 60/11, integrated in two substeps per frame; all
+   motion is transform/opacity.
+
+   TRAVEL ACROSS PAGES: the bar itself is carried across the
+   navigation by the cross-document view transition (see the
+   @view-transition CSS), so this script runs on ARRIVAL. The
+   parking script after the bar markup has already placed the pill
+   on the tab we came from (window.__tabgooFrom); once the view
+   transition has finished (pagereveal carries it), the pill
+   springs from there to this page's tab — the travel is watched
+   under the same bar that never left the screen. With no view
+   transition (a browser without cross-document support, or the
+   transition was skipped) it springs straight away on pagereveal;
+   with no recorded origin — first visit, same tab, arrival from
+   a product page — it simply rests on the active tab. Cart and
+   Settings open sheets and never become active, so the pill never
+   travels to them. prefers-reduced-motion: the pill rests in
+   place — no spring, no droplets. On the way OUT, pageswap makes
+   sure the bar is captured in its visible state, never mid
+   auto-hide. */
+(function(){
+  var bar = document.querySelector('.tabbar'); if(!bar) return;
+  var goo = bar.querySelector('.tabgoo'); if(!goo) return;
+  var ball = goo.querySelector('.tabgoo-ball'), blob = goo.querySelector('.tabgoo-blob');
+  if(!ball || !blob) return;
+  var activeEl = bar.querySelector('.tab.on'); if(!activeEl) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BW = 104, BH = 32; /* ball layout size from the CSS — all sizing is transform scale */
+  function box(el){
+    return { x: el.offsetLeft + el.offsetWidth / 2, y: el.offsetTop + el.offsetHeight / 2,
+             sx: (el.offsetWidth - 8) / BW, sy: (el.offsetHeight - 6) / BH };
+  }
+  var dest = box(activeEl);
+  var fromEl = (!reduced && window.__tabgooFrom) ? bar.querySelector('.tab[data-tab="' + window.__tabgooFrom + '"]') : null;
+  var start = (fromEl && fromEl !== activeEl) ? box(fromEl) : dest;
+  var cx = start.x, cy = start.y, sx = start.sx, sy = start.sy;
+  var tx = dest.x, ty = dest.y, tsx = dest.sx, tsy = dest.sy;
+  var vx = 0, vy = 0, vsx = 0, vsy = 0, bcx = cx, bvx = 0;
+  var raf = 0, last = 0, landed = true, begun = false;
+  function paint(){
+    ball.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+    var sp = Math.min(1, Math.abs(vx) / 2400);
+    blob.style.transform = 'translate(' + bcx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + (1 + sp * 1.5).toFixed(3) + ',' + (1 + sp * 0.8).toFixed(3) + ')';
+  }
+  var SHADES = ['#e6c87c', '#c9a24a', '#a37f2c', '#7c5a1e', '#ffedbe'];
+  function burst(x, y){
+    if(reduced) return;
+    for(var i = 0; i < 12; i++){
+      var p = document.createElement('span');
+      p.className = 'tabgoo-p';
+      var s = 3 + Math.random() * 4;
+      p.style.width = s + 'px'; p.style.height = s + 'px';
+      p.style.margin = (-s / 2) + 'px 0 0 ' + (-s / 2) + 'px';
+      p.style.background = SHADES[i % SHADES.length];
+      goo.appendChild(p);
+      var ang = Math.random() * Math.PI * 2, dist = 16 + Math.random() * 30;
+      var dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist * 0.7 - 6;
+      var anim = p.animate([
+        { transform: 'translate(' + x + 'px,' + y + 'px)', opacity: 1 },
+        { transform: 'translate(' + (x + dx).toFixed(1) + 'px,' + (y + dy + 14).toFixed(1) + 'px)', opacity: 0 }
+      ], { duration: 480 + Math.random() * 320, easing: 'cubic-bezier(.17,.67,.35,1)' });
+      anim.onfinish = (function(el){ return function(){ el.remove(); }; })(p);
+    }
+  }
+  function frame(now){
+    raf = 0;
+    var dt = Math.min(0.032, (now - last) / 1000 || 0.016); last = now;
+    var h = dt / 2, n;
+    for(n = 0; n < 2; n++){
+      vx += ((tx - cx) * 170 - vx * 19) * h; cx += vx * h;
+      vy += ((ty - cy) * 170 - vy * 19) * h; cy += vy * h;
+      vsx += ((tsx - sx) * 210 - vsx * 17) * h; sx += vsx * h;
+      vsy += ((tsy - sy) * 210 - vsy * 17) * h; sy += vsy * h;
+      bvx += ((cx - bcx) * 60 - bvx * 11) * h; bcx += bvx * h;
+    }
+    paint();
+    var settled = Math.abs(tx - cx) < 0.4 && Math.abs(vx) < 25 && Math.abs(tsx - sx) < 0.01 && Math.abs(cx - bcx) < 0.6;
+    if(Math.abs(tx - cx) > 6) landed = false;
+    if(settled && !landed){ landed = true; burst(cx, cy); }
+    if(!settled) raf = requestAnimationFrame(frame);
+  }
+  function begin(){
+    if(begun) return; begun = true;
+    paint(); /* exact measured position — the parking was arithmetic */
+    if(reduced || start === dest) return;
+    landed = false;
+    last = performance.now();
+    raf = requestAnimationFrame(frame);
+  }
+  window.addEventListener('pageswap', function(e){
+    if(e.viewTransition) document.body.classList.remove('bar-hide');
+  });
+  window.addEventListener('pagereveal', function(e){
+    if(e.viewTransition) e.viewTransition.finished.then(begin, begin);
+    else begin();
+  }, { once: true });
+  /* pagereveal fires on every activation; this timer only guards
+     exotic restores where it might not, so the pill can never be
+     left parked on the wrong tab. */
+  setTimeout(begin, 1500);
+  window.addEventListener('resize', function(){
+    dest = box(activeEl); tx = dest.x; ty = dest.y; tsx = dest.sx; tsy = dest.sy;
+    if(!raf){ /* settled: re-snap onto the active tab at the new width */
+      cx = tx; cy = ty; sx = tsx; sy = tsy; bcx = tx; vx = vy = vsx = vsy = bvx = 0; paint();
+    }
+  });
+  paint();
 })();
 </script>
 
