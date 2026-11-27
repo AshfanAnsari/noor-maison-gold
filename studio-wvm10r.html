@@ -105,6 +105,13 @@
     padding:.55rem 1.15rem; font-weight:500; font-size:1rem; transition:background-color .18s ease,color .18s ease}
   .tab:hover{background:var(--bg)}
   .tab.on{background:var(--gold); color:#fff}
+  .btn.danger{background:#8c2b1d; border-color:#8c2b1d; color:#fff}
+  .btn.danger:hover{background:#73241a; border-color:#73241a}
+  .pw-link{background:none; border:none; color:var(--gold); font-weight:600; cursor:pointer;
+    padding:.3rem 0; font-size:.95rem; text-decoration:underline; font-family:inherit}
+  .edit-host:empty{display:none}
+  .edit-host{margin-top:.9rem}
+  #greet-line{margin:.9rem 0 0; color:var(--ink); font-weight:500}
   .tab .n{background:var(--danger); color:#fff; border-radius:999px; font-size:12px; padding:1px 7px; margin-left:5px; vertical-align:2px}
   .tab.on .n{background:#fff; color:var(--danger)}
 
@@ -176,13 +183,14 @@
     <div class="admin-bar">
       <div>
         <h2>Noor Maison Admin</h2>
-        <div class="who" id="who"></div>
       </div>
       <div class="bar-actions">
         <a class="btn ghost small" href="./">View shop</a>
         <button class="btn small" id="signout" type="button">Log out</button>
       </div>
     </div>
+
+    <p id="greet-line"></p>
 
     <div class="overview">
       <button class="overview-card" type="button" data-goto="products"><span class="overview-num" id="c-products">–</span><span class="overview-label">Pieces on your website</span></button>
@@ -192,44 +200,31 @@
     </div>
 
     <nav class="tabs">
-      <button class="tab on" data-tab="home" type="button">Overview</button>
-      <button class="tab" data-tab="products" type="button">Pieces</button>
+      <button class="tab on" data-tab="products" type="button">Pieces</button>
       <button class="tab" data-tab="enquiries" type="button">Questions<span class="n hide" id="n-enq"></span></button>
       <button class="tab" data-tab="orders" type="button">Orders<span class="n hide" id="n-ord"></span></button>
     </nav>
+    <div><button class="pw-link" id="pw-open" type="button">Set or change my password</button></div>
 
-    <!-- HOME -->
-    <section id="tab-home">
-      <div class="card">
-        <h3>Welcome back, Saba</h3>
-        <p id="greet-line" style="color:var(--ink); font-weight:500"></p>
-        <p>
-          <b>Pieces</b> — change a price, add photos, mark a piece finished, or add a new piece.<br>
-          <b>Questions</b> — messages customers sent from the website.<br>
-          <b>Orders</b> — orders customers placed. Change the order step as you pack and send.
-        </p>
-        <div class="row">
-          <button class="btn ghost small" id="pw-open" type="button">Set or change my password</button>
-        </div>
+    <!-- PASSWORD: standalone card, opened from the link above or
+         automatically when she arrives from an invite/reset email -->
+    <div class="card hide" id="pw-card" style="margin-top:1rem">
+      <h3>Set your password</h3>
+      <p>Choose a password for this page. Next time, open your studio with your email and this password.</p>
+      <div class="msg" id="pw-msg"></div>
+      <div class="field">
+        <label for="pw-1">New password</label>
+        <input id="pw-1" type="password" autocomplete="new-password" placeholder="At least 6 characters">
       </div>
-      <div class="card hide" id="pw-card">
-        <h3>Set your password</h3>
-        <p>Choose a password for this page. Next time, open your studio with your email and this password.</p>
-        <div class="msg" id="pw-msg"></div>
-        <div class="field">
-          <label for="pw-1">New password</label>
-          <input id="pw-1" type="password" autocomplete="new-password" placeholder="At least 6 characters">
-        </div>
-        <div class="field">
-          <label for="pw-2">Type it again</label>
-          <input id="pw-2" type="password" autocomplete="new-password" placeholder="Same password again">
-        </div>
-        <button class="btn wide" id="pw-btn" type="button">Save my password</button>
+      <div class="field">
+        <label for="pw-2">Type it again</label>
+        <input id="pw-2" type="password" autocomplete="new-password" placeholder="Same password again">
       </div>
-    </section>
+      <button class="btn wide" id="pw-btn" type="button">Save my password</button>
+    </div>
 
     <!-- PRODUCTS -->
-    <section id="tab-products" class="hide">
+    <section id="tab-products">
       <input class="search" id="prod-search" type="search" placeholder="Search your pieces…">
       <div class="row">
         <button class="btn" id="add-piece" type="button">+ Add a new piece</button>
@@ -239,7 +234,8 @@
 
     <!-- PRODUCT EDIT -->
     <section id="tab-edit" class="hide">
-      <p class="back-link" style="margin:0 0 .5rem"><a href="#" id="edit-back">← Back to all pieces</a></p>
+      <div id="edit-wrap">
+      <p class="back-link" style="margin:0 0 .5rem"><a href="#" id="edit-back">← Close</a></p>
       <form class="card" id="edit-form">
         <h3 id="edit-title">Edit piece</h3>
         <div class="msg" id="edit-msg"></div>
@@ -285,6 +281,7 @@
         </div>
         <button class="btn wide" type="submit" id="edit-save">Save changes</button>
       </form>
+      </div>
     </section>
 
     <!-- ENQUIRIES -->
@@ -395,7 +392,7 @@ if (/error_code=otp_expired|error=access_denied/.test(NM_HASH)) {
   showMsg($('login-msg'), 'That email link is old or has expired. Please use the newest email we sent you. If you already set your password, just log in below.', false);
 }
 function nmShowPwCard(){
-  openTab('home');
+  openTab('products');
   $('pw-card').classList.remove('hide');
   $('pw-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
   setTimeout(function(){ $('pw-1').focus(); }, 350);
@@ -419,7 +416,6 @@ sb.auth.onAuthStateChange(function(_ev, session){
   if(session && session.user){
     $('view-login').classList.add('hide');
     $('view-app').classList.remove('hide');
-    $('who').textContent = session.user.email;
     loadAll();
     if (NM_NEED_PW) nmShowPwCard();
   } else {
@@ -432,7 +428,7 @@ sb.auth.onAuthStateChange(function(_ev, session){
 document.querySelectorAll('.tab').forEach(function(tab){
   tab.addEventListener('click', function(){
     document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t === tab); });
-    ['home','products','enquiries','orders'].forEach(function(name){
+    ['products','enquiries','orders'].forEach(function(name){
       $('tab-' + name).classList.toggle('hide', name !== tab.dataset.tab);
     });
     $('tab-edit').classList.add('hide');
@@ -478,13 +474,27 @@ function renderCounts(){
    The dashboard design's third button was Delete; here it is Hide/Show
    on purpose — hiding is reversible, and a deleted piece would leave
    its page on the website with nothing behind it. */
+function parkEditForm(){
+  var wrap = $('edit-wrap'), sec = $('tab-edit');
+  if(wrap && sec && wrap.parentElement !== sec) sec.appendChild(wrap);
+}
+function seatEditForm(id){
+  var host = document.querySelector('[data-host="' + id + '"]');
+  var wrap = $('edit-wrap');
+  if(host && wrap){
+    host.appendChild(wrap);
+    $('tab-edit').classList.add('hide');
+    host.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
 function renderProducts(){
+  parkEditForm();
   var q = ($('prod-search').value || '').toLowerCase();
   var list = PRODUCTS.filter(function(p){
     return !q || unesc(p.name).toLowerCase().indexOf(q) > -1 || (p.category || '').toLowerCase().indexOf(q) > -1;
   });
   $('prod-list').innerHTML = list.length ? list.map(function(p){
-    return '<div class="card">'
+    return '<div class="card" data-card="' + esc(p.id) + '">'
       + '<div class="prod-head"><div class="prod-info">'
       + '<h3>' + esc(unesc(p.name)) + '</h3>'
       + '<div class="meta-line">' + esc(priceText(p)) + ' · ' + (p.is_active ? 'Visible' : 'Hidden') + esc(stockText(p)) + '</div>'
@@ -495,7 +505,9 @@ function renderProducts(){
       + '<div class="row">'
       + '<button class="btn ghost small" type="button" data-edit="' + esc(p.id) + '">Edit</button>'
       + '<button class="btn ghost small" type="button" data-hide="' + esc(p.id) + '">' + (p.is_active ? 'Hide' : 'Show') + '</button>'
-      + '</div></div>';
+      + '<button class="btn danger small" type="button" data-del="' + esc(p.id) + '">Delete</button>'
+      + '</div>'
+      + '<div class="edit-host" data-host="' + esc(p.id) + '"></div></div>';
   }).join('') : '<div class="empty">No pieces found.</div>';
   $('prod-list').querySelectorAll('[data-edit]').forEach(function(btn){
     btn.addEventListener('click', function(){ openEdit(btn.getAttribute('data-edit')); });
@@ -503,12 +515,36 @@ function renderProducts(){
   $('prod-list').querySelectorAll('[data-hide]').forEach(function(btn){
     btn.addEventListener('click', function(){ quickToggle(btn.getAttribute('data-hide')); });
   });
+  $('prod-list').querySelectorAll('[data-del]').forEach(function(btn){
+    btn.addEventListener('click', function(){ deletePiece(btn.getAttribute('data-del')); });
+  });
+  if(editing) seatEditForm(editing.id);
 }
 function quickToggle(id){
   var p = PRODUCTS.filter(function(x){ return x.id === id; })[0];
   if(!p) return;
   sb.from('products').update({ is_active: !p.is_active, updated_at: new Date().toISOString() })
     .eq('id', id).then(function(r){ if(!r.error) loadAll(); });
+}
+function deletePiece(id){
+  var p = PRODUCTS.filter(function(x){ return x.id === id; })[0];
+  if(!p) return;
+  if(!confirm('Delete "' + unesc(p.name) + '" forever? This cannot be undone.')) return;
+  /* her uploaded photos leave storage too (best effort, either way
+     the row delete proceeds) */
+  var marker = '/product-photos/';
+  var paths = (p.photos || []).map(function(u){
+    return u.indexOf(marker) > -1 ? u.split(marker)[1] : null;
+  }).filter(Boolean);
+  var after = function(){
+    sb.from('products').delete().eq('id', id).then(function(r){
+      if(r.error){ alert('Sorry, it could not be deleted. Please try again.'); return; }
+      if(editing && editing.id === id) editing = null;
+      loadAll();
+    });
+  };
+  if(paths.length) sb.storage.from('product-photos').remove(paths).then(after, after);
+  else after();
 }
 $('prod-search').addEventListener('input', renderProducts);
 $('add-piece').addEventListener('click', function(){ openEdit(null); });
@@ -542,11 +578,19 @@ function openEdit(id){
   stagedPhotos = p ? (p.photos || []).slice() : [];
   renderFormPhotos();
   $('edit-msg').className = 'msg'; $('edit-msg').textContent = '';
-  ['home','products','enquiries','orders'].forEach(function(n){ $('tab-' + n).classList.add('hide'); });
-  $('tab-edit').classList.remove('hide');
-  window.scrollTo(0, 0);
+  if(p){
+    /* the form opens INSIDE the piece's own card, the dashboard way;
+       the pieces list stays on screen around it */
+    ['products','enquiries','orders'].forEach(function(n){ $('tab-' + n).classList.toggle('hide', n !== 'products'); });
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t.dataset.tab === 'products'); });
+    seatEditForm(p.id);
+  } else {
+    ['products','enquiries','orders'].forEach(function(n){ $('tab-' + n).classList.add('hide'); });
+    $('tab-edit').classList.remove('hide');
+    window.scrollTo(0, 0);
+  }
 }
-$('edit-back').addEventListener('click', function(ev){ ev.preventDefault(); $('tab-edit').classList.add('hide'); openTab('products'); });
+$('edit-back').addEventListener('click', function(ev){ ev.preventDefault(); parkEditForm(); $('tab-edit').classList.add('hide'); openTab('products'); });
 
 /* Photos: in edit mode they save at once (kind for Saba — no lost
    uploads if she forgets the Save button); for a new piece they wait

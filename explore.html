@@ -1312,7 +1312,14 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
         var total = 0;
         grid.querySelectorAll('.prod[id]').forEach(function(card){
           var r = byId[card.id];
-          if(!r){ total++; return; }
+          if(!r){
+            /* a baked card whose database row is GONE was deleted by
+               Saba in her studio — take it off the shop too. Only on
+               a full-catalogue response (40+ rows), so a partial or
+               failed read can never strip the page. */
+            if(rows.length >= 40 && /^(cat|prod|gold|turk)-\d+$/.test(card.id)){ card.remove(); return; }
+            total++; return;
+          }
           if(r.is_active === false){ card.style.display = 'none'; return; }
           total++;
           var nm = unesc(r.name);
