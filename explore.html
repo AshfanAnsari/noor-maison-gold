@@ -80,6 +80,7 @@
   .sec-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,4.6vw,58px);line-height:1.05}
   .sec-note{color:var(--muted);font-size:11px;letter-spacing:.28em;text-transform:uppercase;white-space:nowrap}
   .ex-sub{color:#57431f;font-size:15.5px;line-height:1.65;max-width:56ch;margin-bottom:20px}
+  .ex-sub[hidden]{display:none}
   /* the category filter's "See all pieces" link (Addition 4) — the
      page's deep foil tone, not the browser's default blue */
   .ex-sub a{color:#7c5a1e;text-decoration:underline;text-underline-offset:3px}
@@ -404,7 +405,11 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 <main>
   <section class="site-sec" id="catalogue">
     <div class="sec-head rv"><h1 class="sec-title">Explore the Catalogue</h1><span class="sec-note">32 pieces</span></div>
-    <p class="ex-sub rv">Every piece from Saba&rsquo;s catalogue, in one place. Tap a photo to see it up close &mdash; and tap <strong>Order</strong> on any piece to order it right here. Saba confirms every order herself, and payment is by UPI after she confirms.</p>
+    <!-- the intro paragraph that sat here was removed on the user's
+         order (2026-11-27: filler instruction text under the heading).
+         This line stays ONLY as the category filter's notice ("You are
+         seeing only the Rings — See all pieces"), hidden otherwise. -->
+    <p class="ex-sub rv" hidden></p>
     <div class="grid">
       <article class="prod rv" id="cat-1" data-keys="magenta teal chandelier earrings pink blue silver flower drops"><div class="ph" data-preview="cat-1"><img fetchpriority="high" decoding="async" src="catalogue/web/prod01.webp" alt="Magenta Teal Chandeliers — silver chandelier earrings with magenta flowers and teal drops"></div><div class="meta"><h3>Magenta Teal Chandeliers</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="cat-1">Order</button></div></article>
       <article class="prod rv" id="cat-2" data-keys="gold oval floral drop earrings flowers yellow pink purple green" style="--d:.06s"><div class="ph" data-preview="cat-2"><img decoding="async" src="catalogue/web/prod02.webp" alt="Gold Oval Floral Drops — gold oval drop earrings with tiny enamel flowers"></div><div class="meta"><h3>Gold Oval Floral Drops</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="cat-2">Order</button></div></article>
@@ -833,7 +838,7 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
   var note = document.querySelector('#catalogue .sec-note');
   if(note) note.textContent = shown + (shown === 1 ? ' piece' : ' pieces');
   var sub = document.querySelector('#catalogue .ex-sub');
-  if(sub) sub.innerHTML = 'You are seeing only the ' + cat.title + '. <a href="explore.html"><strong>See all pieces \u2192</strong></a>';
+  if(sub){ sub.innerHTML = 'You are seeing only the ' + cat.title + '. <a href="explore.html"><strong>See all pieces \u2192</strong></a>'; sub.hidden = false; }
   document.title = cat.title + ' \u2014 Noor Maison by Saba';
 })();
 </script>
