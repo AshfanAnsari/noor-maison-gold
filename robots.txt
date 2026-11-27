@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /studio-wvm10r
+
+Sitemap: https://noormaisonbysaba.com/sitemap.xml
