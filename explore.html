@@ -115,7 +115,9 @@
   @media(hover:hover){.prod:hover .ph img{transform:scale(1.045)}}
   .prod .ph::after{content:"View";position:absolute;right:12px;bottom:12px;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#fdf6dd;background:rgba(46,32,16,.72);padding:7px 12px;border-radius:999px;opacity:0;transition:opacity .3s ease;pointer-events:none}
   @media(hover:hover){.prod:hover .ph::after{opacity:1}}
-  .prod .meta{padding:12px 0 0}
+  /* name+price plate (2026-11-28): its own rounded cover, floating
+     just above the backdrop, separate from the photo tile. */
+  .prod .meta{margin-top:10px;padding:12px 14px 13px;color:var(--paper-ink);background:rgba(255,253,246,.88);border:1px solid rgba(255,255,255,.55);border-radius:16px;box-shadow:0 8px 20px rgba(58,42,18,.13);-webkit-backdrop-filter:blur(6px) saturate(1.1);backdrop-filter:blur(6px) saturate(1.1)}
   /* listing-card pattern (redesign, 2026-11-27): the whole card taps
      through to the piece's page — pointer + a subtle press; the text
      block is name, then the price row directly under it (the price
@@ -129,9 +131,9 @@
      below resets all of that and lays price / MRP / off on one line. */
   .prod .p-price{margin-top:8px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;row-gap:2px;
     font-family:'Manrope',sans-serif;font-size:15px;line-height:1.25;
-    letter-spacing:0;text-transform:none;color:var(--ink)}
-  .prod .p-price .p-now{font-weight:800;font-size:16px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
-  .prod .p-price .p-mrp{color:rgba(58,42,18,.55);text-decoration:line-through;font-size:12.5px;white-space:nowrap}
+    letter-spacing:0;text-transform:none;color:var(--paper-ink)}
+  .prod .p-price .p-now{font-weight:800;font-size:16px;color:var(--paper-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prod .p-price .p-mrp{color:var(--paper-mut);text-decoration:line-through;font-size:12.5px;white-space:nowrap}
   .prod .p-price .p-off{color:#1a7f37;font-weight:700;font-size:12.5px;white-space:nowrap}
   /* stock badge on the photo (added by the live layer from the database) */
   .p-badge{position:absolute;left:10px;top:10px;z-index:3;font-family:'Manrope',sans-serif;
