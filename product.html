@@ -87,7 +87,9 @@
   /* ---------- product detail (Flipkart layout, Noor gold skin) ----------
      Section order mirrors a Flipkart product page: gallery → title →
      price → offers → delivery → specifications → description → reviews →
-     similar products → the original piece (Saba's own photos, unchanged).
+     similar products. Saba's originals are NOT a section of their own:
+     they ride as labelled slides inside the gallery itself (user order
+     2026-11-27 — "on sliding, these originals come").
      The single mid-page Order button is gone: ordering lives in the
      sticky bottom bar (.sticky-bar below). */
   .pd-sec{padding:4px var(--pad) 8px;max-width:880px;margin:0 auto}
@@ -125,6 +127,15 @@
   .gal-slide{flex:0 0 100%;scroll-snap-align:center;background:#efe6cf}
   .gal-slide img{width:100%;height:100%;object-fit:contain;display:block}
   .gal-slide video{width:100%;height:100%;object-fit:contain;display:block;background:#171512}
+  /* ORIGINAL TAG (user order 2026-11-27): slides showing Saba's own
+     photo/video carry a small pill label, top-left, so a customer can
+     tell the real piece from the styled catalogue photo at a glance —
+     the originals were always in this gallery, just unlabelled, and
+     customers complained the delivered piece "looks different".
+     pointer-events:none so the pill never blocks the tap that opens
+     the full-screen viewer. */
+  .gal-slide{position:relative}
+  .gal-tag{position:absolute;top:10px;left:10px;z-index:2;background:rgba(255,253,246,.9);color:#6d4c12;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:999px;box-shadow:0 2px 8px rgba(46,32,16,.18);pointer-events:none}
   .gal-dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;pointer-events:none;z-index:2}
   .gal-dots i{width:7px;height:7px;border-radius:50%;background:rgba(46,32,16,.3);transition:background .3s ease}
   .gal-dots i.on{background:#7c5a1e}
@@ -214,17 +225,9 @@
   .toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(16px);background:#2e2010;color:#fdf6dd;padding:11px 20px;border-radius:999px;font-family:'Manrope',sans-serif;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease;z-index:200}
   .toast.show{opacity:1;transform:translateX(-50%)}
 
-  .pd-orig{margin-top:24px}
-  .pd-sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:8px}
-  .pd-sec-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(28px,4.4vw,40px);line-height:1.05}
-  .pd-sec-note{color:var(--muted);font-size:11px;letter-spacing:.28em;text-transform:uppercase;white-space:nowrap}
-  .pd-sub{color:#57431f;font-size:15px;line-height:1.65;max-width:56ch;margin-bottom:14px}
-  .pd-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  .pd-gallery button{border:none;padding:0;background:var(--paper);border-radius:14px;overflow:hidden;cursor:pointer}
-  .pd-gallery img{width:100%;height:100%;aspect-ratio:4/5;object-fit:cover;display:block;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
-  @media(hover:hover){.pd-gallery button:hover img{transform:scale(1.045)}}
-  .pd-vids{display:grid;gap:12px;margin-top:14px}
-  .pd-vids video{width:100%;max-height:70vh;border-radius:14px;background:#171512;display:block}
+  /* (No separate originals section — removed on the user's order,
+     2026-11-27: Saba's originals are labelled slides in the gallery
+     itself, see .gal-tag, and entries in the full-screen viewer.) */
   /* FULL-SCREEN PHOTO VIEWER (user, 2026-11-27 — "like on Flipkart"):
      the photo fills the whole screen on the site's paper white; pinch /
      double-tap zoom, drag to pan when zoomed, swipe or arrows to browse;
@@ -246,7 +249,6 @@
   @media (prefers-reduced-motion: reduce){ .pv-img{transition:none !important} }
   @media(max-width:760px){
     :root{--pad:3vw}
-    .pd-gallery{grid-template-columns:repeat(2,1fr);gap:8px}
     .pd-block{padding:14px 15px 15px}
     .pd-price{font-size:29px}
   }
@@ -335,15 +337,13 @@
   /* ================= APPLE-SYSTEM ALIGNMENT PASS — 2026-11-27 =================
      The product page's anatomy is unchanged (gallery → title → price →
      offers → delivery → specs → description → reviews → similar →
-     originals → sticky bar); this block only re-dresses it in the home
+     sticky bar); this block only re-dresses it in the home
      page's design system, value for value:
        · page title .pd-name takes the home .sec-title scale exactly —
          Cormorant Garamond 600, clamp(34px,4.6vw,58px), line-height
          1.05 (was clamp(30px,5.4vw,44px)/1.08);
        · the category line under it takes the home card-meta tokens —
          11px, letter-spacing .24em (home .prod p);
-       · the originals section title .pd-sec-title takes the same home
-         .sec-title scale (was clamp(28px,4.4vw,40px));
        · block headings .pd-block h2 take the home category-card name
          size — Cormorant 600 29px (home .cc-name) — was 25px;
        · blocks breathe at the home rhythm: padding 24px 26px and a
@@ -356,7 +356,7 @@
          spec rows 15px with 8–10px row padding (hairlines kept);
        · similar-product names become home card names — Cormorant 600
          17px/1.15 — and their photos take the --tile-r 16px radius
-         (was 12px), as do the originals photos/videos/lightbox (was 14px);
+         (was 12px);
        · the top-bar brand takes the home navbar brand tokens —
          Italiana 17px, letter-spacing .15em (was 15px/.14em).
      The .glass-proof liquid-glass treatment (cat-9) is NOT touched. */
@@ -372,11 +372,6 @@
   .pd-rev-empty{font-size:15px;line-height:1.65}
   .sim-card img{border-radius:16px}
   .sim-card span{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:17px;line-height:1.15;margin-top:8px}
-  .pd-sec-head{margin-bottom:14px}
-  .pd-sec-title{font-size:clamp(34px,4.6vw,58px)}
-  .pd-sub{line-height:1.75;margin-bottom:18px}
-  .pd-gallery button{border-radius:16px}
-  .pd-vids video{border-radius:16px}
   .tb-title{font-size:17px;letter-spacing:.15em}
   @media(max-width:760px){
     .pd-block{padding:19px 18px 21px;margin-top:12px}
@@ -506,12 +501,6 @@
       <div class="sim-row" id="simRow"></div>
     </div>
 
-    <div class="pd-orig" id="pdOrig">
-      <div class="pd-sec-head"><h2 class="pd-sec-title">The original piece</h2><span class="pd-sec-note">Saba&rsquo;s own photos</span></div>
-      <p class="pd-sub">These are Saba&rsquo;s own photos and videos of this exact piece &mdash; tap a photo to see it large.</p>
-      <div class="pd-gallery" id="pdGallery"></div>
-      <div class="pd-vids" id="pdVids"></div>
-    </div>
   </section>
 </main>
 
@@ -777,10 +766,16 @@ var PRODUCTS = {
     document.getElementById('pdPriceRow').hidden = false;
   }
 
-  /* gallery: catalogue photo first, then Saba's originals, then videos */
+  /* gallery: catalogue photo first, then Saba's originals, then videos.
+     addSlide(node, tag): the optional tag pill-labels Saba's own
+     photos/videos inside the gallery (see .gal-tag) so customers can
+     tell the real piece from the styled catalogue photo at a glance —
+     user order 2026-11-27, after "looks different" complaints. */
   var track = document.getElementById('galTrack'), dots = document.getElementById('galDots');
-  function addSlide(node){
-    var s = document.createElement('div'); s.className = 'gal-slide'; s.appendChild(node); track.appendChild(s);
+  function addSlide(node, tag){
+    var s = document.createElement('div'); s.className = 'gal-slide'; s.appendChild(node);
+    if(tag){ var tg = document.createElement('span'); tg.className = 'gal-tag'; tg.textContent = tag; s.appendChild(tg); }
+    track.appendChild(s);
     var d = document.createElement('i'); if(!dots.children.length) d.className = 'on'; dots.appendChild(d);
   }
   var first = document.createElement('img');
@@ -789,12 +784,12 @@ var PRODUCTS = {
   data.org.forEach(function(src){
     var im = document.createElement('img');
     im.src = src; im.alt = name + ' \u2014 Saba\u2019s original photo'; im.loading = 'lazy'; im.decoding = 'async';
-    addSlide(im);
+    addSlide(im, 'Saba\u2019s original photo');
   });
   data.vids.forEach(function(src){
     var v = document.createElement('video');
     v.controls = true; v.playsInline = true; v.preload = 'metadata'; v.poster = catImg; v.src = src;
-    addSlide(v);
+    addSlide(v, 'Saba\u2019s own video');
   });
   if(dots.children.length < 2) dots.hidden = true;
 
@@ -1059,32 +1054,9 @@ var PRODUCTS = {
     m.addEventListener('click', function(){ openPv(myIdx); });
   });
 
-  var gal = document.getElementById('pdGallery');
-  data.org.forEach(function(src, i){
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('aria-label', 'See original photo ' + (i + 1) + ' large');
-    var im = document.createElement('img');
-    im.src = src;
-    im.alt = name + ' — Saba\u2019s original photo';
-    im.loading = 'lazy';
-    im.decoding = 'async';
-    b.appendChild(im);
-    b.addEventListener('click', function(){ openPv(pvList.indexOf(src)); });
-    gal.appendChild(b);
-  });
-
-  var vwrap = document.getElementById('pdVids');
-  data.vids.forEach(function(src){
-    var v = document.createElement('video');
-    v.controls = true;
-    v.playsInline = true;
-    v.preload = 'metadata';
-    v.poster = img.getAttribute('data-src');
-    v.src = src;
-    vwrap.appendChild(v);
-  });
-  if(!data.org.length && !data.vids.length){ document.getElementById('pdOrig').hidden = true; }
+  /* No originals section to fill (removed, user order 2026-11-27):
+     Saba's originals already ride as labelled gallery slides and as
+     entries in the full-screen viewer (pvList) — nothing else to build. */
 })();
 </script>
 
