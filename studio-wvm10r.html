@@ -142,16 +142,17 @@
     .brand-name{font-size:1rem}
   }
 
-  .tabs{order:3; width:100%; display:flex; gap:3px; background:#eff2ec; border:1px solid var(--border);
+  .tabs{order:3; width:100%; display:flex; gap:3px; background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c); border:1px solid rgba(58,42,18,.28); box-shadow:0 10px 24px rgba(58,42,18,.18);
     border-radius:999px; padding:4px}
   @media (min-width:820px){ .tabs{order:0; width:auto; display:inline-flex} }
   .tab{flex:1 1 0; display:inline-flex; align-items:center; justify-content:center; gap:5px; min-height:38px;
-    background:transparent; color:var(--muted); border:none; border-radius:999px;
+    background:transparent; color:#3a2a12; border:none; border-radius:999px; font-weight:600;
     padding:.42rem .75rem; font-weight:500; font-size:.9rem; white-space:nowrap;
     transition:background-color .16s ease,color .16s ease,box-shadow .16s ease}
   @media (min-width:820px){ .tab{flex:0 0 auto; padding:.42rem 1rem; font-size:.92rem} }
-  .tab:hover{color:var(--ink)}
-  .tab.on{background:#ffffff; color:var(--ink); font-weight:700; box-shadow:0 1px 4px rgba(16,20,24,.09)}
+  .tab:hover{color:#3a2a12}
+  .tab.on:hover{color:#ecd28a}
+  .tab.on{background:#3a2a12; color:#ecd28a; font-weight:700; box-shadow:0 4px 12px rgba(58,42,18,.35)}
   .tab .n{background:var(--danger); color:#ffffff; border-radius:999px; font-size:11px; font-weight:700;
     line-height:1; padding:3px 6px; margin-left:2px}
 
