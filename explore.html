@@ -120,11 +120,25 @@
      Saba's real price for the piece exists in NM_PAY) */
   .prod{cursor:pointer}
   .prod:active{transform:scale(.985)}
-  .p-price{margin-top:5px;font-size:15px;line-height:1.3}
-  .p-price .p-now{font-weight:800;color:var(--paper-ink)}
-  .p-price .p-mrp{color:var(--paper-mut);text-decoration:line-through;font-size:13px;margin-left:5px}
-  .p-price .p-off{color:#1a7f37;font-weight:700;font-size:13px;margin-left:5px}
-  .prod h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:23px;line-height:1.15}
+  /* card typography (fixed 2026-11-28): the price row is a <p>, so it
+     used to inherit .prod p's letterspaced uppercase label style — the
+     digits printed spread out ("₹ 3 8 8") and "% off" wrapped. The row
+     below resets all of that and lays price / MRP / off on one line. */
+  .prod .p-price{margin-top:8px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;row-gap:2px;
+    font-family:'Manrope',sans-serif;font-size:15px;line-height:1.25;
+    letter-spacing:0;text-transform:none;color:var(--paper-ink)}
+  .prod .p-price .p-now{font-weight:800;font-size:16px;color:var(--paper-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prod .p-price .p-mrp{color:var(--paper-mut);text-decoration:line-through;font-size:12.5px;white-space:nowrap}
+  .prod .p-price .p-off{color:#1a7f37;font-weight:700;font-size:12.5px;white-space:nowrap}
+  /* stock badge on the photo (added by the live layer from the database) */
+  .p-badge{position:absolute;left:10px;top:10px;z-index:3;font-family:'Manrope',sans-serif;
+    font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+    padding:6px 10px;border-radius:999px;background:rgba(253,246,221,.95);color:#7c2d12;
+    box-shadow:0 2px 8px rgba(46,32,16,.18)}
+  .prod.is-oos .p-badge{background:rgba(46,32,16,.88);color:#fdf6dd}
+  .prod.is-oos .ph img{filter:saturate(.5) brightness(.94)}
+  .prod h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:21px;line-height:1.2;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
   .prod p{color:var(--paper-mut);font-size:11px;letter-spacing:.24em;text-transform:uppercase;margin-top:6px}
   .prod .ord-btn{margin-top:10px;width:100%;padding:12px 0;border:none;border-radius:999px;background:var(--paper-ink);color:var(--paper);font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:transform .3s ease,opacity .3s ease}
   .prod .ord-btn:hover{transform:translateY(-1px)}
@@ -1282,6 +1296,15 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
     } catch(e){}
   };
 
+  function stockBadge(card, r){
+    if(!card || r.stock == null || card.querySelector('.p-badge')) return;
+    var bd = null;
+    if(r.stock === 0){ bd = 'Out of stock'; card.classList.add('is-oos'); }
+    else if(r.stock <= 4){ bd = 'Only ' + r.stock + ' left'; }
+    if(!bd) return;
+    var sp = document.createElement('span'); sp.className = 'p-badge'; sp.textContent = bd;
+    var ph = card.querySelector('.ph'); if(ph) ph.appendChild(sp);
+  }
   function priceRow(r){
     var row = document.createElement('p'); row.className = 'p-price';
     var html = '<span class="p-now">' + inr(r.price) + '</span>';
@@ -1331,6 +1354,7 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
           if(r.price != null && !card.querySelector('.p-price')){
             var meta = card.querySelector('.meta'); if(meta) meta.appendChild(priceRow(r));
           }
+          stockBadge(card, r);
         });
         /* a piece Saba added in her studio has no baked card: build
            one in the same markup, wired the same way (whole card is
@@ -1357,6 +1381,7 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
           im.alt = unesc(r.name || '');
           art.querySelector('h3').textContent = unesc(r.name || 'Piece');
           if(r.price != null) art.querySelector('.meta').appendChild(priceRow(r));
+          stockBadge(art, r);
           art.addEventListener('click', function(){ location.href = 'product?p=' + r.id; });
           if(slug && CATS[slug] && !CATS[slug](r.category || '')) art.style.display = 'none';
           grid.appendChild(art);
