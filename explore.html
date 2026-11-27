@@ -1151,5 +1151,30 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
   place();
 })();
 </script>
+<script>
+/* Back = back to where you were (user, 2026-11-27): tapping a product
+   remembers Explore's scroll position; coming Back (or via the product
+   page's own back link) restores it, so you land on the same card you
+   tapped — not the top of the page. The browser's own scroll
+   restoration stays as the fallback; this makes it deterministic.
+   The marker is one-shot and expires after 10 minutes. */
+(function(){
+  var KEY = 'nm_explore_y';
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var a = t && t.closest ? t.closest('a[href*="product.html"]') : null;
+    if (a) { try { sessionStorage.setItem(KEY, String(window.scrollY || 0) + ':' + Date.now()); } catch(_){} }
+  }, true);
+  window.addEventListener('pageshow', function(){
+    var raw = null;
+    try { raw = sessionStorage.getItem(KEY); if (raw !== null) sessionStorage.removeItem(KEY); } catch(_){}
+    if (!raw) return;
+    var parts = raw.split(':'), target = parseInt(parts[0], 10) || 0, when = parseInt(parts[1] || '0', 10);
+    if (!target || (when && Date.now() - when > 10 * 60 * 1000)) return;
+    requestAnimationFrame(function(){ window.scrollTo(0, target); });
+    setTimeout(function(){ if (Math.abs((window.scrollY || 0) - target) > 4) window.scrollTo(0, target); }, 350);
+  });
+})();
+</script>
 </body>
 </html>
