@@ -369,7 +369,15 @@ $('reset-btn').addEventListener('click', function(){
   var btn = $('reset-btn'); btn.disabled = true; btn.textContent = 'Sending\u2026';
   sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://noormaisonbysaba.com/studio-wvm10r' }).then(function(res){
     btn.disabled = false; btn.textContent = 'Email me the link';
-    if(res.error){ showMsg($('reset-msg'), 'Something went wrong. Please try again.', false); return; }
+    if(res.error){
+      /* Supabase's email guard makes you wait a few seconds between
+         emails (429 over_email_send_rate_limit) — say that plainly
+         instead of a scary "something went wrong". */
+      var em = (res.error.message || '') + ' ' + (res.error.code || '');
+      if(/rate|security purposes|429/i.test(em)) showMsg($('reset-msg'), 'Please wait a few seconds, then tap the button once more.', false);
+      else showMsg($('reset-msg'), 'Something went wrong. Please try again.', false);
+      return;
+    }
     showMsg($('reset-msg'), 'Email sent. Please check your inbox and open the newest email \u2014 it has your link.', true);
   });
 });
