@@ -27,7 +27,14 @@
   a, button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
   /* ---------- navbar (the foil pill, same as home) ---------- */
-  .ex-top{max-width:1560px;margin:0 auto;padding:12px var(--pad) 0}
+  /* the top bar sticks and rides the same hide/show driver as the
+     bottom tab bar (body.bar-hide): down-scroll tucks it away,
+     up-scroll brings it back (defect fix, 2026-11-27 — it used to be
+     plain in-flow, so it scrolled off and never returned) */
+  .ex-top{max-width:1560px;margin:0 auto;padding:12px var(--pad) 0;position:sticky;top:10px;z-index:70;transition:transform .38s cubic-bezier(.22,1,.36,1)}
+  @media (max-width:760px){
+    body.bar-hide .ex-top{transform:translateY(-150%)}
+  }
   .navbar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);border:1px solid rgba(58,42,18,.28);border-radius:999px;padding:6px 9px 6px 24px;box-shadow:0 14px 34px rgba(58,42,18,.25)}
   .nb-brand{font-family:'Italiana',serif;font-size:17px;letter-spacing:.15em;color:#3a2a12;text-decoration:none;white-space:nowrap}
   .nb-links{display:flex;gap:32px}
@@ -681,17 +688,34 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
     }, 60);
   }
 
+  /* search owns one history step while it is open (defect fix,
+     2026-11-27): opening pushes a state, so the phone/browser Back
+     button CLOSES the search and stays on this page at the same
+     scroll position — before this, Back left the page entirely and
+     dumped the visitor on Home. Every UI close path goes through
+     history.back() so both routes land identically. */
+  var pushed = false, savedY = 0;
   function open(){
     overlay.hidden = false;
     document.body.style.overflow = 'hidden';
+    savedY = window.scrollY || 0;
+    if (!pushed){ try { history.pushState({ nmSearch: 1 }, ''); pushed = true; } catch(e){} }
     active = 0;
     render();
     setTimeout(function(){ input.focus(); input.select(); }, 30);
   }
-  function close(){
+  function hideSearch(){
     overlay.hidden = true;
     document.body.style.overflow = '';
+    if ((window.scrollY || 0) !== savedY) window.scrollTo(0, savedY);
   }
+  function close(){
+    if (pushed){ history.back(); }
+    else hideSearch();
+  }
+  window.addEventListener('popstate', function(){
+    if (pushed){ pushed = false; if (!overlay.hidden) hideSearch(); }
+  });
 
   searchBtn.addEventListener('click', open);
   overlay.addEventListener('click', function(e){ if (e.target === overlay) close(); });

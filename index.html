@@ -1716,17 +1716,34 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
     }, 60);
   }
 
+  /* search owns one history step while it is open (defect fix,
+     2026-11-27): opening pushes a state, so the phone/browser Back
+     button CLOSES the search and stays on this page at the same
+     scroll position — before this, Back left the page entirely and
+     dumped the visitor on Home. Every UI close path goes through
+     history.back() so both routes land identically. */
+  var pushed = false, savedY = 0;
   function open(){
     overlay.hidden = false;
     document.body.style.overflow = 'hidden';
+    savedY = window.scrollY || 0;
+    if (!pushed){ try { history.pushState({ nmSearch: 1 }, ''); pushed = true; } catch(e){} }
     active = 0;
     render();
     setTimeout(function(){ input.focus(); input.select(); }, 30);
   }
-  function close(){
+  function hideSearch(){
     overlay.hidden = true;
     document.body.style.overflow = '';
+    if ((window.scrollY || 0) !== savedY) window.scrollTo(0, savedY);
   }
+  function close(){
+    if (pushed){ history.back(); }
+    else hideSearch();
+  }
+  window.addEventListener('popstate', function(){
+    if (pushed){ pushed = false; if (!overlay.hidden) hideSearch(); }
+  });
 
   /* talk button stays out of the hero's way; it appears once the hero scrolls off */
   var fab = document.querySelector('.talk-fab');

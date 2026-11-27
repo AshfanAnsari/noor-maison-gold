@@ -41,7 +41,14 @@
   a, button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 
   /* ---------- navbar (the foil pill, same as Explore) ---------- */
-  .ex-top{max-width:1560px;margin:0 auto;padding:12px var(--pad) 0}
+  /* the top bar sticks and rides the same hide/show driver as the
+     bottom tab bar (body.bar-hide): down-scroll tucks it away,
+     up-scroll brings it back (defect fix, 2026-11-27 — it used to be
+     plain in-flow, so it scrolled off and never returned) */
+  .ex-top{max-width:1560px;margin:0 auto;padding:12px var(--pad) 0;position:sticky;top:10px;z-index:70;transition:transform .38s cubic-bezier(.22,1,.36,1)}
+  @media (max-width:760px){
+    body.bar-hide .ex-top{transform:translateY(-150%)}
+  }
   .navbar{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);border:1px solid rgba(58,42,18,.28);border-radius:999px;padding:6px 9px 6px 24px;box-shadow:0 14px 34px rgba(58,42,18,.25)}
   .nb-brand{font-family:'Italiana',serif;font-size:17px;letter-spacing:.15em;color:#3a2a12;text-decoration:none;white-space:nowrap}
   .nb-links{display:flex;gap:32px}
