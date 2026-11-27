@@ -306,6 +306,8 @@
   .ord-f{display:block;font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#8a6420;margin-top:11px}
   .ord-f input,.ord-f textarea{display:block;width:100%;margin-top:7px;padding:12px 13px;border:1px solid rgba(26,23,18,.25);border-radius:12px;background:#fff;font-family:'Manrope',sans-serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:#262019;box-sizing:border-box}
   .ord-err{margin-top:12px;font-size:13.5px;color:#a12622;line-height:1.45}
+  .ord-total{font-weight:800;color:#7c5a1e}
+  .ord-pay{display:block;text-align:center;text-decoration:none}
   .ord-place{margin-top:14px;width:100%;padding:13px 0;border:none;border-radius:999px;background:#2e2010;color:#fdf6dd;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
   .ord-place.ghost{background:none;border:1px solid rgba(26,23,18,.3);color:#3d382e}
   .ord-fine{margin-top:12px;font-size:12.5px;line-height:1.55;color:#6d6252}
@@ -377,6 +379,21 @@
     .pd-block{padding:19px 18px 21px;margin-top:12px}
   }
 </style>
+<script>
+/* PAYMENT CONFIG — the ONE place to fill when Saba's details arrive.
+   The payment flow was decided 2026-11-24: direct UPI intent, no
+   gateway; Saba verifies the payment before she dispatches; the
+   Order ID rides inside the UPI note so she can match the two.
+   TO SWITCH PAYMENTS ON, fill in:
+     upiId   — Saba's UPI ID (looks like noormaison@okhdfcbank)
+     upiName — the name on that UPI account
+     prices  — her price list in rupees, by product id, e.g.
+               { 'cat-1': 1299, 'prod-1': 899, 'turk-1': 749 }
+   While upiId is empty (today) nothing changes for customers: Saba
+   confirms first, payment by UPI after. The same block sits in
+   index / explore / product — fill all three identically. */
+window.NM_PAY = { upiId: '', upiName: '', prices: {} };
+</script>
 </head>
 <body>
   <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
@@ -537,6 +554,7 @@
     <div id="ordForm">
       <div class="ord-head"><img id="ordImg" alt=""><div><h3 id="ordName"></h3><p class="ord-cat" id="ordCat"></p></div></div>
       <div class="ord-row"><span class="ord-lab">Quantity</span><span class="qty"><button type="button" id="qMinus" aria-label="Less">&minus;</button><span id="qVal">1</span><button type="button" id="qPlus" aria-label="More">+</button></span></div>
+      <div class="ord-row" id="ordTotalRow" hidden><span class="ord-lab">Total</span><span class="ord-total" id="ordTotal"></span></div>
       <label class="ord-f">Your name<input id="fName" type="text" autocomplete="name" placeholder="Full name"></label>
       <label class="ord-f">Phone (WhatsApp)<input id="fPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number"></label>
       <label class="ord-f">Full address<textarea id="fAddr" rows="3" placeholder="House, street, city, PIN code"></textarea></label>
@@ -549,6 +567,10 @@
       <h3>Order placed</h3>
       <p class="ord-done-id">Your Order ID is <b id="ordIdOut"></b></p>
       <p class="ord-done-sum" id="ordSummary"></p>
+      <div id="ordPay" hidden>
+        <a class="ord-place ord-pay" id="ordPayBtn" href="#">Pay with UPI</a>
+        <p class="ord-fine" id="ordPayNote"></p>
+      </div>
       <p class="ord-fine">Saba will confirm your order, then you pay by UPI. Your order is saved under Cart &rarr; Your Orders.</p>
       <button type="button" class="ord-place" id="ordDoneBtn">Done</button>
     </div>
@@ -759,8 +781,11 @@ var PRODUCTS = {
   /* price row: fills ONLY when the product data carries real prices
      (Saba's list). While price is absent the row stays hidden and the
      UPI note under it carries the block. */
-  if(data.price){
-    document.getElementById('pdPrice').textContent = data.price;
+  /* price row: NM_PAY.prices (the payment config) is the live source
+     the day Saba's list arrives; a legacy data.price string still works */
+  var payPrice = (window.NM_PAY && window.NM_PAY.prices && window.NM_PAY.prices[id]) || 0;
+  if(payPrice || data.price){
+    document.getElementById('pdPrice').textContent = payPrice ? ('\u20B9' + payPrice.toLocaleString('en-IN')) : data.price;
     if(data.mrp) document.getElementById('pdMrp').textContent = data.mrp;
     if(data.off) document.getElementById('pdOff').textContent = data.off;
     document.getElementById('pdPriceRow').hidden = false;
@@ -1060,6 +1085,7 @@ var PRODUCTS = {
 })();
 </script>
 
+
 <script>
 /* website ordering — the home page's order script, unchanged */
 (function(){
@@ -1067,6 +1093,18 @@ var PRODUCTS = {
   if(!sheet) return;
   var cur = null, qty = 1;
   var qVal = document.getElementById('qVal'), err = document.getElementById('ordErr');
+  /* payment readiness: price() stays 0 until Saba's price list is
+     filled into NM_PAY, and every payment surface stays hidden
+     while it is 0 / upiId is empty — see the config above */
+  var PAY = window.NM_PAY || { upiId: '', upiName: '', prices: {} };
+  function price(){ return (cur && PAY.prices && PAY.prices[cur.id]) || 0; }
+  function inr(n){ return '\u20B9' + n.toLocaleString('en-IN'); }
+  function updTotal(){
+    var row = document.getElementById('ordTotalRow'); if(!row) return;
+    var p = price();
+    if(p){ row.hidden = false; document.getElementById('ordTotal').textContent = inr(p) + ' \u00D7 ' + qty + ' = ' + inr(p * qty); }
+    else row.hidden = true;
+  }
   function orders(){ try { return JSON.parse(localStorage.getItem('nm_orders') || '[]'); } catch(e){ return []; } }
   [sheet, listSheet].forEach(function(s){ s.querySelector('[data-close]').addEventListener('click', function(){ s.classList.remove('open'); }); });
   document.getElementById('ordDoneBtn').addEventListener('click', function(){ sheet.classList.remove('open'); });
@@ -1079,13 +1117,14 @@ var PRODUCTS = {
       document.getElementById('ordImg').src = cur.img;
       document.getElementById('ordName').textContent = cur.name;
       document.getElementById('ordCat').textContent = cur.cat;
+      updTotal();
       document.getElementById('ordForm').hidden = false;
       document.getElementById('ordDone').hidden = true;
       sheet.classList.add('open');
     });
   });
-  document.getElementById('qMinus').addEventListener('click', function(){ if(qty > 1){ qty--; qVal.textContent = qty; } });
-  document.getElementById('qPlus').addEventListener('click', function(){ if(qty < 9){ qty++; qVal.textContent = qty; } });
+  document.getElementById('qMinus').addEventListener('click', function(){ if(qty > 1){ qty--; qVal.textContent = qty; updTotal(); } });
+  document.getElementById('qPlus').addEventListener('click', function(){ if(qty < 9){ qty++; qVal.textContent = qty; updTotal(); } });
   document.getElementById('ordPlace').addEventListener('click', function(){
     var name = document.getElementById('fName').value.trim();
     var phone = document.getElementById('fPhone').value.replace(/\D/g, '');
@@ -1098,18 +1137,29 @@ var PRODUCTS = {
     if(msg){ err.textContent = msg; err.hidden = false; return; }
     err.hidden = true;
     var oid = 'NM-' + Date.now().toString(36).toUpperCase().slice(-6);
+    var amt = price() * qty;
     var all = orders();
-    all.unshift({ oid: oid, pid: cur.id, name: cur.name, qty: qty, cname: name, phone: phone, addr: addr, note: note, when: new Date().toISOString() });
+    all.unshift({ oid: oid, pid: cur.id, name: cur.name, qty: qty, cname: name, phone: phone, addr: addr, note: note, amount: amt, when: new Date().toISOString() });
     try { localStorage.setItem('nm_orders', JSON.stringify(all)); } catch(e){}
     document.getElementById('ordIdOut').textContent = oid;
     document.getElementById('ordSummary').textContent = cur.name + ' \u00d7 ' + qty + ' \u2014 for ' + name + ', ' + phone + '.';
     document.getElementById('ordForm').hidden = true;
+    var payBox = document.getElementById('ordPay');
+    if(PAY.upiId){
+      var link = 'upi://pay?pa=' + encodeURIComponent(PAY.upiId) + '&pn=' + encodeURIComponent(PAY.upiName || 'Noor Maison by Saba') + '&cu=INR&tn=' + encodeURIComponent(oid);
+      if(amt) link += '&am=' + amt;
+      var payBtn = document.getElementById('ordPayBtn');
+      payBtn.href = link;
+      payBtn.textContent = amt ? ('Pay ' + inr(amt) + ' with UPI') : 'Pay with UPI';
+      document.getElementById('ordPayNote').textContent = 'Opens your UPI app (GPay, PhonePe, Paytm) with ' + (amt ? 'the amount and ' : '') + 'your Order ID filled in. On a computer, pay to UPI ID ' + PAY.upiId + ' and write your Order ID in the note. Saba checks the payment before she sends your order.';
+      payBox.hidden = false;
+    } else { payBox.hidden = true; }
     document.getElementById('ordDone').hidden = false;
   });
   window.__openOrders = function(){
     var box = document.getElementById('ordList'); var all = orders();
     if(!all.length){ box.innerHTML = '<p class="ord-empty">No orders yet. Pick a piece from the Catalogue and tap Order.</p>'; }
-    else { box.innerHTML = all.map(function(o){ return '<div class="ord-item"><b>' + o.name + ' \u00d7 ' + o.qty + '</b><p>Order ID ' + o.oid + ' \u00b7 ' + new Date(o.when).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) + '<br>Status: Waiting for Saba to confirm</p></div>'; }).join(''); }
+    else { box.innerHTML = all.map(function(o){ return '<div class="ord-item"><b>' + o.name + ' \u00d7 ' + o.qty + '</b><p>Order ID ' + o.oid + ' \u00b7 ' + new Date(o.when).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) + (o.amount ? ' \u00B7 ' + inr(o.amount) : '') + '<br>Status: Waiting for Saba to confirm</p></div>'; }).join(''); }
     listSheet.classList.add('open');
   };
 })();
