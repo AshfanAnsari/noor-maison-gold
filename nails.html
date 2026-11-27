@@ -349,7 +349,7 @@
 
 <main>
   <section class="site-sec" id="nails">
-    <div class="sec-head rv"><h1 class="sec-title">Nails</h1><span class="sec-note">Coming soon</span></div>
+    <div class="sec-head rv"><h1 class="sec-title">Nails</h1><span class="sec-note">10 sets</span></div>
 
     <!-- ======== PRODUCT GRID — EMPTY FOR NOW ========
          Nail product cards go here when Saba's photos arrive. Copy one
@@ -362,16 +362,20 @@
          only — no Order button, no category line; the whole card
          opens the set's own page, where ordering lives.)
          …and delete the .soon card below at the same time. -->
-    <div class="grid" id="nailGrid"></div>
-
-    <!-- Coming-soon state (delete when the first product cards land). -->
-    <div class="soon rv">
-      <img src="assets/logo-mark-sm.webp" alt="Noor Maison by Saba">
-      <h2>Nail sets are coming soon</h2>
-      <p>Saba is getting the first nail sets ready. When they are ready, you will see them right here &mdash; and you can order them on this page, just like the jewellery.</p>
-      <a class="soon-btn" href="explore.html">See the jewellery</a>
+    <div class="grid" id="nailGrid">
+        <article class="prod rv" id="nail-1" data-cat="Nail Set" data-keys="dusty pink cat eye gold swirl flower press on nails"><div class="ph" data-preview="nail-1"><img loading="eager" fetchpriority="high" decoding="async" src="nails/web/nail01.webp" alt="Dusty Pink Cat-Eye Set — press-on nail set"></div><div class="meta"><h3>Dusty Pink Cat-Eye Set</h3></div></article>
+        <article class="prod rv" id="nail-2" data-cat="Nail Set" data-keys="mauve pink cat eye silver french crystal press on nails"><div class="ph" data-preview="nail-2"><img loading="eager" fetchpriority="high" decoding="async" src="nails/web/nail02.webp" alt="Mauve Cat-Eye Set — press-on nail set"></div><div class="meta"><h3>Mauve Cat-Eye Set</h3></div></article>
+        <article class="prod rv" id="nail-3" data-cat="Nail Set" data-keys="nude pink gold glitter fade press on nails"><div class="ph" data-preview="nail-3"><img loading="eager" fetchpriority="high" decoding="async" src="nails/web/nail03.webp" alt="Nude Pink Glitter Set — press-on nail set"></div><div class="meta"><h3>Nude Pink Glitter Set</h3></div></article>
+        <article class="prod rv" id="nail-4" data-cat="Nail Set" data-keys="chocolate brown gold foil flower press on nails"><div class="ph" data-preview="nail-4"><img loading="eager" decoding="async" src="nails/web/nail04.webp" alt="Chocolate Gold-Foil Set — press-on nail set"></div><div class="meta"><h3>Chocolate Gold-Foil Set</h3></div></article>
+        <article class="prod rv" id="nail-5" data-cat="Nail Set" data-keys="dusty rose glitter pearl petal press on nails"><div class="ph" data-preview="nail-5"><img loading="eager" decoding="async" src="nails/web/nail05.webp" alt="Dusty Rose Pearl Set — press-on nail set"></div><div class="meta"><h3>Dusty Rose Pearl Set</h3></div></article>
+        <article class="prod rv" id="nail-6" data-cat="Nail Set" data-keys="matte chocolate white stripes heart dots press on nails"><div class="ph" data-preview="nail-6"><img loading="eager" decoding="async" src="nails/web/nail06.webp" alt="Chocolate & White Set — press-on nail set"></div><div class="meta"><h3>Chocolate & White Set</h3></div></article>
+        <article class="prod rv" id="nail-7" data-cat="Nail Set" data-keys="nude cream crystal drops flower press on nails"><div class="ph" data-preview="nail-7"><img loading="lazy" decoding="async" src="nails/web/nail07.webp" alt="Nude Crystal Set — press-on nail set"></div><div class="meta"><h3>Nude Crystal Set</h3></div></article>
+        <article class="prod rv" id="nail-8" data-cat="Nail Set" data-keys="pink red french tips dots gold rhinestone press on nails"><div class="ph" data-preview="nail-8"><img loading="lazy" decoding="async" src="nails/web/nail08.webp" alt="Pink French-Tip Set — press-on nail set"></div><div class="meta"><h3>Pink French-Tip Set</h3></div></article>
+        <article class="prod rv" id="nail-9" data-cat="Nail Set" data-keys="champagne gold glitter crystal pearl press on nails"><div class="ph" data-preview="nail-9"><img loading="lazy" decoding="async" src="nails/web/nail09.webp" alt="Champagne Crystal Set — press-on nail set"></div><div class="meta"><h3>Champagne Crystal Set</h3></div></article>
+        <article class="prod rv" id="nail-10" data-cat="Nail Set" data-keys="pale pink glitter bronze swirl daisy press on nails"><div class="ph" data-preview="nail-10"><img loading="lazy" decoding="async" src="nails/web/nail10.webp" alt="Pale Pink Daisy Set — press-on nail set"></div><div class="meta"><h3>Pale Pink Daisy Set</h3></div></article>
     </div>
-  </section>
+
+</section>
 </main>
 
 <div class="endpanel">
@@ -796,6 +800,17 @@
     }
   }
   document.querySelectorAll('.ph img, .cc-ph img').forEach(arm);
+})();
+</script>
+<script>
+/* Nail cards: the whole card opens the set's own page, where the
+   photos, details and ordering live (same pattern as Explore). */
+(function(){
+  document.querySelectorAll('#nailGrid .prod[id]').forEach(function(card){
+    card.addEventListener('click', function(){
+      location.href = 'product.html?p=' + card.id;
+    });
+  });
 })();
 </script>
 </body>
