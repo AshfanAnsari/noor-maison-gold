@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio — Noor Maison by Saba</title>
+<!--
+  NOOR MAISON STUDIO — Saba's own admin page (private, noindex).
+  Everything here talks to her Supabase project with her login.
+  The public (anon) key below is public by design — it ships in the
+  website too. The real lock is Supabase Row Level Security: only
+  Saba's signed-in account can read orders/enquiries or change
+  anything; these checks were proven with the anon key alone.
+-->
+<style>
+  /* Fonts — the same files the website uses (one level up). */
+  @font-face{font-family:'Italiana';src:url('assets/fonts/Italiana-400-normal.woff2') format('woff2');font-weight:400}
+  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-400-normal.woff2') format('woff2');font-weight:400}
+  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-600-normal.woff2') format('woff2');font-weight:600}
+  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-700-normal.woff2') format('woff2');font-weight:700}
+  :root{
+    --bg:#faf6ee; --card:#fffdf8; --ink:#2e2413; --muted:#7c6a45;
+    --gold:#a37f2c; --gold-deep:#7c5a1e; --line:#e7dcc4;
+    --ok:#1a7f37; --warn:#b3261e; --radius:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg); color:var(--ink); font-family:'Manrope',system-ui,sans-serif; font-size:16px; line-height:1.45}
+  button{font-family:inherit; cursor:pointer}
+  input,select,textarea{font-family:inherit; font-size:16px; color:var(--ink)}
+  .wrap{max-width:760px; margin:0 auto; padding:18px 16px 90px}
+
+  /* ---------- login ---------- */
+  .login-card{max-width:420px; margin:9vh auto 0; background:var(--card); border:1px solid var(--line);
+    border-radius:22px; padding:30px 24px 26px; box-shadow:0 18px 50px rgba(124,90,30,.12); text-align:center}
+  .login-card .brand{font-family:'Italiana',serif; font-size:30px; letter-spacing:.14em; color:var(--gold-deep)}
+  .login-card .brand small{display:block; font-size:12px; letter-spacing:.34em; color:var(--muted); margin-top:4px}
+  .login-card p{color:var(--muted); font-size:14.5px; margin:14px 0 20px}
+  .field{text-align:left; margin-bottom:14px}
+  .field label{display:block; font-weight:600; font-size:14px; margin-bottom:6px}
+  .field input,.field select,.field textarea{width:100%; padding:13px 14px; border:1.5px solid var(--line);
+    border-radius:12px; background:#fff; outline:none}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+  .field .hint{font-size:13px; color:var(--muted); margin-top:5px}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:999px;
+    padding:14px 22px; font-weight:700; font-size:16px; min-height:52px}
+  .btn-gold{background:linear-gradient(160deg,#c9a24d,#a37f2c); color:#fff; width:100%}
+  .btn-line{background:#fff; border:1.5px solid var(--line); color:var(--ink)}
+  .btn-small{padding:10px 16px; min-height:44px; font-size:14.5px}
+  .msg{border-radius:12px; padding:12px 14px; font-size:14.5px; margin:12px 0; display:none}
+  .msg.err{display:block; background:#fdeceb; color:var(--warn)}
+  .msg.good{display:block; background:#e7f6ec; color:var(--ok)}
+
+  /* ---------- app frame ---------- */
+  .topbar{position:sticky; top:0; z-index:5; background:rgba(250,246,238,.94); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line); padding:12px 16px; display:flex; align-items:center; gap:10px}
+  .topbar .brand{font-family:'Italiana',serif; font-size:20px; letter-spacing:.12em; color:var(--gold-deep); margin-right:auto}
+  .topbar .who{font-size:12.5px; color:var(--muted); max-width:38vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .tabs{display:flex; gap:8px; padding:14px 16px 0; max-width:760px; margin:0 auto; flex-wrap:wrap}
+  .tab{flex:1 1 auto; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:999px;
+    padding:12px 10px; font-weight:700; font-size:15px; min-height:48px}
+  .tab.on{background:var(--gold-deep); border-color:var(--gold-deep); color:#fff}
+  .tab .n{background:var(--warn); color:#fff; border-radius:999px; font-size:12px; padding:1px 7px; margin-left:5px; vertical-align:2px}
+  .tab.on .n{background:#fff; color:var(--warn)}
+
+  /* ---------- cards & lists ---------- */
+  .counts{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px}
+  .count{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 10px; text-align:center}
+  .count b{display:block; font-family:'Italiana',serif; font-size:34px; color:var(--gold-deep); line-height:1}
+  .count span{font-size:13px; color:var(--muted)}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px}
+  .row{display:flex; gap:12px; align-items:center}
+  .thumb{width:64px; height:80px; object-fit:cover; border-radius:10px; background:#efe7d3; flex:0 0 auto}
+  .row .grow{flex:1 1 auto; min-width:0}
+  .row h3{margin:0 0 3px; font-size:16.5px}
+  .row .sub{font-size:13.5px; color:var(--muted)}
+  .badge{display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 9px; margin-left:6px; vertical-align:2px}
+  .badge.show{background:#e7f6ec; color:var(--ok)}
+  .badge.hide{background:#f3e2c7; color:#8a5a12}
+  .badge.low{background:#fdeceb; color:var(--warn)}
+  .search{width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; background:#fff; margin-top:14px}
+  .photos{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 4px}
+  .photos figure{margin:0; position:relative}
+  .photos img{width:74px; height:92px; object-fit:cover; border-radius:10px; background:#efe7d3; display:block}
+  .photos button{position:absolute; top:-7px; right:-7px; width:26px; height:26px; border-radius:50%; border:none;
+    background:var(--warn); color:#fff; font-size:15px; line-height:1}
+  .photos .main-tag{position:absolute; left:0; bottom:0; right:0; font-size:10.5px; text-align:center;
+    background:rgba(46,36,19,.72); color:#fff; border-radius:0 0 10px 10px; padding:2px 0}
+  .switch{display:flex; align-items:center; gap:10px; font-weight:600}
+  .switch input{width:24px; height:24px; accent-color:var(--gold-deep)}
+  .status-sel{padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-weight:600}
+  .empty{color:var(--muted); text-align:center; padding:26px 10px; font-size:15px}
+  .done-line{display:flex; align-items:center; gap:9px; font-weight:600; margin-top:10px}
+  .done-line input{width:23px; height:23px; accent-color:var(--ok)}
+  .is-done{opacity:.55}
+  a.tel{color:var(--gold-deep); font-weight:700; text-decoration:none}
+  .hide{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<main id="view-login" class="wrap">
+  <form class="login-card" id="login-form">
+    <div class="brand">NOOR MAISON<small>BY SABA · STUDIO</small></div>
+    <p>This is your private page. From here you can change prices, add photos, add new pieces and see your orders.</p>
+    <div class="msg" id="login-msg"></div>
+    <div class="field">
+      <label for="li-email">Your email</label>
+      <input id="li-email" type="email" autocomplete="username" required placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label for="li-pass">Password</label>
+      <input id="li-pass" type="password" autocomplete="current-password" required placeholder="Your password">
+    </div>
+    <button class="btn btn-gold" type="submit" id="login-btn">Open my studio</button>
+  </form>
+</main>
+
+<!-- ================= APP ================= -->
+<div id="view-app" class="hide">
+  <div class="topbar">
+    <div class="brand">STUDIO</div>
+    <div class="who" id="who"></div>
+    <button class="btn btn-line btn-small" id="signout" type="button">Sign out</button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="home" type="button">Home</button>
+    <button class="tab" data-tab="products" type="button">Pieces</button>
+    <button class="tab" data-tab="enquiries" type="button">Questions<span class="n hide" id="n-enq"></span></button>
+    <button class="tab" data-tab="orders" type="button">Orders<span class="n hide" id="n-ord"></span></button>
+  </nav>
+
+  <main class="wrap">
+    <!-- HOME -->
+    <section id="tab-home">
+      <div class="counts">
+        <div class="count"><b id="c-products">–</b><span>pieces on your website</span></div>
+        <div class="count"><b id="c-enq">–</b><span>new questions</span></div>
+        <div class="count"><b id="c-ord">–</b><span>new orders</span></div>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px">Welcome, Saba</h3>
+        <p style="margin:0; color:var(--muted); font-size:14.5px">
+          <b>Pieces</b> — change a price, add photos, mark a piece finished, or add a new piece.<br>
+          <b>Questions</b> — messages customers sent from the website.<br>
+          <b>Orders</b> — orders customers placed. Change the order step as you pack and send.
+        </p>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="tab-products" class="hide">
+      <input class="search" id="prod-search" type="search" placeholder="Search your pieces…">
+      <div style="margin-top:12px">
+        <button class="btn btn-gold" id="add-piece" type="button">+ Add a new piece</button>
+      </div>
+      <div id="prod-list"></div>
+    </section>
+
+    <!-- PRODUCT EDIT -->
+    <section id="tab-edit" class="hide">
+      <button class="btn btn-line btn-small" id="edit-back" type="button">← Back to all pieces</button>
+      <form class="card" id="edit-form">
+        <h3 style="margin:0 0 14px" id="edit-title">Edit piece</h3>
+        <div class="msg" id="edit-msg"></div>
+        <div class="field">
+          <label for="f-name">Name of the piece</label>
+          <input id="f-name" required>
+        </div>
+        <div class="field">
+          <label for="f-cat">Type</label>
+          <select id="f-cat">
+            <option>Earrings</option><option>Necklace Set</option><option>Pendant</option>
+            <option>Bracelet</option><option>Ring</option><option>Nail Set</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-desc">About this piece</label>
+          <textarea id="f-desc" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label for="f-price">Price (₹)</label>
+          <input id="f-price" type="number" min="0" step="1" inputmode="numeric" placeholder="For example 1299">
+          <div class="hint">Leave empty if you want customers to ask you the price.</div>
+        </div>
+        <div class="field">
+          <label for="f-mrp">Old price (₹) — only if there is a discount</label>
+          <input id="f-mrp" type="number" min="0" step="1" inputmode="numeric" placeholder="For example 1799">
+          <div class="hint">If you fill this, the website shows the old price cut with a line, and the % off.</div>
+        </div>
+        <div class="field">
+          <label for="f-stock">How many pieces are left?</label>
+          <input id="f-stock" type="number" min="0" step="1" inputmode="numeric" placeholder="For example 5">
+          <div class="hint">Leave empty if you have many. Write 0 when the piece is finished — the website will say "Out of stock". If 4 or less are left, the website says "Only X left".</div>
+        </div>
+        <div class="field">
+          <label>Photos</label>
+          <div class="photos" id="f-photos"></div>
+          <input id="f-upload" type="file" accept="image/*" multiple>
+          <div class="hint">The first photo is the main photo customers see first.</div>
+        </div>
+        <div class="field switch">
+          <input id="f-active" type="checkbox" checked>
+          <label for="f-active">Show this piece on the website</label>
+        </div>
+        <button class="btn btn-gold" type="submit" id="edit-save">Save changes</button>
+      </form>
+    </section>
+
+    <!-- ENQUIRIES -->
+    <section id="tab-enquiries" class="hide">
+      <div id="enq-list"></div>
+    </section>
+
+    <!-- ORDERS -->
+    <section id="tab-orders" class="hide">
+      <div id="ord-list"></div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* If the library could not load (no internet), say so in simple words
+   instead of leaving a dead page. */
+if(!window.supabase){
+  document.getElementById('login-msg').textContent = 'No internet connection. Please check your internet and open this page again.';
+  document.getElementById('login-msg').className = 'msg err';
+  document.getElementById('login-btn').disabled = true;
+}
+</script>
+<script>
+/* ================= Noor Maison Studio — app logic =================
+   Data rules (proven against the live database):
+   - price/mrp/stock NULL means "not set": no price shown ("Price on
+     enquiry"), stock NULL = many, 0 = out of stock, 1–4 = "Only X left".
+   - photos[0] is the main photo. Entries are either website paths
+     (catalogue/…, media/…, assets-stock/…) or full storage URLs.
+   - The seed data carries a few literal "&amp;" texts; unesc() cleans
+     them for display, and saving a piece stores the clean text back. */
+var SB_URL = 'https://iysracetedbkjfpsizah.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5c3JhY2V0ZWRia2pmcHNpemFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3NzIzOTUsImV4cCI6MjExMTM0ODM5NX0._r5U_dDLzlI161_NYlrsNlLEdDKoI8i1exlBeHguHe4';
+var sb = supabase.createClient(SB_URL, SB_KEY);
+
+var $ = function(id){ return document.getElementById(id); };
+function esc(t){ return String(t == null ? '' : t).replace(/[&<>"']/g, function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function unesc(t){ return String(t == null ? '' : t)
+  .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'"); }
+function photoSrc(p){ return !p ? '' : (/^https?:\/\//.test(p) ? p : p); }
+function priceText(p){ return p.price == null ? 'Price on enquiry' : '₹' + Number(p.price).toLocaleString('en-IN'); }
+function stockText(p){
+  if(p.stock == null) return '';
+  if(p.stock === 0) return ' · Out of stock';
+  if(p.stock <= 4) return ' · Only ' + p.stock + ' left';
+  return ' · ' + p.stock + ' left';
+}
+function dateText(ts){ try { return new Date(ts).toLocaleString('en-IN',
+  {day:'numeric', month:'short', hour:'numeric', minute:'2-digit'}); } catch(e){ return ''; } }
+function showMsg(el, text, good){ el.textContent = text; el.className = 'msg ' + (good ? 'good' : 'err'); }
+
+var PRODUCTS = [], ENQUIRIES = [], ORDERS = [];
+var editing = null;        // product being edited (null = new piece)
+var stagedPhotos = [];     // photo list of the form currently open
+
+/* ---------------- auth ---------------- */
+$('login-form').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  var btn = $('login-btn'); btn.disabled = true; btn.textContent = 'Opening…';
+  sb.auth.signInWithPassword({ email: $('li-email').value.trim(), password: $('li-pass').value })
+    .then(function(res){
+      btn.disabled = false; btn.textContent = 'Open my studio';
+      if(res.error) showMsg($('login-msg'), 'This email or password is not right. Please check and try again.', false);
+    });
+});
+$('signout').addEventListener('click', function(){ sb.auth.signOut(); });
+
+sb.auth.onAuthStateChange(function(_ev, session){
+  if(session && session.user){
+    $('view-login').classList.add('hide');
+    $('view-app').classList.remove('hide');
+    $('who').textContent = session.user.email;
+    loadAll();
+  } else {
+    $('view-app').classList.add('hide');
+    $('view-login').classList.remove('hide');
+  }
+});
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('on', t === tab); });
+    ['home','products','enquiries','orders'].forEach(function(name){
+      $('tab-' + name).classList.toggle('hide', name !== tab.dataset.tab);
+    });
+    $('tab-edit').classList.add('hide');
+  });
+});
+function openTab(name){
+  document.querySelector('.tab[data-tab="' + name + '"]').click();
+}
+
+/* ---------------- data ---------------- */
+function loadAll(){
+  sb.from('products').select('*').order('sort', {ascending:true}).order('name', {ascending:true})
+    .then(function(r){ if(!r.error){ PRODUCTS = r.data || []; renderProducts(); renderCounts(); } });
+  sb.from('enquiries').select('*').order('created_at', {ascending:false})
+    .then(function(r){ if(!r.error){ ENQUIRIES = r.data || []; renderEnquiries(); renderCounts(); } });
+  sb.from('orders').select('*').order('created_at', {ascending:false})
+    .then(function(r){ if(!r.error){ ORDERS = r.data || []; renderOrders(); renderCounts(); } });
+}
+function renderCounts(){
+  var live = PRODUCTS.filter(function(p){ return p.is_active; }).length;
+  var newE = ENQUIRIES.filter(function(e){ return !e.is_done; }).length;
+  var newO = ORDERS.filter(function(o){ return o.status === 'new'; }).length;
+  $('c-products').textContent = live;
+  $('c-enq').textContent = newE;
+  $('c-ord').textContent = newO;
+  $('n-enq').textContent = newE; $('n-enq').classList.toggle('hide', newE === 0);
+  $('n-ord').textContent = newO; $('n-ord').classList.toggle('hide', newO === 0);
+}
+
+/* ---------------- products list ---------------- */
+function renderProducts(){
+  var q = ($('prod-search').value || '').toLowerCase();
+  var list = PRODUCTS.filter(function(p){
+    return !q || unesc(p.name).toLowerCase().indexOf(q) > -1 || (p.category || '').toLowerCase().indexOf(q) > -1;
+  });
+  $('prod-list').innerHTML = list.length ? list.map(function(p){
+    return '<div class="card row" data-open="' + esc(p.id) + '" style="cursor:pointer">'
+      + '<img class="thumb" src="' + esc(photoSrc((p.photos || [])[0])) + '" alt="">'
+      + '<div class="grow"><h3>' + esc(unesc(p.name))
+      + '<span class="badge ' + (p.is_active ? 'show' : 'hide') + '">' + (p.is_active ? 'Shown' : 'Hidden') + '</span>'
+      + (p.stock != null && p.stock <= 4 && p.stock > 0 ? '<span class="badge low">Only ' + p.stock + ' left</span>' : '')
+      + (p.stock === 0 ? '<span class="badge low">Out of stock</span>' : '')
+      + '</h3><div class="sub">' + esc(priceText(p)) + esc(stockText(p)) + ' · ' + esc(p.category || '') + '</div></div>'
+      + '<div aria-hidden="true" style="color:var(--muted); font-size:22px">›</div></div>';
+  }).join('') : '<div class="empty">No pieces found.</div>';
+  $('prod-list').querySelectorAll('[data-open]').forEach(function(card){
+    card.addEventListener('click', function(){ openEdit(card.getAttribute('data-open')); });
+  });
+}
+$('prod-search').addEventListener('input', renderProducts);
+$('add-piece').addEventListener('click', function(){ openEdit(null); });
+
+/* ---------------- product edit ---------------- */
+function renderFormPhotos(){
+  $('f-photos').innerHTML = stagedPhotos.map(function(p, i){
+    return '<figure><img src="' + esc(photoSrc(p)) + '" alt="">'
+      + '<button type="button" data-rm="' + i + '" aria-label="Remove photo">×</button>'
+      + (i === 0 ? '<span class="main-tag">Main photo</span>' : '') + '</figure>';
+  }).join('') || '<span style="color:var(--muted); font-size:14px">No photos yet.</span>';
+  $('f-photos').querySelectorAll('[data-rm]').forEach(function(btn){
+    btn.addEventListener('click', function(){ removePhoto(Number(btn.getAttribute('data-rm'))); });
+  });
+}
+function openEdit(id){
+  editing = PRODUCTS.filter(function(p){ return p.id === id; })[0] || null;
+  var p = editing;
+  $('edit-title').textContent = p ? 'Edit piece' : 'Add a new piece';
+  $('f-name').value = p ? unesc(p.name) : '';
+  var cat = $('f-cat');
+  if(p && p.category && !Array.prototype.some.call(cat.options, function(o){ return o.value === p.category; })){
+    var opt = document.createElement('option'); opt.value = p.category; opt.textContent = p.category; cat.appendChild(opt);
+  }
+  cat.value = p ? p.category : 'Earrings';
+  $('f-desc').value = p ? unesc(p.description) : '';
+  $('f-price').value = p && p.price != null ? p.price : '';
+  $('f-mrp').value = p && p.mrp != null ? p.mrp : '';
+  $('f-stock').value = p && p.stock != null ? p.stock : '';
+  $('f-active').checked = p ? !!p.is_active : true;
+  stagedPhotos = p ? (p.photos || []).slice() : [];
+  renderFormPhotos();
+  $('edit-msg').className = 'msg'; $('edit-msg').textContent = '';
+  ['home','products','enquiries','orders'].forEach(function(n){ $('tab-' + n).classList.add('hide'); });
+  $('tab-edit').classList.remove('hide');
+  window.scrollTo(0, 0);
+}
+$('edit-back').addEventListener('click', function(){ $('tab-edit').classList.add('hide'); openTab('products'); });
+
+/* Photos: in edit mode they save at once (kind for Saba — no lost
+   uploads if she forgets the Save button); for a new piece they wait
+   for the first Save, because the piece does not exist yet. */
+function savePhotosNow(){
+  if(!editing) { renderFormPhotos(); return; }
+  sb.from('products').update({ photos: stagedPhotos, updated_at: new Date().toISOString() })
+    .eq('id', editing.id).then(function(r){
+      if(r.error) showMsg($('edit-msg'), 'The photo could not be saved. Please try again.', false);
+      else { editing.photos = stagedPhotos.slice(); renderFormPhotos(); renderProducts(); }
+    });
+}
+function removePhoto(i){
+  var gone = stagedPhotos.splice(i, 1)[0];
+  renderFormPhotos(); savePhotosNow();
+  /* If it was one of her uploads, remove the file too (best effort). */
+  var marker = '/product-photos/';
+  if(gone && gone.indexOf(marker) > -1){
+    sb.storage.from('product-photos').remove([gone.split(marker)[1]]).then(function(){});
+  }
+}
+$('f-upload').addEventListener('change', function(){
+  var files = Array.prototype.slice.call($('f-upload').files || []);
+  if(!files.length) return;
+  var id = editing ? editing.id : 'new-' + Date.now().toString(36);
+  var chain = Promise.resolve();
+  files.forEach(function(file){
+    chain = chain.then(function(){
+      var clean = file.name.toLowerCase().replace(/[^a-z0-9.]+/g, '-');
+      var path = id + '/' + Date.now() + '-' + clean;
+      return sb.storage.from('product-photos').upload(path, file).then(function(r){
+        if(r.error){ showMsg($('edit-msg'), 'One photo could not be added. Please try again.', false); return; }
+        var url = sb.storage.from('product-photos').getPublicUrl(path).data.publicUrl;
+        stagedPhotos.push(url);
+      });
+    });
+  });
+  chain.then(function(){ $('f-upload').value = ''; renderFormPhotos(); savePhotosNow(); });
+});
+
+$('edit-form').addEventListener('submit', function(ev){
+  ev.preventDefault();
+  var num = function(id){ var v = $(id).value.trim(); return v === '' ? null : Math.max(0, parseInt(v, 10) || 0); };
+  var payload = {
+    name: unesc($('f-name').value.trim()),
+    category: $('f-cat').value,
+    description: unesc($('f-desc').value.trim()) || null,
+    price: num('f-price'), mrp: num('f-mrp'), stock: num('f-stock'),
+    is_active: $('f-active').checked,
+    photos: stagedPhotos,
+    updated_at: new Date().toISOString()
+  };
+  var btn = $('edit-save'); btn.disabled = true; btn.textContent = 'Saving…';
+  var done = function(r){
+    btn.disabled = false; btn.textContent = 'Save changes';
+    if(r.error){ showMsg($('edit-msg'), 'Sorry, it could not be saved. Please try again.', false); return; }
+    showMsg($('edit-msg'), 'Saved. Your website is updated.', true);
+    loadAll();
+  };
+  if(editing){
+    sb.from('products').update(payload).eq('id', editing.id).then(done);
+  } else {
+    payload.id = 'piece-' + Date.now().toString(36);
+    payload.sort = PRODUCTS.reduce(function(m, p){ return Math.max(m, p.sort || 0); }, 0) + 10;
+    sb.from('products').insert(payload).then(function(r){
+      if(!r.error){ editing = Object.assign({}, payload); $('edit-title').textContent = 'Edit piece'; }
+      done(r);
+    });
+  }
+});
+
+/* ---------------- enquiries ---------------- */
+function renderEnquiries(){
+  $('enq-list').innerHTML = ENQUIRIES.length ? ENQUIRIES.map(function(e){
+    var piece = e.product_id ? (PRODUCTS.filter(function(p){ return p.id === e.product_id; })[0]) : null;
+    return '<div class="card' + (e.is_done ? ' is-done' : '') + '">'
+      + '<div class="row"><div class="grow"><h3>' + esc(unesc(e.name)) + '</h3>'
+      + '<div class="sub">' + esc(dateText(e.created_at)) + (piece ? ' · asked about ' + esc(unesc(piece.name)) : '') + '</div></div></div>'
+      + '<p style="margin:10px 0 4px">' + esc(unesc(e.message)) + '</p>'
+      + '<div>Phone: <a class="tel" href="tel:' + esc(e.phone) + '">' + esc(e.phone) + '</a></div>'
+      + '<label class="done-line"><input type="checkbox" data-done="' + esc(e.id) + '"' + (e.is_done ? ' checked' : '') + '> Done — I have replied</label>'
+      + '</div>';
+  }).join('') : '<div class="empty">No questions yet. When a customer writes from the website, it will come here.</div>';
+  $('enq-list').querySelectorAll('[data-done]').forEach(function(box){
+    box.addEventListener('change', function(){
+      sb.from('enquiries').update({ is_done: box.checked }).eq('id', box.getAttribute('data-done'))
+        .then(function(){ loadAll(); });
+    });
+  });
+}
+
+/* ---------------- orders ---------------- */
+var STATUS_WORDS = { new:'New order', confirmed:'Confirmed', dispatched:'Sent out', done:'Finished', cancelled:'Cancelled' };
+function renderOrders(){
+  $('ord-list').innerHTML = ORDERS.length ? ORDERS.map(function(o){
+    var opts = Object.keys(STATUS_WORDS).map(function(s){
+      return '<option value="' + s + '"' + (o.status === s ? ' selected' : '') + '>' + STATUS_WORDS[s] + '</option>';
+    }).join('');
+    return '<div class="card">'
+      + '<div class="row"><div class="grow"><h3>' + esc(o.order_code) + '</h3>'
+      + '<div class="sub">' + esc(dateText(o.created_at)) + '</div></div>'
+      + (o.amount != null ? '<div style="font-weight:700">₹' + Number(o.amount).toLocaleString('en-IN') + '</div>' : '')
+      + '</div>'
+      + '<p style="margin:10px 0 4px">' + esc(unesc(o.product_name)) + ' × ' + esc(o.qty) + '</p>'
+      + '<div>' + esc(unesc(o.name)) + ' · <a class="tel" href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></div>'
+      + '<div style="color:var(--muted); font-size:14.5px; margin:4px 0 10px">' + esc(unesc(o.address)) + '</div>'
+      + '<label style="font-weight:600; font-size:14px">Order step: </label>'
+      + '<select class="status-sel" data-status="' + esc(o.id) + '">' + opts + '</select>'
+      + '</div>';
+  }).join('') : '<div class="empty">No orders yet. When a customer orders from the website, it will come here.</div>';
+  $('ord-list').querySelectorAll('[data-status]').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      sb.from('orders').update({ status: sel.value }).eq('id', sel.getAttribute('data-status'))
+        .then(function(){ loadAll(); });
+    });
+  });
+}
+</script>
+</body>
+</html>

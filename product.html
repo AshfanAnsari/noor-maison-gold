@@ -1307,6 +1307,9 @@ var PRODUCTS = {
     var all = orders();
     all.unshift({ oid: oid, pid: cur.id, name: cur.name, qty: qty, cname: name, phone: phone, addr: addr, note: note, amount: amt, when: new Date().toISOString() });
     try { localStorage.setItem('nm_orders', JSON.stringify(all)); } catch(e){}
+    /* live copy for Saba's Orders list (her database) — the phone
+       copy above stays the fallback if this cannot send */
+    if(window.NM_LIVE_POST) window.NM_LIVE_POST({ order_code: oid, product_id: cur.id, product_name: cur.name, qty: qty, amount: amt || null, name: name, phone: phone, address: addr + (note ? ' (Note: ' + note + ')' : '') });
     document.getElementById('ordIdOut').textContent = oid;
     document.getElementById('ordSummary').textContent = cur.name + ' \u00d7 ' + qty + ' \u2014 for ' + name + ', ' + phone + '.';
     document.getElementById('ordForm').hidden = true;
@@ -1431,6 +1434,105 @@ var PRODUCTS = {
   window.addEventListener('load', place);
   if(document.fonts && document.fonts.ready) document.fonts.ready.then(place);
   place();
+})();
+</script>
+
+<script>
+/* ================================================================
+   LIVE DATA — Saba's database (Supabase), added 2026-11-27.
+   The pages are baked with everything they need, so the site works
+   exactly as before if this fetch fails or her database is paused.
+   When it answers, it only ever ADDS: real prices (merged into
+   NM_PAY.prices — the same config every price surface reads),
+   stock state, hidden pieces, and, via NM_LIVE_POST below, a copy
+   of each new order in her Orders list. The anon key is public by
+   design; the database rules (RLS) decide what it may do.
+   ================================================================ */
+(function(){
+  var BASE = 'https://iysracetedbkjfpsizah.supabase.co/rest/v1/';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5c3JhY2V0ZWRia2pmcHNpemFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3NzIzOTUsImV4cCI6MjExMTM0ODM5NX0._r5U_dDLzlI161_NYlrsNlLEdDKoI8i1exlBeHguHe4';
+  function inr(n){ return '\u20B9' + Number(n).toLocaleString('en-IN'); }
+
+  /* Orders: the order sheets call this right after saving the order
+     on the customer's phone (which stays the fallback of record). */
+  window.NM_LIVE_POST = function(order){
+    try {
+      fetch(BASE + 'orders', { method: 'POST',
+        headers: { apikey: KEY, Authorization: 'Bearer ' + KEY,
+                   'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify(order) }).catch(function(){});
+    } catch(e){}
+  };
+
+  fetch(BASE + 'products?select=id,price,mrp,stock,is_active',
+        { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(rows){
+      if(!rows || !rows.length) return;
+      var byId = {};
+      window.NM_PAY = window.NM_PAY || { upiId: '', upiName: '', prices: {} };
+      window.NM_PAY.prices = window.NM_PAY.prices || {};
+      rows.forEach(function(r){
+        byId[r.id] = r;
+        if(r.price != null) window.NM_PAY.prices[r.id] = { price: r.price, mrp: r.mrp };
+      });
+      window.NM_LIVE = byId;
+
+      /* Catalogue cards (Explore's #catalogue grid only — the home
+         page's tiles keep their frozen design): a piece Saba hid in
+         her studio disappears; a priced piece gains its price row,
+         in the same markup the baked price script writes. */
+      document.querySelectorAll('#catalogue .prod[id]').forEach(function(card){
+        var r = byId[card.id]; if(!r) return;
+        if(r.is_active === false){ card.style.display = 'none'; return; }
+        if(r.price != null && !card.querySelector('.p-price')){
+          var row = document.createElement('p'); row.className = 'p-price';
+          var html = '<span class="p-now">' + inr(r.price) + '</span>';
+          if(r.mrp && r.mrp > r.price)
+            html += ' <span class="p-mrp">' + inr(r.mrp) + '</span> <span class="p-off">'
+                  + Math.round((1 - r.price / r.mrp) * 100) + '% off</span>';
+          row.innerHTML = html;
+          var meta = card.querySelector('.meta'); if(meta) meta.appendChild(row);
+        }
+      });
+
+      /* Product page: fill the price row for the piece being viewed,
+         mirror the baked out-of-stock behaviour when her studio says
+         the piece is finished, and price the Similar Products cards
+         (which are built before this fetch returns). */
+      var pid = new URLSearchParams(location.search).get('p');
+      var cur = pid && byId[pid];
+      if(cur){
+        if(cur.price != null){
+          var pr = document.getElementById('pdPrice'), rowEl = document.getElementById('pdPriceRow');
+          if(pr && rowEl){
+            pr.textContent = inr(cur.price);
+            if(cur.mrp && cur.mrp > cur.price){
+              document.getElementById('pdMrp').textContent = inr(cur.mrp);
+              document.getElementById('pdOff').textContent = Math.round((1 - cur.price / cur.mrp) * 100) + '% off';
+            }
+            rowEl.hidden = false;
+          }
+        }
+        if(cur.stock === 0){
+          ['pdOrder', 'pdOrderDesk'].forEach(function(bid){
+            var ob = document.getElementById(bid);
+            if(ob){ ob.disabled = true; ob.removeAttribute('data-order'); ob.textContent = 'Out of stock'; }
+          });
+        }
+        document.querySelectorAll('.sim-card').forEach(function(a){
+          var m = /[?&]p=([a-z]+-\d+)/.exec(a.getAttribute('href') || '');
+          var sr = m && byId[m[1]];
+          if(sr && sr.price != null && !a.querySelector('.sim-price')){
+            var sp = document.createElement('span'); sp.className = 'sim-price';
+            sp.innerHTML = '<b>' + inr(sr.price) + '</b>' + ((sr.mrp && sr.mrp > sr.price)
+              ? ' <s>' + inr(sr.mrp) + '</s> <em>' + Math.round((1 - sr.price / sr.mrp) * 100) + '% off</em>' : '');
+            a.appendChild(sp);
+          }
+        });
+      }
+    })
+    .catch(function(){});
 })();
 </script>
 </body>
