@@ -457,6 +457,19 @@
    index / explore / product — fill all three identically. */
 window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 </script>
+
+<style>
+/* IMAGE LOADING ARMOUR (2026-11-27): skeleton shimmer + fade-in.
+   The shimmer lives on the slot's own background; the photo covers
+   it the moment it paints, and .nm-done stops the animation. */
+.ph, .cc-ph{background-color:#eee2c8;
+  background-image:linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 70%);
+  background-size:220% 100%; animation:nmShimmer 1.4s linear infinite}
+.ph.nm-done, .cc-ph.nm-done{background-image:none; animation:none}
+.ph img, .cc-ph img{opacity:0; transition:opacity .45s ease}
+.ph img.nm-in, .cc-ph img.nm-in{opacity:1}
+@keyframes nmShimmer{from{background-position:180% 0}to{background-position:-80% 0}}
+</style>
 </head>
 <body>
   <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
@@ -1533,6 +1546,28 @@ var PRODUCTS = {
       }
     })
     .catch(function(){});
+})();
+</script>
+
+<script>
+/* Image loading armour: fade each photo in as it paints, stop its
+   slot's shimmer, and retry a failed photo once before giving up. */
+(function(){
+  function arm(img){
+    if(img.dataset.nmArm) return; img.dataset.nmArm = 1;
+    var slot = img.closest('.ph, .cc-ph');
+    function done(){ img.classList.add('nm-in'); if(slot) slot.classList.add('nm-done'); }
+    if(img.complete && img.naturalWidth) done();
+    else {
+      img.addEventListener('load', done);
+      img.addEventListener('error', function(){
+        if(img.dataset.nmRetry){ done(); return; }
+        img.dataset.nmRetry = 1;
+        img.src = img.src + (img.src.indexOf('?') > -1 ? '&' : '?') + 'r=1';
+      });
+    }
+  }
+  document.querySelectorAll('.ph img, .cc-ph img').forEach(arm);
 })();
 </script>
 </body>

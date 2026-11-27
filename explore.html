@@ -377,6 +377,19 @@
    index / explore / product — fill all three identically. */
 window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 </script>
+
+<style>
+/* IMAGE LOADING ARMOUR (2026-11-27): skeleton shimmer + fade-in.
+   The shimmer lives on the slot's own background; the photo covers
+   it the moment it paints, and .nm-done stops the animation. */
+.ph, .cc-ph{background-color:#eee2c8;
+  background-image:linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 70%);
+  background-size:220% 100%; animation:nmShimmer 1.4s linear infinite}
+.ph.nm-done, .cc-ph.nm-done{background-image:none; animation:none}
+.ph img, .cc-ph img{opacity:0; transition:opacity .45s ease}
+.ph img.nm-in, .cc-ph img.nm-in{opacity:1}
+@keyframes nmShimmer{from{background-position:180% 0}to{background-position:-80% 0}}
+</style>
 </head>
 <body>
   <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
@@ -433,14 +446,14 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
       <article class="prod rv" id="cat-2" data-cat="Earrings" data-keys="gold oval floral drop earrings flowers yellow pink purple green" style="--d:.06s"><div class="ph" data-preview="cat-2"><img decoding="async" src="catalogue/web/prod02.webp" alt="Gold Oval Floral Drops — gold oval drop earrings with tiny enamel flowers"></div><div class="meta"><h3>Gold Oval Floral Drops</h3></div></article>
       <article class="prod rv" id="cat-3" data-cat="Earrings" data-keys="ornate gold amber chandelier earrings crystal purple rose" style="--d:.12s"><div class="ph" data-preview="cat-3"><img decoding="async" src="catalogue/web/prod03-clean.webp" alt="Ornate Gold Amber Chandeliers — gold filigree chandelier earrings with an amber centre stone and crystal drops"></div><div class="meta"><h3>Ornate Gold Amber Chandeliers</h3></div></article>
       <article class="prod rv" id="cat-4" data-cat="Necklace Set" data-keys="gold leaf necklace set pink pearl drop earrings"><div class="ph" data-preview="cat-4"><img decoding="async" src="catalogue/web/prod04.webp" alt="Gold Leaf Set — gold leaf necklace with matching leaf earrings and a pink pearl drop"></div><div class="meta"><h3>Gold Leaf Set</h3></div></article>
-      <article class="prod rv" id="cat-5" data-cat="Necklace Set" data-keys="crystal leaf necklace set clear stones gold leaves cream" style="--d:.06s"><div class="ph" data-preview="cat-5"><img loading="lazy" decoding="async" src="catalogue/web/prod05.webp" alt="Crystal Leaf Set — necklace of clear cushion stones and gold leaf sprays, with matching earrings"></div><div class="meta"><h3>Crystal Leaf Set</h3></div></article>
-      <article class="prod rv" id="cat-6" data-cat="Earrings" data-keys="pink clear tier drop earrings raspberry red silk" style="--d:.12s"><div class="ph" data-preview="cat-6"><img loading="lazy" decoding="async" src="catalogue/web/prod06.webp" alt="Pink + Clear Tier Drops — five-tier drop earrings in pink and clear stones on deep red silk"></div><div class="meta"><h3>Pink + Clear Tier Drops</h3></div></article>
-      <article class="prod rv" id="cat-7" data-cat="Necklace Set" data-keys="mint pearl statement necklace set green gold leaf feather"><div class="ph" data-preview="cat-7"><img loading="lazy" decoding="async" src="catalogue/web/prod07.webp" alt="Mint + Pearl Statement Set — gold leaf necklace with mint stones and a pearl centre, with matching earrings"></div><div class="meta"><h3>Mint + Pearl Statement Set</h3></div></article>
-      <article class="prod rv" id="cat-8" data-cat="Earrings" data-keys="turquoise pink filigree statement earrings blue spiral video" style="--d:.06s"><div class="ph" data-preview="cat-8"><img loading="lazy" decoding="async" src="catalogue/web/prod08.webp" alt="Turquoise + Pink Filigree Statement Earrings — filigree dome earrings with turquoise stones and a spiral detail"></div><div class="meta"><h3>Turquoise + Pink Filigree Statement Earrings</h3></div></article>
-      <article class="prod rv" id="cat-9" data-cat="Necklace Set" data-keys="gold panel necklace set filigree pave red mannequin" style="--d:.12s"><div class="ph" data-preview="cat-9"><img loading="lazy" decoding="async" src="catalogue/web/prod09.webp" alt="Gold Panel Set — necklace of nine gold panels, half filigree and half pave, with matching earrings"></div><div class="meta"><h3>Gold Panel Set</h3></div></article>
-      <article class="prod rv" id="cat-10" data-cat="Pendant" data-keys="square cushion pendant clear crystal silver chain green bust"><div class="ph" data-preview="cat-10"><img loading="lazy" decoding="async" src="catalogue/web/prod10.webp" alt="Square Cushion Pendant — one square cushion clear stone in a crystal halo on a fine silver chain"></div><div class="meta"><h3>Square Cushion Pendant</h3></div></article>
-      <article class="prod rv" id="cat-11" data-cat="Pendant" data-keys="round pendant pink halo clear crystal silver chain green bust" style="--d:.06s"><div class="ph" data-preview="cat-11"><img loading="lazy" decoding="async" src="catalogue/web/prod11.webp" alt="Round Pendant, Pink Halo — one large round clear stone in a pink crystal halo on a fine silver chain"></div><div class="meta"><h3>Round Pendant, Pink Halo</h3></div></article>
-      <article class="prod rv" id="cat-12" data-cat="Pendant" data-keys="pink teardrop pendant clear crystal frame silver chain" style="--d:.12s"><div class="ph" data-preview="cat-12"><img loading="lazy" decoding="async" src="catalogue/web/prod12.webp" alt="Pink Teardrop Pendant — a teardrop crystal frame holding one large round pink stone"></div><div class="meta"><h3>Pink Teardrop Pendant</h3></div></article>
+      <article class="prod rv" id="cat-5" data-cat="Necklace Set" data-keys="crystal leaf necklace set clear stones gold leaves cream" style="--d:.06s"><div class="ph" data-preview="cat-5"><img loading="eager" fetchpriority="high" decoding="async" src="catalogue/web/prod05.webp" alt="Crystal Leaf Set — necklace of clear cushion stones and gold leaf sprays, with matching earrings"></div><div class="meta"><h3>Crystal Leaf Set</h3></div></article>
+      <article class="prod rv" id="cat-6" data-cat="Earrings" data-keys="pink clear tier drop earrings raspberry red silk" style="--d:.12s"><div class="ph" data-preview="cat-6"><img loading="eager" fetchpriority="high" decoding="async" src="catalogue/web/prod06.webp" alt="Pink + Clear Tier Drops — five-tier drop earrings in pink and clear stones on deep red silk"></div><div class="meta"><h3>Pink + Clear Tier Drops</h3></div></article>
+      <article class="prod rv" id="cat-7" data-cat="Necklace Set" data-keys="mint pearl statement necklace set green gold leaf feather"><div class="ph" data-preview="cat-7"><img loading="eager" fetchpriority="high" decoding="async" src="catalogue/web/prod07.webp" alt="Mint + Pearl Statement Set — gold leaf necklace with mint stones and a pearl centre, with matching earrings"></div><div class="meta"><h3>Mint + Pearl Statement Set</h3></div></article>
+      <article class="prod rv" id="cat-8" data-cat="Earrings" data-keys="turquoise pink filigree statement earrings blue spiral video" style="--d:.06s"><div class="ph" data-preview="cat-8"><img loading="eager" decoding="async" src="catalogue/web/prod08.webp" alt="Turquoise + Pink Filigree Statement Earrings — filigree dome earrings with turquoise stones and a spiral detail"></div><div class="meta"><h3>Turquoise + Pink Filigree Statement Earrings</h3></div></article>
+      <article class="prod rv" id="cat-9" data-cat="Necklace Set" data-keys="gold panel necklace set filigree pave red mannequin" style="--d:.12s"><div class="ph" data-preview="cat-9"><img loading="eager" decoding="async" src="catalogue/web/prod09.webp" alt="Gold Panel Set — necklace of nine gold panels, half filigree and half pave, with matching earrings"></div><div class="meta"><h3>Gold Panel Set</h3></div></article>
+      <article class="prod rv" id="cat-10" data-cat="Pendant" data-keys="square cushion pendant clear crystal silver chain green bust"><div class="ph" data-preview="cat-10"><img loading="eager" decoding="async" src="catalogue/web/prod10.webp" alt="Square Cushion Pendant — one square cushion clear stone in a crystal halo on a fine silver chain"></div><div class="meta"><h3>Square Cushion Pendant</h3></div></article>
+      <article class="prod rv" id="cat-11" data-cat="Pendant" data-keys="round pendant pink halo clear crystal silver chain green bust" style="--d:.06s"><div class="ph" data-preview="cat-11"><img loading="eager" decoding="async" src="catalogue/web/prod11.webp" alt="Round Pendant, Pink Halo — one large round clear stone in a pink crystal halo on a fine silver chain"></div><div class="meta"><h3>Round Pendant, Pink Halo</h3></div></article>
+      <article class="prod rv" id="cat-12" data-cat="Pendant" data-keys="pink teardrop pendant clear crystal frame silver chain" style="--d:.12s"><div class="ph" data-preview="cat-12"><img loading="eager" decoding="async" src="catalogue/web/prod12.webp" alt="Pink Teardrop Pendant — a teardrop crystal frame holding one large round pink stone"></div><div class="meta"><h3>Pink Teardrop Pendant</h3></div></article>
       <article class="prod rv" id="cat-13" data-cat="Pendant" data-keys="yellow floral pendant golden stone crystal flower silver chain"><div class="ph" data-preview="cat-13"><img loading="lazy" decoding="async" src="catalogue/web/prod13.webp" alt="Yellow Floral Pendant — one round golden-yellow stone in a scalloped crystal halo with a flower bail"></div><div class="meta"><h3>Yellow Floral Pendant</h3></div></article>
       <article class="prod rv" id="cat-14" data-cat="Necklace Set" data-keys="lavender aqua floral enamel necklace set purple blue flowers" style="--d:.06s"><div class="ph" data-preview="cat-14"><img loading="lazy" decoding="async" src="catalogue/web/prod14.webp" alt="Lavender &amp; Aqua Floral Enamel Set — oval pendant with a lavender crystal over an aqua stone and enamel flowers, with matching earrings"></div><div class="meta"><h3>Lavender &amp; Aqua Floral Enamel Set</h3></div></article>
       <article class="prod rv" id="cat-15" data-cat="Necklace Set" data-keys="emerald green statement necklace set fringe crystal flowers" style="--d:.12s"><div class="ph" data-preview="cat-15"><img loading="lazy" decoding="async" src="catalogue/web/prod15.webp" alt="Emerald Statement Set — collar of emerald-green stones with silver fringe strands and crystal flower ends, worn by a model"></div><div class="meta"><h3>Emerald Statement Set</h3></div></article>
@@ -1305,6 +1318,28 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
       }
     })
     .catch(function(){});
+})();
+</script>
+
+<script>
+/* Image loading armour: fade each photo in as it paints, stop its
+   slot's shimmer, and retry a failed photo once before giving up. */
+(function(){
+  function arm(img){
+    if(img.dataset.nmArm) return; img.dataset.nmArm = 1;
+    var slot = img.closest('.ph, .cc-ph');
+    function done(){ img.classList.add('nm-in'); if(slot) slot.classList.add('nm-done'); }
+    if(img.complete && img.naturalWidth) done();
+    else {
+      img.addEventListener('load', done);
+      img.addEventListener('error', function(){
+        if(img.dataset.nmRetry){ done(); return; }
+        img.dataset.nmRetry = 1;
+        img.src = img.src + (img.src.indexOf('?') > -1 ? '&' : '?') + 'r=1';
+      });
+    }
+  }
+  document.querySelectorAll('.ph img, .cc-ph img').forEach(arm);
 })();
 </script>
 </body>

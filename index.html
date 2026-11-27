@@ -988,6 +988,19 @@
    index / explore / product — fill all three identically. */
 window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 </script>
+
+<style>
+/* IMAGE LOADING ARMOUR (2026-11-27): skeleton shimmer + fade-in.
+   The shimmer lives on the slot's own background; the photo covers
+   it the moment it paints, and .nm-done stops the animation. */
+.ph, .cc-ph{background-color:#eee2c8;
+  background-image:linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 70%);
+  background-size:220% 100%; animation:nmShimmer 1.4s linear infinite}
+.ph.nm-done, .cc-ph.nm-done{background-image:none; animation:none}
+.ph img, .cc-ph img{opacity:0; transition:opacity .45s ease}
+.ph img.nm-in, .cc-ph img.nm-in{opacity:1}
+@keyframes nmShimmer{from{background-position:180% 0}to{background-position:-80% 0}}
+</style>
 </head>
 <body>
   <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
@@ -1143,31 +1156,31 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
       <article class="ccard rv">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Rings</h3>
-        <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring"></div>
+        <div class="cc-ph"><img loading="eager" fetchpriority="high" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring"></div>
         <a class="view-btn cat-link" href="explore.html?cat=rings">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.05s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Necklace Sets</h3>
-        <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set on blue velvet"></div>
+        <div class="cc-ph"><img loading="eager" fetchpriority="high" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set on blue velvet"></div>
         <a class="view-btn cat-link" href="explore.html?cat=necklace-sets">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.1s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Earrings</h3>
-        <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-06.webp" alt="Pastel Chandelier earrings"></div>
+        <div class="cc-ph"><img loading="eager" fetchpriority="high" decoding="async" src="assets-stock/site-06.webp" alt="Pastel Chandelier earrings"></div>
         <a class="view-btn cat-link" href="explore.html?cat=earrings">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.15s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Sapphire</h3>
-        <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-cut sapphire ring"></div>
+        <div class="cc-ph"><img loading="eager" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-cut sapphire ring"></div>
         <a class="view-btn cat-link" href="explore.html?cat=sapphire">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.2s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Pearl</h3>
-        <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf and Pearl Set"></div>
+        <div class="cc-ph"><img loading="eager" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf and Pearl Set"></div>
         <button class="view-btn" data-tag="Pearl">View Pieces <span aria-hidden="true">&#8594;</span></button>
       </article>
     </div>
@@ -1190,17 +1203,17 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
   <section class="site-sec" id="gold-plated">
   <div class="bs-head rv"><h2 class="bs-title">Gold Plated Collection</h2></div>
   <div class="bento">
-    <a class="bt b-hero rv" href="product.html?p=gold-1"><img loading="lazy" decoding="async" src="assets-stock/site-gold-02.webp" alt="Round Pendant Set — gold filigree pendant and earrings on maroon velvet"><span class="bt-meta"><span class="bt-name">Round Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
-    <a class="bt b-tall rv" style="--d:.05s" href="product.html?p=gold-2"><img loading="lazy" decoding="async" src="assets-stock/site-gold-01.webp" alt="Panel Pendant Set — gold panel necklace and earrings on a red mannequin"><span class="bt-meta"><span class="bt-name">Panel Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
-    <a class="bt rv" style="--d:.1s" href="product.html?p=gold-3"><img loading="lazy" decoding="async" src="assets-stock/site-gold-03.webp" alt="Stone-Link Chain — gold chain with stone-set links on blue velvet"><span class="bt-meta"><span class="bt-name">Stone-Link Chain</span><span class="bt-line">Gold Plated · Necklace</span></span></a>
+    <a class="bt b-hero rv" href="product.html?p=gold-1"><img loading="eager" decoding="async" src="assets-stock/site-gold-02.webp" alt="Round Pendant Set — gold filigree pendant and earrings on maroon velvet"><span class="bt-meta"><span class="bt-name">Round Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
+    <a class="bt b-tall rv" style="--d:.05s" href="product.html?p=gold-2"><img loading="eager" decoding="async" src="assets-stock/site-gold-01.webp" alt="Panel Pendant Set — gold panel necklace and earrings on a red mannequin"><span class="bt-meta"><span class="bt-name">Panel Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
+    <a class="bt rv" style="--d:.1s" href="product.html?p=gold-3"><img loading="eager" decoding="async" src="assets-stock/site-gold-03.webp" alt="Stone-Link Chain — gold chain with stone-set links on blue velvet"><span class="bt-meta"><span class="bt-name">Stone-Link Chain</span><span class="bt-line">Gold Plated · Necklace</span></span></a>
     <a class="disc rv" style="--d:.15s" href="#collection"><span>See all pieces</span><span class="arr">&#8594;</span></a>
   </div>
 </section>
 <section class="site-sec" id="collection">
     <div class="sec-head rv"><h2 class="sec-title">The Collection</h2><span class="sec-note">Handpicked pieces</span></div>
     <div class="grid">
-      <article class="prod rv" id="prod-1" data-keys="clover sapphire blue gold ring"><div class="ph" data-preview="prod-1"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring — blue sapphire clover ring in gold"></div><div class="meta"><h3 data-preview="prod-1">The Clover Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-1">Order</button></div></article>
-      <article class="prod rv" id="prod-2" data-keys="emerald cut sapphire blue gold ring" data-stock="low" style="--d:.06s"><div class="ph" data-preview="prod-2"><span class="badge low">Only 4 left</span><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-Cut Ring — emerald-cut blue sapphire ring in gold"></div><div class="meta"><h3 data-preview="prod-2">Emerald-Cut Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-2">Order</button></div></article>
+      <article class="prod rv" id="prod-1" data-keys="clover sapphire blue gold ring"><div class="ph" data-preview="prod-1"><img loading="eager" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring — blue sapphire clover ring in gold"></div><div class="meta"><h3 data-preview="prod-1">The Clover Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-1">Order</button></div></article>
+      <article class="prod rv" id="prod-2" data-keys="emerald cut sapphire blue gold ring" data-stock="low" style="--d:.06s"><div class="ph" data-preview="prod-2"><span class="badge low">Only 4 left</span><img loading="eager" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-Cut Ring — emerald-cut blue sapphire ring in gold"></div><div class="meta"><h3 data-preview="prod-2">Emerald-Cut Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-2">Order</button></div></article>
       <article class="prod rv" id="prod-3" data-keys="paisley pearl necklace blue velvet" style="--d:.12s"><div class="ph" data-preview="prod-3"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set — gold and pearl necklace set on royal blue velvet"></div><div class="meta"><h3 data-preview="prod-3">Paisley Pearl Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-3">Order</button></div></article>
       <article class="prod rv" id="prod-4" data-keys="mint leaf pearl necklace green emerald"><div class="ph" data-preview="prod-4"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf Set — gold leaf and pearl necklace set on emerald velvet"></div><div class="meta"><h3 data-preview="prod-4">Mint Leaf Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-4">Order</button></div></article>
       <article class="prod rv" id="prod-5" data-keys="gulposh floral pendant necklace multicolour stones" style="--d:.06s"><div class="ph" data-preview="prod-5"><img loading="lazy" decoding="async" src="assets-stock/site-03.webp" alt="Gulposh Pendant Set — floral pendant set with multicolour stones"></div><div class="meta"><h3 data-preview="prod-5">Gulposh Pendant Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-5">Order</button></div></article>
@@ -2730,6 +2743,28 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
       }
     })
     .catch(function(){});
+})();
+</script>
+
+<script>
+/* Image loading armour: fade each photo in as it paints, stop its
+   slot's shimmer, and retry a failed photo once before giving up. */
+(function(){
+  function arm(img){
+    if(img.dataset.nmArm) return; img.dataset.nmArm = 1;
+    var slot = img.closest('.ph, .cc-ph');
+    function done(){ img.classList.add('nm-in'); if(slot) slot.classList.add('nm-done'); }
+    if(img.complete && img.naturalWidth) done();
+    else {
+      img.addEventListener('load', done);
+      img.addEventListener('error', function(){
+        if(img.dataset.nmRetry){ done(); return; }
+        img.dataset.nmRetry = 1;
+        img.src = img.src + (img.src.indexOf('?') > -1 ? '&' : '?') + 'r=1';
+      });
+    }
+  }
+  document.querySelectorAll('.ph img, .cc-ph img').forEach(arm);
 })();
 </script>
 </body>
