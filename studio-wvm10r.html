@@ -7,6 +7,9 @@
 <title>Studio — Noor Maison by Saba</title>
 <!--
   NOOR MAISON STUDIO — Saba's own admin page (private, noindex).
+  Design: the approved "Noor Maison Admin" dashboard design (gold &
+  ivory, Cormorant Garamond + Plus Jakarta Sans) — the same design as
+  the dashboard built for her first store, carried onto this page.
   Everything here talks to her Supabase project with her login.
   The public (anon) key below is public by design — it ships in the
   website too. The real lock is Supabase Row Level Security: only
@@ -14,97 +17,133 @@
   anything; these checks were proven with the anon key alone.
 -->
 <style>
-  /* Fonts — the same files the website uses (one level up). */
-  @font-face{font-family:'Italiana';src:url('assets/fonts/Italiana-400-normal.woff2') format('woff2');font-weight:400}
-  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-400-normal.woff2') format('woff2');font-weight:400}
-  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-600-normal.woff2') format('woff2');font-weight:600}
-  @font-face{font-family:'Manrope';src:url('assets/fonts/Manrope-700-normal.woff2') format('woff2');font-weight:700}
+  /* Fonts — the dashboard design's two families, as files the site hosts. */
+  @font-face{font-family:'Cormorant Garamond';src:url('assets/fonts/CormorantGaramond-500-normal.woff2') format('woff2');font-weight:500}
+  @font-face{font-family:'Cormorant Garamond';src:url('assets/fonts/CormorantGaramond-600-normal.woff2') format('woff2');font-weight:600}
+  @font-face{font-family:'Plus Jakarta Sans';src:url('assets/fonts/PlusJakartaSans-400-normal.woff2') format('woff2');font-weight:400}
+  @font-face{font-family:'Plus Jakarta Sans';src:url('assets/fonts/PlusJakartaSans-500-normal.woff2') format('woff2');font-weight:500}
+  @font-face{font-family:'Plus Jakarta Sans';src:url('assets/fonts/PlusJakartaSans-700-normal.woff2') format('woff2');font-weight:700}
   :root{
-    --bg:#faf6ee; --card:#fffdf8; --ink:#2e2413; --muted:#7c6a45;
-    --gold:#a37f2c; --gold-deep:#7c5a1e; --line:#e7dcc4;
-    --ok:#1a7f37; --warn:#b3261e; --radius:16px;
+    --bg:#faf6ec; --panel:#fffdf6; --gold:#8a6420; --gold-hover:#705018; --gold-mid:#c9a24a;
+    --border:#e7d9bd; --ink:#1f1a12; --muted:#6f6154; --danger:#8c2b1d; --danger-hover:#6f2116;
+    --ok:#2e6b34;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
-  body{background:var(--bg); color:var(--ink); font-family:'Manrope',system-ui,sans-serif; font-size:16px; line-height:1.45}
+  body{background:var(--bg); color:var(--ink); font-family:'Plus Jakarta Sans',system-ui,sans-serif; font-size:16px; line-height:1.45}
   button{font-family:inherit; cursor:pointer}
   input,select,textarea{font-family:inherit; font-size:16px; color:var(--ink)}
-  .wrap{max-width:760px; margin:0 auto; padding:18px 16px 90px}
+  :focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  .wrap{max-width:900px; margin:0 auto; padding:1.5rem 1rem 3rem}
+  @media (min-width:640px){ .wrap{padding:2.5rem 2rem 3.5rem} }
+  .hide{display:none !important}
 
-  /* ---------- login ---------- */
-  .login-card{max-width:420px; margin:9vh auto 0; background:var(--card); border:1px solid var(--line);
-    border-radius:22px; padding:30px 24px 26px; box-shadow:0 18px 50px rgba(124,90,30,.12); text-align:center}
-  .login-card .brand{font-family:'Italiana',serif; font-size:30px; letter-spacing:.14em; color:var(--gold-deep)}
-  .login-card .brand small{display:block; font-size:12px; letter-spacing:.34em; color:var(--muted); margin-top:4px}
-  .login-card p{color:var(--muted); font-size:14.5px; margin:14px 0 20px}
-  .field{text-align:left; margin-bottom:14px}
-  .field label{display:block; font-weight:600; font-size:14px; margin-bottom:6px}
-  .field input,.field select,.field textarea{width:100%; padding:13px 14px; border:1.5px solid var(--line);
-    border-radius:12px; background:#fff; outline:none}
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
-  .field .hint{font-size:13px; color:var(--muted); margin-top:5px}
-  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; border-radius:999px;
-    padding:14px 22px; font-weight:700; font-size:16px; min-height:52px}
-  .btn-gold{background:linear-gradient(160deg,#c9a24d,#a37f2c); color:#fff; width:100%}
-  .btn-line{background:#fff; border:1.5px solid var(--line); color:var(--ink)}
-  .btn-small{padding:10px 16px; min-height:44px; font-size:14.5px}
+  /* ---------- buttons (dashboard pills) ---------- */
+  .btn{display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.6rem 1.35rem;
+    border-radius:999px; background:var(--gold); color:#fff; border:1px solid var(--gold);
+    font-weight:500; font-size:1rem; text-decoration:none; transition:background-color .18s ease,border-color .18s ease}
+  .btn:hover{background:var(--gold-hover); border-color:var(--gold-hover)}
+  .btn.ghost{background:#fff; color:var(--gold); border:1px solid var(--gold)}
+  .btn.ghost:hover{background:var(--bg)}
+  .btn.small{min-height:44px; padding:.5rem 1.05rem; font-size:.92rem}
+  .btn.wide{width:100%}
+  .btn[disabled]{opacity:.6; cursor:default}
+
+  /* ---------- messages ---------- */
   .msg{border-radius:12px; padding:12px 14px; font-size:14.5px; margin:12px 0; display:none}
-  .msg.err{display:block; background:#fdeceb; color:var(--warn)}
-  .msg.good{display:block; background:#e7f6ec; color:var(--ok)}
+  .msg.err{display:block; background:#f9e9e5; color:var(--danger)}
+  .msg.good{display:block; background:#e9f4ea; color:var(--ok)}
 
-  /* ---------- app frame ---------- */
-  .topbar{position:sticky; top:0; z-index:5; background:rgba(250,246,238,.94); backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--line); padding:12px 16px; display:flex; align-items:center; gap:10px}
-  .topbar .brand{font-family:'Italiana',serif; font-size:20px; letter-spacing:.12em; color:var(--gold-deep); margin-right:auto}
-  .topbar .who{font-size:12.5px; color:var(--muted); max-width:38vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .tabs{display:flex; gap:8px; padding:14px 16px 0; max-width:760px; margin:0 auto; flex-wrap:wrap}
-  .tab{flex:1 1 auto; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:999px;
-    padding:12px 10px; font-weight:700; font-size:15px; min-height:48px}
-  .tab.on{background:var(--gold-deep); border-color:var(--gold-deep); color:#fff}
-  .tab .n{background:var(--warn); color:#fff; border-radius:999px; font-size:12px; padding:1px 7px; margin-left:5px; vertical-align:2px}
-  .tab.on .n{background:#fff; color:var(--warn)}
+  /* ---------- login (dashboard card) ---------- */
+  .login-wrap{display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1.5rem 1rem}
+  .login-card{width:100%; max-width:440px; background:var(--panel); border:1px solid var(--border);
+    border-radius:14px; box-shadow:0 2px 10px rgba(138,100,32,.05); padding:1.5rem 1.25rem}
+  @media (min-width:640px){ .login-card{padding:2rem 1.75rem} }
+  .login-card h2{font-family:'Cormorant Garamond',Georgia,serif; color:var(--gold); font-size:1.85rem;
+    font-weight:600; line-height:1.15; margin:0 0 .4rem}
+  .login-note{margin:0 0 1.25rem; color:var(--muted); font-size:.95rem; line-height:1.5}
+  .back-link{margin:1.25rem 0 0; font-size:.95rem}
+  .back-link a{color:var(--gold); text-decoration:none; font-weight:500; display:inline-flex; align-items:center; min-height:44px}
+  .back-link a:hover{text-decoration:underline}
 
-  /* ---------- cards & lists ---------- */
-  .counts{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px}
-  .count{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px 10px; text-align:center}
-  .count b{display:block; font-family:'Italiana',serif; font-size:34px; color:var(--gold-deep); line-height:1}
-  .count span{font-size:13px; color:var(--muted)}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-top:12px}
-  .row{display:flex; gap:12px; align-items:center}
-  .thumb{width:64px; height:80px; object-fit:cover; border-radius:10px; background:#efe7d3; flex:0 0 auto}
-  .row .grow{flex:1 1 auto; min-width:0}
-  .row h3{margin:0 0 3px; font-size:16.5px}
-  .row .sub{font-size:13.5px; color:var(--muted)}
-  .badge{display:inline-block; font-size:12px; font-weight:700; border-radius:999px; padding:2px 9px; margin-left:6px; vertical-align:2px}
-  .badge.show{background:#e7f6ec; color:var(--ok)}
-  .badge.hide{background:#f3e2c7; color:#8a5a12}
-  .badge.low{background:#fdeceb; color:var(--warn)}
-  .search{width:100%; padding:13px 14px; border:1.5px solid var(--line); border-radius:12px; background:#fff; margin-top:14px}
+  /* ---------- fields (dashboard form style) ---------- */
+  .field{display:grid; gap:.35rem; margin-bottom:.9rem}
+  .field label{font-weight:500; font-size:.92rem; color:var(--ink)}
+  .field input,.field select,.field textarea{width:100%; min-height:44px; padding:.625rem .85rem;
+    border:1px solid #d4be8d; border-radius:10px; background:#fff; line-height:1.4}
+  .field textarea{resize:vertical; min-height:88px}
+  .field input[type="file"]{border:1px dashed var(--gold-mid); background:var(--bg); cursor:pointer; padding:.5rem .7rem}
+  .field .hint{font-size:13px; color:var(--muted)}
+  .search{width:100%; min-height:44px; padding:.625rem .85rem; border:1px solid #d4be8d; border-radius:10px; background:#fff}
+
+  /* ---------- app header (dashboard bar) ---------- */
+  .admin-bar{display:flex; justify-content:space-between; align-items:center; gap:.75rem 1rem; flex-wrap:wrap;
+    padding-bottom:1rem; border-bottom:1px solid var(--border)}
+  .admin-bar h2{font-family:'Cormorant Garamond',Georgia,serif; font-size:1.85rem; font-weight:600; line-height:1.15; margin:0}
+  .who{font-size:.82rem; color:var(--muted); margin-top:.15rem}
+  .bar-actions{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
+
+  /* ---------- overview strip ---------- */
+  .overview{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; margin:1.15rem 0}
+  @media (min-width:640px){ .overview{gap:.85rem} }
+  .overview-card{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:.2rem;
+    min-height:44px; padding:.75rem .65rem; background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    box-shadow:0 2px 10px rgba(138,100,32,.05); color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
+    transition:border-color .18s ease,background-color .18s ease}
+  @media (min-width:640px){ .overview-card{padding:.95rem 1.15rem} }
+  .overview-card:hover{border-color:var(--gold-mid); background:#fff}
+  .overview-num{font-family:'Cormorant Garamond',Georgia,serif; font-size:1.75rem; font-weight:600; line-height:1; color:var(--gold)}
+  @media (min-width:640px){ .overview-num{font-size:2.1rem} }
+  .overview-label{font-size:.78rem; line-height:1.3; color:var(--muted); font-weight:500; overflow-wrap:anywhere}
+  @media (min-width:640px){ .overview-label{font-size:.85rem} }
+
+  /* ---------- tabs (dashboard pills) ---------- */
+  .tabs{display:flex; gap:.5rem; margin:1.1rem 0; flex-wrap:wrap}
+  .tab{min-height:44px; background:var(--panel); color:var(--ink); border:1px solid var(--gold-mid); border-radius:999px;
+    padding:.55rem 1.2rem; font-weight:500; font-size:1rem; transition:background-color .18s ease,color .18s ease,border-color .18s ease}
+  .tab:hover{border-color:var(--gold); background:#fff}
+  .tab.on{background:var(--gold); color:#fff; border-color:var(--gold)}
+  .tab .n{background:var(--danger); color:#fff; border-radius:999px; font-size:12px; padding:1px 7px; margin-left:5px; vertical-align:2px}
+  .tab.on .n{background:#fff; color:var(--danger)}
+
+  /* ---------- cards ---------- */
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.15rem;
+    margin:.85rem 0; box-shadow:0 2px 10px rgba(138,100,32,.05)}
+  @media (min-width:640px){ .card{padding:1.25rem 1.35rem} }
+  .card h3{font-family:'Cormorant Garamond',Georgia,serif; color:var(--gold); font-size:1.35rem; font-weight:600;
+    line-height:1.2; margin:0 0 .3rem; overflow-wrap:anywhere}
+  .card p{margin:.3rem 0; color:var(--muted); font-size:.95rem; line-height:1.5; overflow-wrap:anywhere}
+  .prod-head{display:flex; justify-content:space-between; align-items:flex-start; gap:.9rem}
+  .prod-info{flex:1 1 auto; min-width:0}
+  .meta-line{color:var(--muted); font-size:.95rem; margin:.3rem 0}
+  .thumb{width:74px; height:96px; object-fit:cover; border-radius:10px; border:1px solid var(--border);
+    flex-shrink:0; display:block; background:var(--bg)}
+  .row{display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-top:.85rem}
   .photos{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 4px}
   .photos figure{margin:0; position:relative}
-  .photos img{width:74px; height:92px; object-fit:cover; border-radius:10px; background:#efe7d3; display:block}
+  .photos img{width:74px; height:92px; object-fit:cover; border-radius:10px; border:1px solid var(--border); background:var(--bg); display:block}
   .photos button{position:absolute; top:-7px; right:-7px; width:26px; height:26px; border-radius:50%; border:none;
-    background:var(--warn); color:#fff; font-size:15px; line-height:1}
+    background:var(--danger); color:#fff; font-size:15px; line-height:1; cursor:pointer}
   .photos .main-tag{position:absolute; left:0; bottom:0; right:0; font-size:10.5px; text-align:center;
-    background:rgba(46,36,19,.72); color:#fff; border-radius:0 0 10px 10px; padding:2px 0}
-  .switch{display:flex; align-items:center; gap:10px; font-weight:600}
-  .switch input{width:24px; height:24px; accent-color:var(--gold-deep)}
-  .status-sel{padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:#fff; font-weight:600}
+    background:rgba(31,26,18,.72); color:#fff; border-radius:0 0 10px 10px; padding:2px 0}
+  .switch{display:flex; align-items:center; gap:10px; font-weight:500}
+  .switch input{width:24px; height:24px; accent-color:var(--gold)}
+  .status-sel{width:auto; min-width:180px; max-width:100%; min-height:44px; padding:.5rem .85rem;
+    border:1px solid #d4be8d; border-radius:10px; background:#fff; font-weight:500}
   .empty{color:var(--muted); text-align:center; padding:26px 10px; font-size:15px}
-  .done-line{display:flex; align-items:center; gap:9px; font-weight:600; margin-top:10px}
+  .done-line{display:flex; align-items:center; gap:9px; font-weight:500; margin-top:10px}
   .done-line input{width:23px; height:23px; accent-color:var(--ok)}
   .is-done{opacity:.55}
-  a.tel{color:var(--gold-deep); font-weight:700; text-decoration:none}
-  .hide{display:none !important}
+  a.tel{color:var(--gold); font-weight:700; text-decoration:none}
 </style>
 </head>
 <body>
 
 <!-- ================= LOGIN ================= -->
-<main id="view-login" class="wrap">
+<main id="view-login" class="login-wrap">
   <form class="login-card" id="login-form">
-    <div class="brand">NOOR MAISON<small>BY SABA · STUDIO</small></div>
-    <p>This is your private page. From here you can change prices, add photos, add new pieces and see your orders.</p>
+    <h2>Admin login</h2>
+    <p class="login-note">Noor Maison By Saba — admin only. From here you can change prices, add photos, add new pieces and see your orders.</p>
     <div class="msg" id="login-msg"></div>
     <div class="field">
       <label for="li-email">Your email</label>
@@ -114,45 +153,54 @@
       <label for="li-pass">Password</label>
       <input id="li-pass" type="password" autocomplete="current-password" required placeholder="Your password">
     </div>
-    <button class="btn btn-gold" type="submit" id="login-btn">Open my studio</button>
+    <button class="btn wide" type="submit" id="login-btn">Open my studio</button>
+    <p class="back-link"><a href="index.html">← Back to the shop</a></p>
   </form>
 </main>
 
 <!-- ================= APP ================= -->
 <div id="view-app" class="hide">
-  <div class="topbar">
-    <div class="brand">STUDIO</div>
-    <div class="who" id="who"></div>
-    <button class="btn btn-line btn-small" id="signout" type="button">Sign out</button>
-  </div>
-
-  <nav class="tabs">
-    <button class="tab on" data-tab="home" type="button">Home</button>
-    <button class="tab" data-tab="products" type="button">Pieces</button>
-    <button class="tab" data-tab="enquiries" type="button">Questions<span class="n hide" id="n-enq"></span></button>
-    <button class="tab" data-tab="orders" type="button">Orders<span class="n hide" id="n-ord"></span></button>
-  </nav>
-
   <main class="wrap">
+    <div class="admin-bar">
+      <div>
+        <h2>Noor Maison Admin</h2>
+        <div class="who" id="who"></div>
+      </div>
+      <div class="bar-actions">
+        <a class="btn ghost small" href="index.html">View shop</a>
+        <button class="btn small" id="signout" type="button">Log out</button>
+      </div>
+    </div>
+
+    <div class="overview">
+      <button class="overview-card" type="button" data-goto="products"><span class="overview-num" id="c-products">–</span><span class="overview-label">Pieces on your website</span></button>
+      <button class="overview-card" type="button" data-goto="enquiries"><span class="overview-num" id="c-enq">–</span><span class="overview-label">New questions</span></button>
+      <button class="overview-card" type="button" data-goto="orders"><span class="overview-num" id="c-ord">–</span><span class="overview-label">New orders</span></button>
+    </div>
+
+    <nav class="tabs">
+      <button class="tab on" data-tab="home" type="button">Home</button>
+      <button class="tab" data-tab="products" type="button">Pieces</button>
+      <button class="tab" data-tab="enquiries" type="button">Questions<span class="n hide" id="n-enq"></span></button>
+      <button class="tab" data-tab="orders" type="button">Orders<span class="n hide" id="n-ord"></span></button>
+    </nav>
+
     <!-- HOME -->
     <section id="tab-home">
-      <div class="counts">
-        <div class="count"><b id="c-products">–</b><span>pieces on your website</span></div>
-        <div class="count"><b id="c-enq">–</b><span>new questions</span></div>
-        <div class="count"><b id="c-ord">–</b><span>new orders</span></div>
-      </div>
       <div class="card">
-        <h3 style="margin:0 0 6px">Welcome, Saba</h3>
-        <p style="margin:0; color:var(--muted); font-size:14.5px">
+        <h3>Welcome, Saba</h3>
+        <p>
           <b>Pieces</b> — change a price, add photos, mark a piece finished, or add a new piece.<br>
           <b>Questions</b> — messages customers sent from the website.<br>
           <b>Orders</b> — orders customers placed. Change the order step as you pack and send.
         </p>
-        <button class="btn btn-line btn-small" id="pw-open" type="button" style="margin-top:12px">Set or change my password</button>
+        <div class="row">
+          <button class="btn ghost small" id="pw-open" type="button">Set or change my password</button>
+        </div>
       </div>
       <div class="card hide" id="pw-card">
-        <h3 style="margin:0 0 6px">Set your password</h3>
-        <p style="margin:0 0 12px; color:var(--muted); font-size:14.5px">Choose a password for this page. Next time, open your studio with your email and this password.</p>
+        <h3>Set your password</h3>
+        <p>Choose a password for this page. Next time, open your studio with your email and this password.</p>
         <div class="msg" id="pw-msg"></div>
         <div class="field">
           <label for="pw-1">New password</label>
@@ -162,24 +210,24 @@
           <label for="pw-2">Type it again</label>
           <input id="pw-2" type="password" autocomplete="new-password" placeholder="Same password again">
         </div>
-        <button class="btn btn-gold" id="pw-btn" type="button">Save my password</button>
+        <button class="btn wide" id="pw-btn" type="button">Save my password</button>
       </div>
     </section>
 
     <!-- PRODUCTS -->
     <section id="tab-products" class="hide">
       <input class="search" id="prod-search" type="search" placeholder="Search your pieces…">
-      <div style="margin-top:12px">
-        <button class="btn btn-gold" id="add-piece" type="button">+ Add a new piece</button>
+      <div class="row">
+        <button class="btn" id="add-piece" type="button">+ Add a new piece</button>
       </div>
       <div id="prod-list"></div>
     </section>
 
     <!-- PRODUCT EDIT -->
     <section id="tab-edit" class="hide">
-      <button class="btn btn-line btn-small" id="edit-back" type="button">← Back to all pieces</button>
+      <p class="back-link" style="margin:0 0 .5rem"><a href="#" id="edit-back">← Back to all pieces</a></p>
       <form class="card" id="edit-form">
-        <h3 style="margin:0 0 14px" id="edit-title">Edit piece</h3>
+        <h3 id="edit-title">Edit piece</h3>
         <div class="msg" id="edit-msg"></div>
         <div class="field">
           <label for="f-name">Name of the piece</label>
@@ -221,7 +269,7 @@
           <input id="f-active" type="checkbox" checked>
           <label for="f-active">Show this piece on the website</label>
         </div>
-        <button class="btn btn-gold" type="submit" id="edit-save">Save changes</button>
+        <button class="btn wide" type="submit" id="edit-save">Save changes</button>
       </form>
     </section>
 
@@ -305,6 +353,7 @@ if (/error_code=otp_expired|error=access_denied/.test(NM_HASH)) {
   showMsg($('login-msg'), 'That email link is old or has expired. Please use the newest email we sent you. If you already set your password, just log in below.', false);
 }
 function nmShowPwCard(){
+  openTab('home');
   $('pw-card').classList.remove('hide');
   $('pw-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
   setTimeout(function(){ $('pw-1').focus(); }, 350);
@@ -350,6 +399,9 @@ document.querySelectorAll('.tab').forEach(function(tab){
 function openTab(name){
   document.querySelector('.tab[data-tab="' + name + '"]').click();
 }
+document.querySelectorAll('.overview-card').forEach(function(card){
+  card.addEventListener('click', function(){ openTab(card.getAttribute('data-goto')); });
+});
 
 /* ---------------- data ---------------- */
 function loadAll(){
@@ -371,25 +423,41 @@ function renderCounts(){
   $('n-ord').textContent = newO; $('n-ord').classList.toggle('hide', newO === 0);
 }
 
-/* ---------------- products list ---------------- */
+/* ---------------- products list (dashboard cards) ----------------
+   The dashboard design's third button was Delete; here it is Hide/Show
+   on purpose — hiding is reversible, and a deleted piece would leave
+   its page on the website with nothing behind it. */
 function renderProducts(){
   var q = ($('prod-search').value || '').toLowerCase();
   var list = PRODUCTS.filter(function(p){
     return !q || unesc(p.name).toLowerCase().indexOf(q) > -1 || (p.category || '').toLowerCase().indexOf(q) > -1;
   });
   $('prod-list').innerHTML = list.length ? list.map(function(p){
-    return '<div class="card row" data-open="' + esc(p.id) + '" style="cursor:pointer">'
-      + '<img class="thumb" src="' + esc(photoSrc((p.photos || [])[0])) + '" alt="">'
-      + '<div class="grow"><h3>' + esc(unesc(p.name))
-      + '<span class="badge ' + (p.is_active ? 'show' : 'hide') + '">' + (p.is_active ? 'Shown' : 'Hidden') + '</span>'
-      + (p.stock != null && p.stock <= 4 && p.stock > 0 ? '<span class="badge low">Only ' + p.stock + ' left</span>' : '')
-      + (p.stock === 0 ? '<span class="badge low">Out of stock</span>' : '')
-      + '</h3><div class="sub">' + esc(priceText(p)) + esc(stockText(p)) + ' · ' + esc(p.category || '') + '</div></div>'
-      + '<div aria-hidden="true" style="color:var(--muted); font-size:22px">›</div></div>';
+    return '<div class="card">'
+      + '<div class="prod-head"><div class="prod-info">'
+      + '<h3>' + esc(unesc(p.name)) + '</h3>'
+      + '<div class="meta-line">' + esc(priceText(p)) + ' · ' + (p.is_active ? 'Visible' : 'Hidden') + esc(stockText(p)) + '</div>'
+      + (p.description ? '<p>' + esc(unesc(p.description)) + '</p>' : '')
+      + '</div>'
+      + ((p.photos || [])[0] ? '<img class="thumb" src="' + esc(photoSrc(p.photos[0])) + '" alt="">' : '')
+      + '</div>'
+      + '<div class="row">'
+      + '<button class="btn ghost small" type="button" data-edit="' + esc(p.id) + '">Edit</button>'
+      + '<button class="btn ghost small" type="button" data-hide="' + esc(p.id) + '">' + (p.is_active ? 'Hide' : 'Show') + '</button>'
+      + '</div></div>';
   }).join('') : '<div class="empty">No pieces found.</div>';
-  $('prod-list').querySelectorAll('[data-open]').forEach(function(card){
-    card.addEventListener('click', function(){ openEdit(card.getAttribute('data-open')); });
+  $('prod-list').querySelectorAll('[data-edit]').forEach(function(btn){
+    btn.addEventListener('click', function(){ openEdit(btn.getAttribute('data-edit')); });
   });
+  $('prod-list').querySelectorAll('[data-hide]').forEach(function(btn){
+    btn.addEventListener('click', function(){ quickToggle(btn.getAttribute('data-hide')); });
+  });
+}
+function quickToggle(id){
+  var p = PRODUCTS.filter(function(x){ return x.id === id; })[0];
+  if(!p) return;
+  sb.from('products').update({ is_active: !p.is_active, updated_at: new Date().toISOString() })
+    .eq('id', id).then(function(r){ if(!r.error) loadAll(); });
 }
 $('prod-search').addEventListener('input', renderProducts);
 $('add-piece').addEventListener('click', function(){ openEdit(null); });
@@ -427,7 +495,7 @@ function openEdit(id){
   $('tab-edit').classList.remove('hide');
   window.scrollTo(0, 0);
 }
-$('edit-back').addEventListener('click', function(){ $('tab-edit').classList.add('hide'); openTab('products'); });
+$('edit-back').addEventListener('click', function(ev){ ev.preventDefault(); $('tab-edit').classList.add('hide'); openTab('products'); });
 
 /* Photos: in edit mode they save at once (kind for Saba — no lost
    uploads if she forgets the Save button); for a new piece they wait
@@ -504,9 +572,9 @@ function renderEnquiries(){
   $('enq-list').innerHTML = ENQUIRIES.length ? ENQUIRIES.map(function(e){
     var piece = e.product_id ? (PRODUCTS.filter(function(p){ return p.id === e.product_id; })[0]) : null;
     return '<div class="card' + (e.is_done ? ' is-done' : '') + '">'
-      + '<div class="row"><div class="grow"><h3>' + esc(unesc(e.name)) + '</h3>'
-      + '<div class="sub">' + esc(dateText(e.created_at)) + (piece ? ' · asked about ' + esc(unesc(piece.name)) : '') + '</div></div></div>'
-      + '<p style="margin:10px 0 4px">' + esc(unesc(e.message)) + '</p>'
+      + '<h3>' + esc(unesc(e.name)) + '</h3>'
+      + '<div class="meta-line">' + esc(dateText(e.created_at)) + (piece ? ' · asked about ' + esc(unesc(piece.name)) : '') + '</div>'
+      + '<p>' + esc(unesc(e.message)) + '</p>'
       + '<div>Phone: <a class="tel" href="tel:' + esc(e.phone) + '">' + esc(e.phone) + '</a></div>'
       + '<label class="done-line"><input type="checkbox" data-done="' + esc(e.id) + '"' + (e.is_done ? ' checked' : '') + '> Done — I have replied</label>'
       + '</div>';
@@ -527,14 +595,14 @@ function renderOrders(){
       return '<option value="' + s + '"' + (o.status === s ? ' selected' : '') + '>' + STATUS_WORDS[s] + '</option>';
     }).join('');
     return '<div class="card">'
-      + '<div class="row"><div class="grow"><h3>' + esc(o.order_code) + '</h3>'
-      + '<div class="sub">' + esc(dateText(o.created_at)) + '</div></div>'
-      + (o.amount != null ? '<div style="font-weight:700">₹' + Number(o.amount).toLocaleString('en-IN') + '</div>' : '')
+      + '<div class="prod-head"><div class="prod-info"><h3>' + esc(o.order_code) + '</h3>'
+      + '<div class="meta-line">' + esc(dateText(o.created_at)) + '</div></div>'
+      + (o.amount != null ? '<div style="font-family:\'Cormorant Garamond\',serif; font-size:1.5rem; font-weight:600; color:var(--gold)">₹' + Number(o.amount).toLocaleString('en-IN') + '</div>' : '')
       + '</div>'
-      + '<p style="margin:10px 0 4px">' + esc(unesc(o.product_name)) + ' × ' + esc(o.qty) + '</p>'
+      + '<p>' + esc(unesc(o.product_name)) + ' × ' + esc(o.qty) + '</p>'
       + '<div>' + esc(unesc(o.name)) + ' · <a class="tel" href="tel:' + esc(o.phone) + '">' + esc(o.phone) + '</a></div>'
       + '<div style="color:var(--muted); font-size:14.5px; margin:4px 0 10px">' + esc(unesc(o.address)) + '</div>'
-      + '<label style="font-weight:600; font-size:14px">Order step: </label>'
+      + '<label style="font-weight:500; font-size:14px">Order step: </label>'
       + '<select class="status-sel" data-status="' + esc(o.id) + '">' + opts + '</select>'
       + '</div>';
   }).join('') : '<div class="empty">No orders yet. When a customer orders from the website, it will come here.</div>';
