@@ -311,6 +311,35 @@
   .mq-seq i{font-style:normal;color:#a37f2c;padding:0 .9em}
   @keyframes mqScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @media (prefers-reduced-motion: reduce){ .mq-track{animation:none} }
+
+  /* ================= APPLE-SYSTEM ALIGNMENT PASS — 2026-11-27 =================
+     Explore already shared the home page's tokens (:root palette, .prod
+     card pattern, foil navbar); what drifted was the RHYTHM and the chip
+     dress. This block re-aligns both to the home page's actual values —
+     no markup, copy or behaviour changes:
+       · section top padding 64px (home .site-sec) — was 36px; phone 44px
+         (home @media .site-sec) — was 30px;
+       · .sec-head margin-bottom 22px (home) — was 10px; phone 18px
+         (home) — was 8px;
+       · intro copy line-height 1.75 (home .edit .tx p) and a 28px gap
+         under it before the grid;
+       · card Order button margin-top 14px (home .prod .ord-btn) — was 10px;
+       · the search modal's filter chips (.sm-tag) take the home pill
+         dress: the active chip wears the foil-gold gradient pill of the
+         home navbar / Talk-to-Saba FAB (linear-gradient 100deg
+         #a37f2c → #e6c87c → #a37f2c, ink #3a2a12 text) instead of a flat
+         fill; resting chips keep the pill radius with a deepened bronze
+         label (Manrope 700). */
+  .site-sec{padding-top:64px}
+  .sec-head{margin-bottom:22px}
+  .ex-sub{line-height:1.75;margin-bottom:28px}
+  .prod .ord-btn{margin-top:14px}
+  .sm-tag{font-size:12px;font-weight:700;padding:8px 15px}
+  .sm-tag.on{background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#3a2a12;border-color:rgba(58,42,18,.28)}
+  @media(max-width:760px){
+    .site-sec{padding-top:44px}
+    .sec-head{margin-bottom:18px}
+  }
 </style>
 </head>
 <body>
