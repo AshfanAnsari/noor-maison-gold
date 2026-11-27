@@ -495,20 +495,20 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
        do not fake one. Cart opens the saved-orders sheet (the product
        script wires #cartBtn to window.__openOrders). -->
   <div class="topbar">
-    <a class="tb-btn" href="explore.html" aria-label="Back to Explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
+    <a class="tb-btn" href="explore" aria-label="Back to Explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></a>
     <span class="tb-title">NOOR MAISON</span>
     <span class="tb-sp"></span>
-    <a class="tb-btn" href="explore.html" aria-label="Browse the catalogue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></a>
+    <a class="tb-btn" href="explore" aria-label="Browse the catalogue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16.7 16.7"/></svg></a>
     <button type="button" class="tb-btn" id="cartBtn" aria-label="Your orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 8h13.6l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H8.1a1.8 1.8 0 0 1-1.8-1.6z"/><path d="M8.6 10V6.8a3.4 3.4 0 0 1 6.8 0V10"/></svg></button>
     <!-- Nav-links row (added 2026-11-27): the same centre links as the
          other pages, with the GooeyNav ball (.goo, decorative only).
          Explore is the active page for every product page. -->
     <nav class="tb-nav" data-goo-nav aria-label="Main">
       <span class="goo" aria-hidden="true"><span class="goo-ball"></span><span class="goo-blob"></span></span>
-      <a href="index.html">Home</a>
-      <a href="index.html#collection">The Collection</a>
-      <a href="explore.html" class="on">Explore</a>
-      <a href="nails.html">Nails</a>
+      <a href="./">Home</a>
+      <a href="./#collection">The Collection</a>
+      <a href="explore" class="on">Explore</a>
+      <a href="nails">Nails</a>
     </nav>
   </div>
 
@@ -629,7 +629,7 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 <div class="endpanel">
   <footer class="foot">
     <p class="foot-c">&copy; 2026 Noor Maison by Saba</p>
-    <p class="foot-l"><a href="index.html">Home</a><span class="dot" aria-hidden="true">&middot;</span><a href="index.html#collection">The Collection</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://www.instagram.com/noormaison_by_saba" target="_blank" rel="noopener">Instagram @noormaison_by_saba</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a></p>
+    <p class="foot-l"><a href="./">Home</a><span class="dot" aria-hidden="true">&middot;</span><a href="./#collection">The Collection</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://www.instagram.com/noormaison_by_saba" target="_blank" rel="noopener">Instagram @noormaison_by_saba</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a></p>
   </footer>
 </div>
 
@@ -820,11 +820,11 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(rows){
       var row = rows && rows[0];
-      if(!row || row.is_active === false){ location.replace('explore.html'); return; }
+      if(!row || row.is_active === false){ location.replace('explore'); return; }
       try { sessionStorage.setItem(ck, JSON.stringify(row)); } catch(e){}
       location.replace(location.href);
     })
-    .catch(function(){ location.replace('explore.html'); });
+    .catch(function(){ location.replace('explore'); });
 })();
 </script>
 <script>
@@ -932,7 +932,7 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
 (function(){
   var id = new URLSearchParams(location.search).get('p');
   var rec = id ? document.getElementById(id) : null;
-  if(!rec || !PRODUCTS[id]){ if(window.__nmBootPending){ return; } location.replace('explore.html'); return; }
+  if(!rec || !PRODUCTS[id]){ if(window.__nmBootPending){ return; } location.replace('explore'); return; }
   var data = PRODUCTS[id];
   var img = rec.querySelector('.ph img');
   var catImg = img.getAttribute('data-src');
@@ -947,8 +947,8 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
 
   /* breadcrumb (Flipkart rebuild): Home / Explore / category / piece */
   document.getElementById('pdCrumbs').innerHTML =
-    '<a href="index.html">Home</a><span class="sep">\u203A</span>' +
-    '<a href="explore.html">Explore</a><span class="sep">\u203A</span>' +
+    '<a href="./">Home</a><span class="sep">\u203A</span>' +
+    '<a href="explore">Explore</a><span class="sep">\u203A</span>' +
     '<span>' + cat + '</span><span class="sep">\u203A</span>' +
     '<span class="here">' + name + '</span>';
 
@@ -1160,7 +1160,7 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
     var r = document.getElementById(k);
     var ri = r.querySelector('.ph img');
     var a = document.createElement('a');
-    a.className = 'sim-card'; a.href = 'product.html?p=' + k;
+    a.className = 'sim-card'; a.href = 'product?p=' + k;
     var im = document.createElement('img');
     im.src = ri.getAttribute('data-src'); im.alt = ri.alt || ''; im.loading = 'lazy'; im.decoding = 'async';
     var sp = document.createElement('span');
@@ -1616,7 +1616,7 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
           im.alt = unesc(r.name || '');
           art.querySelector('h3').textContent = unesc(r.name || 'Piece');
           if(r.price != null) art.querySelector('.meta').appendChild(priceRow(r));
-          art.addEventListener('click', function(){ location.href = 'product.html?p=' + r.id; });
+          art.addEventListener('click', function(){ location.href = 'product?p=' + r.id; });
           if(slug && CATS[slug] && !CATS[slug](r.category || '')) art.style.display = 'none';
           grid.appendChild(art);
           if(window.NM_ARM_IMG) window.NM_ARM_IMG(im);
