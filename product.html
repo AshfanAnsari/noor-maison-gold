@@ -225,7 +225,25 @@
   @media(hover:hover){.pd-gallery button:hover img{transform:scale(1.045)}}
   .pd-vids{display:grid;gap:12px;margin-top:14px}
   .pd-vids video{width:100%;max-height:70vh;border-radius:14px;background:#171512;display:block}
-  .lb-img{width:100%;max-width:min(92vw,560px);margin:0 auto;max-height:62vh;object-fit:contain;background:#171512;border-radius:14px;display:block}
+  /* FULL-SCREEN PHOTO VIEWER (user, 2026-11-27 — "like on Flipkart"):
+     the photo fills the whole screen on the site's paper white; pinch /
+     double-tap zoom, drag to pan when zoomed, swipe or arrows to browse;
+     chrome is only a small × in the corner, edge arrows and dots. */
+  .pv{position:fixed;inset:0;z-index:200;background:#fffdf6;display:flex;align-items:center;justify-content:center}
+  .pv[hidden]{display:none}
+  .pv-stage{position:absolute;inset:0;overflow:hidden;touch-action:none}
+  .pv-img{position:absolute;left:50%;top:50%;max-width:100%;max-height:100%;transform:translate(-50%,-50%);user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+  .pv-x{position:absolute;top:calc(10px + env(safe-area-inset-top));right:12px;width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,253,246,.85);box-shadow:0 1px 6px rgba(46,32,16,.20);color:#2e2010;font-size:26px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3}
+  .pv-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:none;border-radius:50%;background:rgba(255,253,246,.85);box-shadow:0 1px 6px rgba(46,32,16,.20);color:#2e2010;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3}
+  .pv-nav svg{width:22px;height:22px}
+  .pv-prev{left:10px}
+  .pv-next{right:10px}
+  .pv-nav.off,.pv-x.off{opacity:.25;pointer-events:none}
+  .pv-dots{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));display:flex;gap:6px;justify-content:center;z-index:3}
+  .pv-dots i{width:7px;height:7px;border-radius:50%;background:rgba(46,32,16,.22)}
+  .pv-dots i.on{background:#8a6420}
+  #galTrack .gal-slide img{cursor:zoom-in}
+  @media (prefers-reduced-motion: reduce){ .pv-img{transition:none !important} }
   @media(max-width:760px){
     :root{--pad:3vw}
     .pd-gallery{grid-template-columns:repeat(2,1fr);gap:8px}
@@ -359,7 +377,6 @@
   .pd-sub{line-height:1.75;margin-bottom:18px}
   .pd-gallery button{border-radius:16px}
   .pd-vids video{border-radius:16px}
-  .lb-img{border-radius:16px}
   .tb-title{font-size:17px;letter-spacing:.15em}
   @media(max-width:760px){
     .pd-block{padding:19px 18px 21px;margin-top:12px}
@@ -559,13 +576,17 @@
   </div>
 </div>
 
-<div class="set-sheet ord-sheet" id="lbSheet" role="dialog" aria-modal="true" aria-label="Original photo, large">
-  <div class="scrim" data-close></div>
-  <div class="panel">
-    <div class="grab" aria-hidden="true"></div>
-    <img class="lb-img" id="lbImg" alt="">
-    <button type="button" class="ord-place ghost" id="lbClose">Close</button>
-  </div>
+<!-- FULL-SCREEN PHOTO VIEWER (user, 2026-11-27, "like on Flipkart"):
+     replaces the old bottom-sheet lightbox. One photo fills the screen;
+     pinch / double-tap to zoom, drag to pan, swipe or arrows to browse
+     the product's photos, small × in the corner to close. The script
+     fills it with the main gallery's photo list (videos excluded). -->
+<div class="pv" id="pv" role="dialog" aria-modal="true" aria-label="Photo viewer" hidden>
+  <div class="pv-stage" id="pvStage"><img class="pv-img" id="pvImg" alt=""></div>
+  <button type="button" class="pv-x" id="pvClose" aria-label="Close photo viewer">&times;</button>
+  <button type="button" class="pv-nav pv-prev" id="pvPrev" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5L8 12l6.5 7"/></svg></button>
+  <button type="button" class="pv-nav pv-next" id="pvNext" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5L16 12l-6.5 7"/></svg></button>
+  <div class="pv-dots" id="pvDots"></div>
 </div>
 
 <!-- hidden product records: the order script resolves a product from the
@@ -895,11 +916,148 @@ var PRODUCTS = {
     sim.appendChild(a);
   });
 
-  /* lightbox for the original photos */
-  var lb = document.getElementById('lbSheet'), lbImg = document.getElementById('lbImg');
-  function closeLb(){ lb.classList.remove('open'); }
-  lb.querySelector('[data-close]').addEventListener('click', closeLb);
-  document.getElementById('lbClose').addEventListener('click', closeLb);
+  /* FULL-SCREEN PHOTO VIEWER (user, 2026-11-27 — "like on Flipkart"):
+     one viewer for every photo on the page — the main gallery slides and
+     the originals row both open it. The photo list is the gallery's
+     photos in order (catalogue photo, then Saba's originals; videos are
+     excluded, they keep their own controls). Gestures: pinch to zoom
+     (1x–4x), double-tap / double-click toggles zoom, drag pans when
+     zoomed, a plain swipe browses at 1x; corner ×, edge arrows, dots
+     and Esc complete it. */
+  var pv = document.getElementById('pv'), pvStage = document.getElementById('pvStage'),
+      pvImg = document.getElementById('pvImg'), pvDots = document.getElementById('pvDots'),
+      pvPrev = document.getElementById('pvPrev'), pvNext = document.getElementById('pvNext');
+  var pvList = [catImg].concat(data.org);
+  var pvI = 0, pvS = 1, pvX = 0, pvY = 0;   /* photo index, zoom scale, pan offsets */
+  function pvApply(anim){
+    pvImg.style.transition = anim ? 'transform .25s ease' : 'none';
+    pvImg.style.transform = 'translate(-50%,-50%) translate(' + pvX + 'px,' + pvY + 'px) scale(' + pvS + ')';
+  }
+  function pvClamp(){
+    /* pan limit = half the overflow of the scaled photo over the stage,
+       so a zoomed photo can never be dragged off into empty space */
+    var mx = Math.max(0, (pvImg.offsetWidth * pvS - pvStage.clientWidth) / 2);
+    var my = Math.max(0, (pvImg.offsetHeight * pvS - pvStage.clientHeight) / 2);
+    pvX = Math.max(-mx, Math.min(mx, pvX));
+    pvY = Math.max(-my, Math.min(my, pvY));
+  }
+  function pvShow(i){
+    pvI = Math.max(0, Math.min(pvList.length - 1, i));
+    pvS = 1; pvX = 0; pvY = 0;
+    pvImg.src = pvList[pvI];
+    pvImg.alt = name + ' — photo ' + (pvI + 1) + ' of ' + pvList.length;
+    pvApply(false);
+    for(var k = 0; k < pvDots.children.length; k++) pvDots.children[k].className = k === pvI ? 'on' : '';
+    pvPrev.classList.toggle('off', pvI === 0);
+    pvNext.classList.toggle('off', pvI === pvList.length - 1);
+  }
+  function openPv(i){
+    if(!pvList.length) return;
+    pv.hidden = false;
+    document.body.style.overflow = 'hidden';   /* lock the page behind the viewer */
+    pvShow(i || 0);
+  }
+  function closePv(){
+    pv.hidden = true;
+    document.body.style.overflow = '';
+  }
+  document.getElementById('pvClose').addEventListener('click', closePv);
+  pvPrev.addEventListener('click', function(){ pvShow(pvI - 1); });
+  pvNext.addEventListener('click', function(){ pvShow(pvI + 1); });
+  document.addEventListener('keydown', function(e){
+    if(pv.hidden) return;
+    if(e.key === 'Escape') closePv();
+    else if(e.key === 'ArrowLeft') pvShow(pvI - 1);
+    else if(e.key === 'ArrowRight') pvShow(pvI + 1);
+  });
+  pvList.forEach(function(){ pvDots.appendChild(document.createElement('i')); });
+  if(pvList.length < 2){ pvDots.hidden = true; pvPrev.hidden = true; pvNext.hidden = true; }
+
+  /* zoom toward a point: keep the photo point under the finger/cursor
+     fixed — pan' = c − (c − pan) × (s'/s), c measured from stage centre
+     (the photo is centred, so its centre is the transform origin) */
+  function pvZoomAt(cx, cy, s){
+    var r = pvStage.getBoundingClientRect();
+    var ox = cx - (r.left + r.width / 2), oy = cy - (r.top + r.height / 2);
+    var k = s / pvS;
+    pvX = ox - (ox - pvX) * k; pvY = oy - (oy - pvY) * k;
+    pvS = s; pvClamp(); pvApply(true);
+  }
+  function pvZoomOut(){ pvS = 1; pvX = 0; pvY = 0; pvApply(true); }
+
+  /* touch gestures — touch-action:none on the stage hands them all to
+     us instead of the browser's own page zoom and scroll */
+  var g = null, lastTap = 0;
+  function tDist(t){ var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY; return Math.sqrt(dx * dx + dy * dy); }
+  function tMid(t){ return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 }; }
+  pvStage.addEventListener('touchstart', function(e){
+    if(e.touches.length === 2){
+      var m = tMid(e.touches);
+      g = { mode: 'pinch', d: tDist(e.touches), s: pvS, x: pvX, y: pvY, mx: m.x, my: m.y };
+    } else if(e.touches.length === 1){
+      g = { mode: 'pan', x: e.touches[0].clientX, y: e.touches[0].clientY, px: pvX, py: pvY, moved: false };
+    }
+  }, { passive: true });
+  pvStage.addEventListener('touchmove', function(e){
+    if(!g) return;
+    if(g.mode === 'pinch' && e.touches.length === 2){
+      e.preventDefault();
+      pvS = Math.max(1, Math.min(4, g.s * tDist(e.touches) / g.d));
+      var m = tMid(e.touches);
+      pvX = g.x + (m.x - g.mx); pvY = g.y + (m.y - g.my);
+      pvClamp(); pvApply(false);
+    } else if(g.mode === 'pan' && e.touches.length === 1){
+      var dx = e.touches[0].clientX - g.x, dy = e.touches[0].clientY - g.y;
+      if(Math.abs(dx) + Math.abs(dy) > 6) g.moved = true;
+      if(pvS > 1){ e.preventDefault(); pvX = g.px + dx; pvY = g.py + dy; pvClamp(); pvApply(false); }
+    }
+  }, { passive: false });
+  pvStage.addEventListener('touchend', function(e){
+    if(!g) return;
+    var was = g; g = null;
+    if(was.mode !== 'pan') return;
+    var dx = e.changedTouches[0].clientX - was.x, dy = e.changedTouches[0].clientY - was.y;
+    var now = Date.now(), isTap = Math.abs(dx) < 8 && Math.abs(dy) < 8;
+    if(isTap){
+      /* two taps in quick succession toggle the zoom, at any scale */
+      if(now - lastTap < 300){
+        lastTap = 0;
+        if(pvS > 1) pvZoomOut(); else pvZoomAt(e.changedTouches[0].clientX, e.changedTouches[0].clientY, 2.6);
+      } else lastTap = now;
+      return;
+    }
+    if(pvS === 1 && Math.abs(dx) > 56 && Math.abs(dx) > Math.abs(dy) * 1.6) pvShow(pvI + (dx < 0 ? 1 : -1));
+  });
+  /* mouse: double-click zooms, drag pans when zoomed, ctrl+wheel zooms */
+  pvStage.addEventListener('dblclick', function(e){
+    if(pvS > 1) pvZoomOut(); else pvZoomAt(e.clientX, e.clientY, 2.6);
+  });
+  var mDrag = null;
+  pvStage.addEventListener('mousedown', function(e){
+    if(pvS > 1) mDrag = { x: e.clientX, y: e.clientY, px: pvX, py: pvY };
+  });
+  window.addEventListener('mousemove', function(e){
+    if(!mDrag) return;
+    pvX = mDrag.px + (e.clientX - mDrag.x); pvY = mDrag.py + (e.clientY - mDrag.y);
+    pvClamp(); pvApply(false);
+  });
+  window.addEventListener('mouseup', function(){ mDrag = null; });
+  pvStage.addEventListener('wheel', function(e){
+    if(!e.ctrlKey) return;   /* plain scrolling does nothing here; ctrl/pinch-wheel zooms */
+    e.preventDefault();
+    var s = Math.max(1, Math.min(4, pvS * (e.deltaY < 0 ? 1.12 : 0.89)));
+    if(s !== pvS) pvZoomAt(e.clientX, e.clientY, s);
+  }, { passive: false });
+
+  /* open from the main gallery: tapping a photo slide opens the viewer
+     at that photo (the slides were built in pvList order) */
+  var pvTrack = document.getElementById('galTrack'), pvIdx = 0;
+  Array.prototype.forEach.call(pvTrack.children, function(slide){
+    var m = slide.firstChild;
+    if(!m || m.tagName !== 'IMG') return;
+    var myIdx = pvIdx++;
+    m.addEventListener('click', function(){ openPv(myIdx); });
+  });
 
   var gal = document.getElementById('pdGallery');
   data.org.forEach(function(src, i){
@@ -912,7 +1070,7 @@ var PRODUCTS = {
     im.loading = 'lazy';
     im.decoding = 'async';
     b.appendChild(im);
-    b.addEventListener('click', function(){ lbImg.src = src; lbImg.alt = im.alt; lb.classList.add('open'); });
+    b.addEventListener('click', function(){ openPv(pvList.indexOf(src)); });
     gal.appendChild(b);
   });
 
