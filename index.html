@@ -2,6 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Return visits (Addition 5, 2026-11-27): the opening loader plays ONLY
+   on the first home-page arrival of a session. This runs in <head>,
+   before anything paints: on a return visit it flags <html> so the
+   loader never renders (CSS at the loader rules), and the loader script
+   below skips its timeline entirely. Scroll restoration is set to
+   'manual' on every home load: the browser's own back/forward restore
+   is OFF for this page, so ONE mechanism — the position saved by the
+   script at the end of <body> — lands the visitor where they left,
+   identically for the back button and the Home link. */
+(function(){
+  var ret = false;
+  try {
+    ret = !!sessionStorage.getItem('nm_home_visited');
+    if (!ret) sessionStorage.setItem('nm_home_visited', '1');
+  } catch(e){}
+  window.__nmReturn = ret;
+  if (ret) document.documentElement.classList.add('nm-return');
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Noor Maison by Saba — Jewellery</title>
 <style>
@@ -345,6 +366,9 @@
   /* ---------- loader: her symbol, Cup2Eat-style intro, in her box's light golden ---------- */
   #loader{position:fixed;inset:0;z-index:200;background:#c8ae84;display:flex;align-items:center;justify-content:center;cursor:pointer}
   body.static #loader{display:none}
+  /* return visits (Addition 5): the loader never renders — see the
+     <head> script that sets .nm-return before first paint */
+  html.nm-return #loader{display:none}
   .ld-lock{text-align:center;padding:0 20px}
   .ld-sym{width:min(88vw,470px);margin:0 auto}
   .ld-symsvg{width:100%;height:auto;display:block;overflow:visible}
@@ -476,6 +500,38 @@
   .nb-links a:hover{color:#2e2010}
   .nb-cta{background:#3a2a12;color:#ecd28a}
   .nb-search{border-color:rgba(58,42,18,.4);color:#3a2a12;background:rgba(255,248,230,.35)}
+
+  /* ---------- GooeyNav ball — vanilla port of React Bits GooeyNav ----------
+     Credit: behaviour ported from the React Bits GooeyNav component
+     (~/workspace/library/web-libs/react-bits/.../GooeyNav/GooeyNav.jsx);
+     the original renders a WebGL SDF "goo" field — this port gets the
+     same visible behaviour with the classic SVG-goo trick + springs:
+       · a molten-gold BALL (a pill) rests behind the active link;
+       · a smaller BLOB chases it on a lazier spring — while the ball
+         flies, the blob lags, and the SVG filter (feGaussianBlur +
+         alpha-contrast feColorMatrix, #nm-goo in the markup) melts the
+         two shapes together, so the ball stretches like liquid;
+       · when the ball lands, a burst of small gold droplets fires.
+     The ball/blob/particles live in .goo (pointer-events:none, behind
+     the links); the links stay fully clickable and navigation is
+     unchanged. All motion is transform/opacity. With
+     prefers-reduced-motion the ball simply rests under the active
+     link — no glide, no particles (handled in the script).
+     NOTE: the centre links are display:none under 900px in this
+     design (the phone tab bar takes over), so the ball is a
+     wide-screen treatment — nothing is added or changed on phone. */
+  [data-goo-nav]{position:relative}
+  [data-goo-nav] a{position:relative;z-index:1}
+  [data-goo-nav] a.goo-on{color:#ffedbe}
+  .goo{position:absolute;inset:0;z-index:0;pointer-events:none;filter:url(#nm-goo)}
+  .goo-ball,.goo-blob{position:absolute;left:0;top:0;border-radius:999px;background:radial-gradient(120% 130% at 30% 20%,#e6c87c 0%,#a37f2c 45%,#7c5a1e 78%,#5d4517 100%);will-change:transform}
+  .goo-ball{width:104px;height:32px;margin:-16px 0 0 -52px;box-shadow:inset 0 1px 2px rgba(255,246,218,.8),inset 0 -3px 6px rgba(46,32,16,.45)}
+  .goo-blob{width:20px;height:20px;margin:-10px 0 0 -10px}
+  .goo-p{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform,opacity}
+  /* Collection cards: photo + name open the piece's own product page
+     (data-preview, wired by the catalogue-nav script — same pattern
+     as Explore). The Order button keeps opening the order sheet. */
+  .prod .ph[data-preview], .prod h3[data-preview]{cursor:pointer}
   /* hero chrome on gold */
   .pill{background:#3a2a12;color:#ecd28a}
   .pill.ghost{background:rgba(255,248,230,.38);color:#3a2a12;border-color:rgba(58,42,18,.42)}
@@ -618,8 +674,6 @@
   .ord-err{margin-top:12px;font-size:13.5px;color:#a12622;line-height:1.45}
   .ord-place{margin-top:18px;width:100%;padding:15px 0;border:none;border-radius:999px;background:#2e2010;color:#fdf6dd;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
   .ord-place.ghost{background:none;border:1px solid rgba(26,23,18,.3);color:#3d382e}
-  .pv-vid{width:100%;max-height:48vh;object-fit:contain;background:#171512;border-radius:14px;display:block}
-  .pv-note{font-size:13.5px;line-height:1.55;color:#3d382e;margin-top:10px}
   .ord-fine{margin-top:12px;font-size:12.5px;line-height:1.55;color:#6d6252}
   .ord-done-id{font-size:16px;margin-top:8px}
   .ord-done-sum{font-size:14px;line-height:1.55;color:#3d382e;margin-top:6px}
@@ -818,6 +872,15 @@
 </style>
 </head>
 <body>
+  <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
+       blur + alpha-contrast melts the ball and its trailing blob into
+       one liquid shape. Referenced by .goo on every page's nav. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="nm-goo" x="-40%" y="-160%" width="180%" height="420%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/>
+    </filter>
+  </defs></svg>
   <!-- Offers marquee (all pages): the two .mq-seq spans must stay
        IDENTICAL — the loop wraps at exactly one sequence width.
        Offers text only; always edit both spans together. -->
@@ -861,8 +924,14 @@
     <div class="chrome-top">
       <nav class="navbar" aria-label="Main">
         <a class="nb-brand" href="#">NOOR MAISON<span class="by"> BY SABA</span></a>
-        <div class="nb-links">
-          <a href="#collection">Collection</a>
+        <div class="nb-links" data-goo-nav>
+          <!-- GooeyNav ball (decorative, ported from React Bits — see
+               the CSS note): .goo holds the gold ball + trailing blob
+               behind the links. Collection carries .on: on the home
+               page it is the current page's own section link, so the
+               ball rests under it. -->
+          <span class="goo" aria-hidden="true"><span class="goo-ball"></span><span class="goo-blob"></span></span>
+          <a href="#collection" class="on">Collection</a>
           <a href="explore.html">Explore</a>
           <!-- Nails link (added 2026-11-27): nails.html is a SHELL for now —
                a coming-soon page in the Explore pattern. Nail products are
@@ -957,25 +1026,25 @@
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Rings</h3>
         <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring"></div>
-        <button class="view-btn" data-tag="Rings">View Pieces <span aria-hidden="true">&#8594;</span></button>
+        <a class="view-btn cat-link" href="explore.html?cat=rings">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.05s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Necklace Sets</h3>
         <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set on blue velvet"></div>
-        <button class="view-btn" data-tag="Necklace Sets">View Pieces <span aria-hidden="true">&#8594;</span></button>
+        <a class="view-btn cat-link" href="explore.html?cat=necklace-sets">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.1s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Earrings</h3>
         <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-06.webp" alt="Pastel Chandelier earrings"></div>
-        <button class="view-btn" data-tag="Earrings">View Pieces <span aria-hidden="true">&#8594;</span></button>
+        <a class="view-btn cat-link" href="explore.html?cat=earrings">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.15s">
         <p class="cc-eyebrow">Categories</p>
         <h3 class="cc-name">Sapphire</h3>
         <div class="cc-ph"><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-cut sapphire ring"></div>
-        <button class="view-btn" data-tag="Sapphire">View Pieces <span aria-hidden="true">&#8594;</span></button>
+        <a class="view-btn cat-link" href="explore.html?cat=sapphire">View Pieces <span aria-hidden="true">&#8594;</span></a>
       </article>
       <article class="ccard rv" style="--d:.2s">
         <p class="cc-eyebrow">Categories</p>
@@ -989,13 +1058,13 @@
   <section class="site-sec" id="best-sellers">
     <div class="bs-head rv"><h2 class="bs-title">Best Sellers</h2></div>
     <div class="bento">
-      <a class="bt b-hero rv" href="#prod-1"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring"><span class="bt-meta"><span class="bt-name">The Clover Ring</span><span class="bt-line">Sapphire · Ring</span></span></a>
-      <a class="bt b-tall rv" style="--d:.05s" href="#prod-3"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set on blue velvet"><span class="bt-meta"><span class="bt-name">Paisley Pearl Set</span><span class="bt-line">Necklace Set</span></span></a>
-      <a class="bt rv" style="--d:.1s" href="#prod-2"><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-cut sapphire ring"><span class="bt-meta"><span class="bt-name">Emerald-Cut Ring</span><span class="bt-line">Sapphire · Ring</span></span></a>
-      <a class="bt rv" style="--d:.15s" href="#prod-9"><img loading="lazy" decoding="async" src="assets-stock/site-07.webp" alt="Amethyst Jhumkas"><span class="bt-meta"><span class="bt-name">Amethyst Jhumkas</span><span class="bt-line">Earrings</span></span></a>
-      <a class="bt rv" style="--d:.2s" href="#prod-4"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf and Pearl Set"><span class="bt-meta"><span class="bt-name">Mint Leaf Set</span><span class="bt-line">Necklace Set</span></span></a>
-      <a class="bt rv" style="--d:.25s" href="#prod-6"><img loading="lazy" decoding="async" src="assets-stock/site-05.webp" alt="Zari Hasli Set on burgundy"><span class="bt-meta"><span class="bt-name">Zari Hasli Set</span><span class="bt-line">Necklace Set</span></span></a>
-      <a class="bt rv" style="--d:.3s" href="#prod-7"><img loading="lazy" decoding="async" src="assets-stock/site-09.webp" alt="Multicolour Floral Set on blue velvet"><span class="bt-meta"><span class="bt-name">Multicolour Floral Set</span><span class="bt-line">Necklace Set</span></span></a>
+      <a class="bt b-hero rv" href="product.html?p=prod-1"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring"><span class="bt-meta"><span class="bt-name">The Clover Ring</span><span class="bt-line">Sapphire · Ring</span></span></a>
+      <a class="bt b-tall rv" style="--d:.05s" href="product.html?p=prod-3"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set on blue velvet"><span class="bt-meta"><span class="bt-name">Paisley Pearl Set</span><span class="bt-line">Necklace Set</span></span></a>
+      <a class="bt rv" style="--d:.1s" href="product.html?p=prod-2"><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-cut sapphire ring"><span class="bt-meta"><span class="bt-name">Emerald-Cut Ring</span><span class="bt-line">Sapphire · Ring</span></span></a>
+      <a class="bt rv" style="--d:.15s" href="product.html?p=prod-9"><img loading="lazy" decoding="async" src="assets-stock/site-07.webp" alt="Amethyst Jhumkas"><span class="bt-meta"><span class="bt-name">Amethyst Jhumkas</span><span class="bt-line">Earrings</span></span></a>
+      <a class="bt rv" style="--d:.2s" href="product.html?p=prod-4"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf and Pearl Set"><span class="bt-meta"><span class="bt-name">Mint Leaf Set</span><span class="bt-line">Necklace Set</span></span></a>
+      <a class="bt rv" style="--d:.25s" href="product.html?p=prod-6"><img loading="lazy" decoding="async" src="assets-stock/site-05.webp" alt="Zari Hasli Set on burgundy"><span class="bt-meta"><span class="bt-name">Zari Hasli Set</span><span class="bt-line">Necklace Set</span></span></a>
+      <a class="bt rv" style="--d:.3s" href="product.html?p=prod-7"><img loading="lazy" decoding="async" src="assets-stock/site-09.webp" alt="Multicolour Floral Set on blue velvet"><span class="bt-meta"><span class="bt-name">Multicolour Floral Set</span><span class="bt-line">Necklace Set</span></span></a>
       <a class="disc rv" style="--d:.35s" href="#collection"><span>Discover more</span><span class="arr">&#8594;</span></a>
     </div>
   </section>
@@ -1003,49 +1072,41 @@
   <section class="site-sec" id="gold-plated">
   <div class="bs-head rv"><h2 class="bs-title">Gold Plated Collection</h2></div>
   <div class="bento">
-    <a class="bt b-hero rv" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-gold-02.webp" alt="Round Pendant Set — gold filigree pendant and earrings on maroon velvet"><span class="bt-meta"><span class="bt-name">Round Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
-    <a class="bt b-tall rv" style="--d:.05s" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-gold-01.webp" alt="Panel Pendant Set — gold panel necklace and earrings on a red mannequin"><span class="bt-meta"><span class="bt-name">Panel Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
-    <a class="bt rv" style="--d:.1s" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-gold-03.webp" alt="Stone-Link Chain — gold chain with stone-set links on blue velvet"><span class="bt-meta"><span class="bt-name">Stone-Link Chain</span><span class="bt-line">Gold Plated · Necklace</span></span></a>
+    <a class="bt b-hero rv" href="product.html?p=gold-1"><img loading="lazy" decoding="async" src="assets-stock/site-gold-02.webp" alt="Round Pendant Set — gold filigree pendant and earrings on maroon velvet"><span class="bt-meta"><span class="bt-name">Round Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
+    <a class="bt b-tall rv" style="--d:.05s" href="product.html?p=gold-2"><img loading="lazy" decoding="async" src="assets-stock/site-gold-01.webp" alt="Panel Pendant Set — gold panel necklace and earrings on a red mannequin"><span class="bt-meta"><span class="bt-name">Panel Pendant Set</span><span class="bt-line">Gold Plated · Necklace Set</span></span></a>
+    <a class="bt rv" style="--d:.1s" href="product.html?p=gold-3"><img loading="lazy" decoding="async" src="assets-stock/site-gold-03.webp" alt="Stone-Link Chain — gold chain with stone-set links on blue velvet"><span class="bt-meta"><span class="bt-name">Stone-Link Chain</span><span class="bt-line">Gold Plated · Necklace</span></span></a>
     <a class="disc rv" style="--d:.15s" href="#collection"><span>See all pieces</span><span class="arr">&#8594;</span></a>
   </div>
 </section>
 <section class="site-sec" id="collection">
     <div class="sec-head rv"><h2 class="sec-title">The Collection</h2><span class="sec-note">Handpicked pieces</span></div>
     <div class="grid">
-      <article class="prod rv" id="prod-1" data-keys="clover sapphire blue gold ring"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring — blue sapphire clover ring in gold"></div><div class="meta"><h3>The Clover Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-1">Order</button></div></article>
-      <article class="prod rv" id="prod-2" data-keys="emerald cut sapphire blue gold ring" data-stock="low" style="--d:.06s"><div class="ph"><span class="badge low">Only 4 left</span><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-Cut Ring — emerald-cut blue sapphire ring in gold"></div><div class="meta"><h3>Emerald-Cut Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-2">Order</button></div></article>
-      <article class="prod rv" id="prod-3" data-keys="paisley pearl necklace blue velvet" style="--d:.12s"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set — gold and pearl necklace set on royal blue velvet"></div><div class="meta"><h3>Paisley Pearl Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-3">Order</button></div></article>
-      <article class="prod rv" id="prod-4" data-keys="mint leaf pearl necklace green emerald"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf Set — gold leaf and pearl necklace set on emerald velvet"></div><div class="meta"><h3>Mint Leaf Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-4">Order</button></div></article>
-      <article class="prod rv" id="prod-5" data-keys="gulposh floral pendant necklace multicolour stones" style="--d:.06s"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-03.webp" alt="Gulposh Pendant Set — floral pendant set with multicolour stones"></div><div class="meta"><h3>Gulposh Pendant Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-5">Order</button></div></article>
-      <article class="prod rv" id="prod-6" data-keys="zari hasli filigree necklace gold burgundy" data-stock="oos" style="--d:.12s"><div class="ph"><span class="badge oos">Out of stock</span><img loading="lazy" decoding="async" src="assets-stock/site-05.webp" alt="Zari Hasli Set — gold filigree hasli necklace set on burgundy velvet"></div><div class="meta"><h3>Zari Hasli Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-6" disabled>Out of stock</button></div></article>
-      <article class="prod rv" id="prod-7" data-keys="multicolour floral necklace stones blue velvet"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-09.webp" alt="Multicolour Floral Set — gold floral necklace set with coloured stones on blue velvet"></div><div class="meta"><h3>Multicolour Floral Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-7">Order</button></div></article>
-      <article class="prod rv" id="prod-8" data-keys="pastel chandelier earrings multicolour drops" style="--d:.06s"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-06.webp" alt="Pastel Chandeliers — pastel multicolour chandelier earrings"></div><div class="meta"><h3>Pastel Chandeliers</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="prod-8">Order</button></div></article>
-      <article class="prod rv" id="prod-9" data-keys="amethyst jhumka earrings purple gold" style="--d:.12s"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-07.webp" alt="Amethyst Jhumkas — gold jhumka earrings with amethyst drops"></div><div class="meta"><h3>Amethyst Jhumkas</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="prod-9">Order</button></div></article>
+      <article class="prod rv" id="prod-1" data-keys="clover sapphire blue gold ring"><div class="ph" data-preview="prod-1"><img loading="lazy" decoding="async" src="assets-stock/site-01.webp" alt="The Clover Ring — blue sapphire clover ring in gold"></div><div class="meta"><h3 data-preview="prod-1">The Clover Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-1">Order</button></div></article>
+      <article class="prod rv" id="prod-2" data-keys="emerald cut sapphire blue gold ring" data-stock="low" style="--d:.06s"><div class="ph" data-preview="prod-2"><span class="badge low">Only 4 left</span><img loading="lazy" decoding="async" src="assets-stock/site-02.webp" alt="Emerald-Cut Ring — emerald-cut blue sapphire ring in gold"></div><div class="meta"><h3 data-preview="prod-2">Emerald-Cut Ring</h3><p>Sapphire · Ring</p><button type="button" class="ord-btn" data-order="prod-2">Order</button></div></article>
+      <article class="prod rv" id="prod-3" data-keys="paisley pearl necklace blue velvet" style="--d:.12s"><div class="ph" data-preview="prod-3"><img loading="lazy" decoding="async" src="assets-stock/site-08.webp" alt="Paisley Pearl Set — gold and pearl necklace set on royal blue velvet"></div><div class="meta"><h3 data-preview="prod-3">Paisley Pearl Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-3">Order</button></div></article>
+      <article class="prod rv" id="prod-4" data-keys="mint leaf pearl necklace green emerald"><div class="ph" data-preview="prod-4"><img loading="lazy" decoding="async" src="assets-stock/site-04.webp" alt="Mint Leaf Set — gold leaf and pearl necklace set on emerald velvet"></div><div class="meta"><h3 data-preview="prod-4">Mint Leaf Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-4">Order</button></div></article>
+      <article class="prod rv" id="prod-5" data-keys="gulposh floral pendant necklace multicolour stones" style="--d:.06s"><div class="ph" data-preview="prod-5"><img loading="lazy" decoding="async" src="assets-stock/site-03.webp" alt="Gulposh Pendant Set — floral pendant set with multicolour stones"></div><div class="meta"><h3 data-preview="prod-5">Gulposh Pendant Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-5">Order</button></div></article>
+      <article class="prod rv" id="prod-6" data-keys="zari hasli filigree necklace gold burgundy" data-stock="oos" style="--d:.12s"><div class="ph" data-preview="prod-6"><span class="badge oos">Out of stock</span><img loading="lazy" decoding="async" src="assets-stock/site-05.webp" alt="Zari Hasli Set — gold filigree hasli necklace set on burgundy velvet"></div><div class="meta"><h3 data-preview="prod-6">Zari Hasli Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-6" disabled>Out of stock</button></div></article>
+      <article class="prod rv" id="prod-7" data-keys="multicolour floral necklace stones blue velvet"><div class="ph" data-preview="prod-7"><img loading="lazy" decoding="async" src="assets-stock/site-09.webp" alt="Multicolour Floral Set — gold floral necklace set with coloured stones on blue velvet"></div><div class="meta"><h3 data-preview="prod-7">Multicolour Floral Set</h3><p>Necklace Set</p><button type="button" class="ord-btn" data-order="prod-7">Order</button></div></article>
+      <article class="prod rv" id="prod-8" data-keys="pastel chandelier earrings multicolour drops" style="--d:.06s"><div class="ph" data-preview="prod-8"><img loading="lazy" decoding="async" src="assets-stock/site-06.webp" alt="Pastel Chandeliers — pastel multicolour chandelier earrings"></div><div class="meta"><h3 data-preview="prod-8">Pastel Chandeliers</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="prod-8">Order</button></div></article>
+      <article class="prod rv" id="prod-9" data-keys="amethyst jhumka earrings purple gold" style="--d:.12s"><div class="ph" data-preview="prod-9"><img loading="lazy" decoding="async" src="assets-stock/site-07.webp" alt="Amethyst Jhumkas — gold jhumka earrings with amethyst drops"></div><div class="meta"><h3 data-preview="prod-9">Amethyst Jhumkas</h3><p>Earrings</p><button type="button" class="ord-btn" data-order="prod-9">Order</button></div></article>
     </div>
   </section>
 
   <section class="site-sec" id="turkish">
   <div class="bs-head rv"><h2 class="bs-title">Turkish Bracelets</h2></div>
   <div class="bento">
-    <a class="bt b-hero rv" data-preview="turk-1" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-turk-01.webp" alt="Royal Purple Turkish bracelet — purple stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Royal Purple</span><span class="bt-line">Turkish Bracelet</span></span></a>
-    <a class="bt b-tall rv" style="--d:.05s" data-preview="turk-2" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-turk-02.webp" alt="Honey Amber Turkish bracelet — yellow stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Honey Amber</span><span class="bt-line">Turkish Bracelet</span></span></a>
-    <a class="bt rv" style="--d:.1s" data-preview="turk-3" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-turk-03.webp" alt="Deep Red Turkish bracelet — red stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Deep Red</span><span class="bt-line">Turkish Bracelet</span></span></a>
-    <a class="bt rv" style="--d:.15s" data-preview="turk-4" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-turk-04.webp" alt="Teal Turkish bracelet — teal stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Teal</span><span class="bt-line">Turkish Bracelet</span></span></a>
-    <a class="bt rv" style="--d:.2s" data-preview="turk-5" href="#collection"><img loading="lazy" decoding="async" src="assets-stock/site-turk-05.webp" alt="Blush Crystal Turkish bracelet — blush crystal bracelet on red silk"><span class="bt-meta"><span class="bt-name">Blush Crystal</span><span class="bt-line">Turkish Bracelet</span></span></a>
+    <a class="bt b-hero rv" href="product.html?p=turk-1"><img loading="lazy" decoding="async" src="assets-stock/site-turk-01.webp" alt="Royal Purple Turkish bracelet — purple stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Royal Purple</span><span class="bt-line">Turkish Bracelet</span></span></a>
+    <a class="bt b-tall rv" style="--d:.05s" href="product.html?p=turk-2"><img loading="lazy" decoding="async" src="assets-stock/site-turk-02.webp" alt="Honey Amber Turkish bracelet — yellow stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Honey Amber</span><span class="bt-line">Turkish Bracelet</span></span></a>
+    <a class="bt rv" style="--d:.1s" href="product.html?p=turk-3"><img loading="lazy" decoding="async" src="assets-stock/site-turk-03.webp" alt="Deep Red Turkish bracelet — red stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Deep Red</span><span class="bt-line">Turkish Bracelet</span></span></a>
+    <a class="bt rv" style="--d:.15s" href="product.html?p=turk-4"><img loading="lazy" decoding="async" src="assets-stock/site-turk-04.webp" alt="Teal Turkish bracelet — teal stone bracelet on red silk"><span class="bt-meta"><span class="bt-name">Teal</span><span class="bt-line">Turkish Bracelet</span></span></a>
+    <a class="bt rv" style="--d:.2s" href="product.html?p=turk-5"><img loading="lazy" decoding="async" src="assets-stock/site-turk-05.webp" alt="Blush Crystal Turkish bracelet — blush crystal bracelet on red silk"><span class="bt-meta"><span class="bt-name">Blush Crystal</span><span class="bt-line">Turkish Bracelet</span></span></a>
     <a class="disc rv" style="--d:.25s" href="#collection"><span>See the Collection</span><span class="arr">&#8594;</span></a>
   </div>
-  <div hidden aria-hidden="true">
-    <article id="turk-1"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-turk-01.webp" alt=""></div><div class="meta"><h3>Royal Purple</h3><p>Turkish Bracelet</p></div></article>
-    <article id="turk-2"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-turk-02.webp" alt=""></div><div class="meta"><h3>Honey Amber</h3><p>Turkish Bracelet</p></div></article>
-    <article id="turk-3"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-turk-03.webp" alt=""></div><div class="meta"><h3>Deep Red</h3><p>Turkish Bracelet</p></div></article>
-    <article id="turk-4"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-turk-04.webp" alt=""></div><div class="meta"><h3>Teal</h3><p>Turkish Bracelet</p></div></article>
-    <article id="turk-5"><div class="ph"><img loading="lazy" decoding="async" src="assets-stock/site-turk-05.webp" alt=""></div><div class="meta"><h3>Blush Crystal</h3><p>Turkish Bracelet</p></div></article>
-    <button type="button" data-order="turk-1">Order</button>
-    <button type="button" data-order="turk-2">Order</button>
-    <button type="button" data-order="turk-3">Order</button>
-    <button type="button" data-order="turk-4">Order</button>
-    <button type="button" data-order="turk-5">Order</button>
-  </div>
+  <!-- The hidden turk order records that used to sit here are gone
+       (2026-11-27): the tiles above now open each bracelet's own
+       product page, where ordering happens — nothing on this page
+       orders a Turkish bracelet directly any more. -->
 </section>
 
   <section class="site-sec">
@@ -1332,6 +1393,17 @@
   intro.pause();
   document.body.style.overflow = 'hidden';
   var loaderEl = document.getElementById('loader');
+  /* Return visit (Addition 5): no loader replay. The veil is already
+     display:none via the .nm-return CSS; set it inline too, so the
+     offer-cards script's loaderDone() check (which reads the inline
+     style) sees it as done. The hero intro jumps straight to its end
+     state and the loader timeline below is never built. */
+  if (window.__nmReturn) {
+    loaderEl.style.display = 'none';
+    document.body.style.overflow = '';
+    intro.progress(1);
+    return;
+  }
   var dismissed = false;
   function dismissLoader(){
     if (dismissed) return; dismissed = true;
@@ -1515,7 +1587,7 @@
 
   /* category cards open the search, pre-filtered to that category */
   window.__openSearch = function(t){ if (t) setTag(t); open(); };
-  document.querySelectorAll('.view-btn').forEach(function(b){
+  document.querySelectorAll('.view-btn:not(.cat-link)') /* category cards navigate to the filtered Explore page now; only plain .view-btn (Pearl) still opens search */.forEach(function(b){
     b.addEventListener('click', function(){ window.__openSearch(b.getAttribute('data-tag')); });
   });
 
@@ -1594,17 +1666,9 @@
       <button type="button" class="ord-place ghost" id="ordListClose">Close</button>
     </div>
   </div>
-  <div class="set-sheet ord-sheet" id="pvSheet" role="dialog" aria-modal="true" aria-label="Product preview">
-    <div class="scrim" data-close></div>
-    <div class="panel">
-      <div class="grab" aria-hidden="true"></div>
-      <video class="pv-vid" id="pvVid" playsinline muted loop preload="none"></video>
-      <div class="ord-head" style="margin-top:14px"><img id="pvImg" alt=""><div><h3 id="pvName"></h3><p class="ord-cat" id="pvCat"></p></div></div>
-      <p class="pv-note">This is the real bracelet in a video, so you can see every stone clearly.</p>
-      <button type="button" class="ord-place" id="pvOrder">Order this bracelet</button>
-      <button type="button" class="ord-place ghost" id="pvClose">Close</button>
-    </div>
-  </div>
+  <!-- The Turkish preview sheet (#pvSheet) was removed 2026-11-27:
+       the bracelet tiles now open each piece's own product page
+       (gallery + video + specs + sticky Order bar) instead. -->
   <!-- ===== Entry offer cards carousel (added 2026-11-27, replaces the
        static offer popup) =====
        Shown once per browser session, just after the loader settles (see
@@ -1993,35 +2057,199 @@
 </script>
 
 <script>
-/* Turkish bracelet previews — the product video opens with the piece (user, 2026-11-26) */
+/* Collection cards — tap a photo or the name to open that piece's own
+   product page (same data-preview pattern as Explore). This replaces
+   the old Turkish preview-sheet script: the Turkish tiles are plain
+   links to their product pages now, and only the Collection cards
+   carry data-preview on this page. The cards' Order buttons are NOT
+   inside [data-preview] elements, so ordering is unaffected. */
 (function(){
-  var sheet = document.getElementById('pvSheet'); if(!sheet) return;
-  var vid = document.getElementById('pvVid'), cur = null;
-  var VIDS = { 'turk-1': 'media/turk-purple.mp4', 'turk-2': 'media/turk-yellow.mp4', 'turk-3': 'media/turk-red.mp4', 'turk-4': 'media/turk-teal.mp4', 'turk-5': 'media/turk-blush.mp4' };
-  function close(){ sheet.classList.remove('open'); try { vid.pause(); } catch(e){} vid.removeAttribute('src'); vid.load(); }
-  sheet.querySelector('[data-close]').addEventListener('click', close);
-  document.getElementById('pvClose').addEventListener('click', close);
-  document.querySelectorAll('[data-preview]').forEach(function(t){
-    t.addEventListener('click', function(e){
-      e.preventDefault();
-      var id = t.dataset.preview, card = document.getElementById(id); if(!card) return;
-      cur = id;
-      var img = card.querySelector('.ph img').src;
-      document.getElementById('pvName').textContent = card.querySelector('h3').textContent;
-      document.getElementById('pvCat').textContent = card.querySelector('.meta p').textContent;
-      document.getElementById('pvImg').src = img;
-      vid.poster = img;
-      vid.src = VIDS[id];
-      sheet.classList.add('open');
-      var p = vid.play(); if(p && p.catch) p.catch(function(){});
+  document.querySelectorAll('[data-preview]').forEach(function(ph){
+    ph.addEventListener('click', function(){
+      location.href = 'product.html?p=' + ph.dataset.preview;
     });
   });
-  document.getElementById('pvOrder').addEventListener('click', function(){
-    if(!cur) return;
-    var btn = document.querySelector('[data-order="' + cur + '"]');
-    close();
-    if(btn) btn.click();
+})();
+</script>
+
+<script>
+/* GooeyNav ball — vanilla port of React Bits' GooeyNav (see the CSS
+   note for the mechanism + credit). The ball rests under the active
+   link (.on); hovering/focusing another link springs it across, the
+   trailing blob melting into it via the #nm-goo SVG filter, and a
+   burst of gold droplets fires when it lands or is tapped.
+   Decorative only: .goo has pointer-events:none and navigation is
+   unchanged. prefers-reduced-motion: static rest position, no
+   glide, no particles. */
+(function(){
+  var nav = document.querySelector('[data-goo-nav]');
+  if(!nav) return;
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var goo = nav.querySelector('.goo'), ball = nav.querySelector('.goo-ball'), blob = nav.querySelector('.goo-blob');
+  if(!links.length || !goo || !ball || !blob) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BW = 104, BH = 32; /* ball layout size from the CSS — all sizing is transform scale */
+  var active = 0;
+  links.forEach(function(a, i){ if(a.classList.contains('on')) active = i; });
+  var rest = active, target = active, ready = false, landed = true;
+  var cx = 0, cy = 0, sx = 1, sy = 1, vx = 0, vy = 0, vsx = 0, vsy = 0;
+  var tx = 0, ty = 0, tsx = 1, tsy = 1, bcx = 0, bvx = 0;
+  var raf = 0, last = 0;
+
+  function box(i){
+    var a = links[i];
+    return { x: a.offsetLeft + a.offsetWidth / 2, y: a.offsetTop + a.offsetHeight / 2,
+             sx: (a.offsetWidth + 18) / BW, sy: (a.offsetHeight + 10) / BH };
+  }
+  function paint(){
+    ball.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+    var sp = Math.min(1, Math.abs(vx) / 2400);
+    blob.style.transform = 'translate(' + bcx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + (1 + sp * 1.5).toFixed(3) + ',' + (1 + sp * 0.8).toFixed(3) + ')';
+  }
+  function aim(i, snap){
+    var b = box(i);
+    tx = b.x; ty = b.y; tsx = b.sx; tsy = b.sy;
+    if(snap){ cx = tx; cy = ty; sx = tsx; sy = tsy; bcx = tx; vx = vy = vsx = vsy = bvx = 0; paint(); }
+  }
+  var SHADES = ['#e6c87c', '#c9a24a', '#a37f2c', '#7c5a1e', '#ffedbe'];
+  function burst(x, y){
+    if(reduced) return;
+    for(var i = 0; i < 12; i++){
+      var p = document.createElement('span');
+      p.className = 'goo-p';
+      var s = 3 + Math.random() * 4;
+      p.style.width = s + 'px'; p.style.height = s + 'px';
+      p.style.margin = (-s / 2) + 'px 0 0 ' + (-s / 2) + 'px';
+      p.style.background = SHADES[i % SHADES.length];
+      goo.appendChild(p);
+      var ang = Math.random() * Math.PI * 2, dist = 16 + Math.random() * 30;
+      var dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist * 0.7 - 6;
+      var anim = p.animate([
+        { transform: 'translate(' + x + 'px,' + y + 'px)', opacity: 1 },
+        { transform: 'translate(' + (x + dx).toFixed(1) + 'px,' + (y + dy + 14).toFixed(1) + 'px)', opacity: 0 }
+      ], { duration: 480 + Math.random() * 320, easing: 'cubic-bezier(.17,.67,.35,1)' });
+      anim.onfinish = (function(el){ return function(){ el.remove(); }; })(p);
+    }
+  }
+  function frame(now){
+    raf = 0;
+    var dt = Math.min(0.032, (now - last) / 1000 || 0.016); last = now;
+    var h = dt / 2, n;
+    for(n = 0; n < 2; n++){
+      vx += ((tx - cx) * 170 - vx * 19) * h; cx += vx * h;
+      vy += ((ty - cy) * 170 - vy * 19) * h; cy += vy * h;
+      vsx += ((tsx - sx) * 210 - vsx * 17) * h; sx += vsx * h;
+      vsy += ((tsy - sy) * 210 - vsy * 17) * h; sy += vsy * h;
+      bvx += ((cx - bcx) * 60 - bvx * 11) * h; bcx += bvx * h;
+    }
+    paint();
+    var settled = Math.abs(tx - cx) < 0.4 && Math.abs(vx) < 25 && Math.abs(tsx - sx) < 0.01 && Math.abs(cx - bcx) < 0.6;
+    if(Math.abs(tx - cx) > 6) landed = false;
+    if(settled && !landed){ landed = true; burst(cx, cy); }
+    if(!settled) raf = requestAnimationFrame(frame);
+  }
+  function wake(){ if(!raf && !reduced){ last = performance.now(); raf = requestAnimationFrame(frame); } }
+  function go(i){
+    target = i;
+    links.forEach(function(a, k){ a.classList.toggle('goo-on', k === i); });
+    aim(i, reduced || !ready);
+    if(!reduced && ready) wake();
+  }
+  function place(){
+    if(!nav.getBoundingClientRect().width) return; /* centre links hidden in this layout — nothing to do */
+    ready = true;
+    links.forEach(function(a, k){ a.classList.toggle('goo-on', k === target); });
+    aim(target, true);
+  }
+  links.forEach(function(a, i){
+    a.addEventListener('pointerover', function(){ go(i); });
+    a.addEventListener('focus', function(){ go(i); });
+    a.addEventListener('click', function(){ rest = i; var b = box(i); burst(b.x, b.y); });
   });
+  nav.addEventListener('pointerleave', function(){ go(rest); });
+  nav.addEventListener('focusout', function(e){ if(!nav.contains(e.relatedTarget)) go(rest); });
+  window.addEventListener('resize', place);
+  window.addEventListener('load', place);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  place();
+})();
+</script>
+
+<script>
+/* Categories (Addition 4): the whole category card is clickable, not just
+   its View Pieces link — the link itself navigates natively; a click
+   anywhere else on the card follows the same link. Pearl has no filtered
+   page in the brief, so its card keeps the old search behaviour. */
+(function(){
+  document.querySelectorAll('.ccard .cat-link').forEach(function(link){
+    var card = link.closest('.ccard'); if(!card) return;
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function(e){
+      if(e.target.closest('a,button')) return;
+      location.href = link.getAttribute('href');
+    });
+  });
+})();
+</script>
+<script>
+/* Home position memory (Addition 5, 2026-11-27): while the visitor is on
+   the home page, keep their place in sessionStorage — not as a raw
+   scrollY (a reloading page grows as its images arrive, so the same Y
+   is a different place), but as the SECTION in view plus the offset
+   into it. On a return visit — flagged by the <head> script — that
+   section is scrolled back instantly (behavior:'instant'; the page's
+   own CSS sets scroll-behavior:smooth, which a plain scrollTo would
+   obey), once at parse end and again on window load, when late layout
+   has settled. history.scrollRestoration is 'manual' (set in <head>),
+   so this is the only restoration mechanism and the back button and
+   the Home link behave identically; nothing double-restores. A #hash
+   in the URL wins over the saved place — the visitor explicitly chose
+   that section. First visit of a session: nothing is restored (top of
+   page, loader plays as always). The offer-cards flag is a separate
+   key and is untouched by this. */
+(function(){
+  var KEY = 'nm_home_pos', ticking = false;
+  function landmarks(){
+    return Array.prototype.slice.call(document.querySelectorAll('main section[id], #stage'));
+  }
+  function save(){
+    try {
+      var y = window.scrollY || 0, marks = landmarks(), cur = null;
+      for (var i = 0; i < marks.length; i++){
+        if (marks[i].getBoundingClientRect().top + y <= y + window.innerHeight * 0.4) cur = marks[i];
+        else break;
+      }
+      var pos = { y: Math.round(y) };
+      if (cur) {
+        pos.s = cur.id;
+        pos.d = Math.round(Math.min(Math.max(y - (cur.getBoundingClientRect().top + y), 0), cur.offsetHeight));
+      }
+      sessionStorage.setItem(KEY, JSON.stringify(pos));
+    } catch(e){}
+  }
+  window.addEventListener('scroll', function(){
+    if (ticking) return; ticking = true;
+    requestAnimationFrame(function(){ ticking = false; save(); });
+  }, { passive: true });
+  window.addEventListener('pagehide', save);
+  if (!window.__nmReturn || location.hash) return;
+  var pos = null;
+  try { pos = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch(e){}
+  if (!pos || (!pos.s && !pos.y)) return;
+  var userMoved = false;
+  ['wheel','touchmove','keydown'].forEach(function(t){
+    window.addEventListener(t, function(){ userMoved = true; }, { passive: true });
+  });
+  function restore(){
+    if (userMoved) return;
+    var el = pos.s && document.getElementById(pos.s);
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + (pos.d || 0), behavior: 'instant' });
+    else if (pos.y) window.scrollTo({ top: pos.y, behavior: 'instant' });
+  }
+  restore();
+  /* re-assert once late layout (images, fonts) has settled — unless the
+     visitor has already started scrolling themselves */
+  window.addEventListener('load', restore);
 })();
 </script>
 </body>

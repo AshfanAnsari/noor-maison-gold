@@ -34,6 +34,33 @@
   .nb-links a{font-size:13px;font-weight:500;letter-spacing:.03em;color:#5d4517;text-decoration:none;transition:color .3s ease}
   .nb-links a:hover{color:#2e2010}
   .nb-links a.on{color:#2e2010;font-weight:700}
+  /* ---------- GooeyNav ball — vanilla port of React Bits GooeyNav ----------
+     Credit: behaviour ported from the React Bits GooeyNav component
+     (~/workspace/library/web-libs/react-bits/.../GooeyNav/GooeyNav.jsx);
+     the original renders a WebGL SDF "goo" field — this port gets the
+     same visible behaviour with the classic SVG-goo trick + springs:
+       · a molten-gold BALL (a pill) rests behind the active link;
+       · a smaller BLOB chases it on a lazier spring — while the ball
+         flies, the blob lags, and the SVG filter (feGaussianBlur +
+         alpha-contrast feColorMatrix, #nm-goo in the markup) melts the
+         two shapes together, so the ball stretches like liquid;
+       · when the ball lands, a burst of small gold droplets fires.
+     The ball/blob/particles live in .goo (pointer-events:none, behind
+     the links); the links stay fully clickable and navigation is
+     unchanged. All motion is transform/opacity. With
+     prefers-reduced-motion the ball simply rests under the active
+     link — no glide, no particles (handled in the script).
+     NOTE: the centre links are display:none under 900px in this
+     design (the phone tab bar takes over), so the ball is a
+     wide-screen treatment — nothing is added or changed on phone. */
+  [data-goo-nav]{position:relative}
+  [data-goo-nav] a{position:relative;z-index:1}
+  [data-goo-nav] a.goo-on{color:#ffedbe}
+  .goo{position:absolute;inset:0;z-index:0;pointer-events:none;filter:url(#nm-goo)}
+  .goo-ball,.goo-blob{position:absolute;left:0;top:0;border-radius:999px;background:radial-gradient(120% 130% at 30% 20%,#e6c87c 0%,#a37f2c 45%,#7c5a1e 78%,#5d4517 100%);will-change:transform}
+  .goo-ball{width:104px;height:32px;margin:-16px 0 0 -52px;box-shadow:inset 0 1px 2px rgba(255,246,218,.8),inset 0 -3px 6px rgba(46,32,16,.45)}
+  .goo-blob{width:20px;height:20px;margin:-10px 0 0 -10px}
+  .goo-p{position:absolute;left:0;top:0;border-radius:50%;pointer-events:none;will-change:transform,opacity}
   .nb-right{display:flex;align-items:center;gap:9px;flex-shrink:0}
   .nb-cta{background:#3a2a12;color:#ecd28a;border-radius:999px;padding:11px 19px;font-size:12.5px;font-weight:700;letter-spacing:.03em;text-decoration:none;white-space:nowrap}
   .nb-search{width:39px;height:39px;border-radius:50%;border:1px solid rgba(58,42,18,.4);background:rgba(255,248,230,.35);color:#3a2a12;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
@@ -53,6 +80,9 @@
   .sec-title{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(34px,4.6vw,58px);line-height:1.05}
   .sec-note{color:var(--muted);font-size:11px;letter-spacing:.28em;text-transform:uppercase;white-space:nowrap}
   .ex-sub{color:#57431f;font-size:15.5px;line-height:1.65;max-width:56ch;margin-bottom:36px}
+  /* the category filter's "See all pieces" link (Addition 4) — the
+     page's deep foil tone, not the browser's default blue */
+  .ex-sub a{color:#7c5a1e;text-decoration:underline;text-underline-offset:3px}
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
   .prod{background:var(--paper);color:var(--paper-ink);border-radius:var(--tile-r);overflow:hidden;scroll-margin-top:26px;transition:box-shadow .5s ease}
   .prod.flash{box-shadow:0 0 0 2px var(--ink),0 0 0 6px rgba(58,42,18,.22)}
@@ -219,6 +249,15 @@
 </style>
 </head>
 <body>
+  <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
+       blur + alpha-contrast melts the ball and its trailing blob into
+       one liquid shape. Referenced by .goo on every page's nav. -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="nm-goo" x="-40%" y="-160%" width="180%" height="420%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/>
+    </filter>
+  </defs></svg>
   <!-- Offers marquee (all pages): the two .mq-seq spans must stay
        IDENTICAL — the loop wraps at exactly one sequence width.
        Offers text only; always edit both spans together. -->
@@ -231,7 +270,11 @@
   <header class="ex-top">
     <nav class="navbar" aria-label="Main">
       <a class="nb-brand" href="index.html">NOOR MAISON<span class="by"> BY SABA</span></a>
-      <div class="nb-links">
+      <div class="nb-links" data-goo-nav>
+        <!-- GooeyNav ball (decorative, ported from React Bits — see
+             the CSS note): .goo holds the gold ball + trailing blob
+             behind the links; the .on link is where it rests. -->
+        <span class="goo" aria-hidden="true"><span class="goo-ball"></span><span class="goo-blob"></span></span>
         <a href="index.html">Home</a>
         <a href="index.html#collection">The Collection</a>
         <a href="explore.html" class="on">Explore</a>
@@ -527,6 +570,93 @@
 </script>
 
 <script>
+/* Category filter (Addition 4, 2026-11-27): explore.html?cat=<slug> shows
+   ONLY that category — across the catalogue AND the home page's own pieces
+   (prod-*, gold-*, turk-* from product.html). The home Categories cards
+   link here. No ?cat (or an unknown slug) = the page behaves exactly as
+   before: this script does nothing at all.
+   How it works: catalogue cards already on the page are shown/hidden by
+   their category line; home pieces get a card built here, in the same
+   markup pattern, BEFORE the order script and the photo-tap script below
+   run — so their Order buttons and photo taps are wired by those scripts
+   exactly like a catalogue card's (the card itself is the order record).
+   prod-6 (Zari Hasli) is out of stock: its card carries a disabled
+   "Out of stock" button with no data-order, same as everywhere else. */
+(function(){
+  var slug = new URLSearchParams(location.search).get('cat');
+  var CATS = {
+    'rings':         { title: 'Rings',         test: function(m){ return m.indexOf('Ring') > -1; } },
+    'sapphire':      { title: 'Sapphire',      test: function(m){ return m.indexOf('Sapphire') > -1; } },
+    'necklace-sets': { title: 'Necklace Sets', test: function(m){ return m.indexOf('Necklace Set') > -1; } },
+    'earrings':      { title: 'Earrings',      test: function(m){ return m === 'Earrings'; } }
+  };
+  var cat = CATS[slug]; if(!cat) return;
+
+  /* the home page's own pieces (same names/categories/photos as their
+     product.html records) */
+  var HOME = [
+    ['prod-1','The Clover Ring','Sapphire \u00B7 Ring','assets-stock/site-01.webp','The Clover Ring — gold clover ring with a blue centre stone'],
+    ['prod-2','Emerald-Cut Ring','Sapphire \u00B7 Ring','assets-stock/site-02.webp','Emerald-Cut Ring — emerald-cut blue stone in a crystal halo on a gold band'],
+    ['prod-3','Paisley Pearl Set','Necklace Set','assets-stock/site-08.webp','Paisley Pearl Set — paisley pendant necklace with pearls, with matching earrings'],
+    ['prod-4','Mint Leaf Set','Necklace Set','assets-stock/site-04.webp','Mint Leaf Set — mint-green leaf necklace with matching earrings'],
+    ['prod-5','Gulposh Pendant Set','Necklace Set','assets-stock/site-03.webp','Gulposh Pendant Set — floral pendant necklace in pink and gold, with matching earrings'],
+    ['prod-6','Zari Hasli Set','Necklace Set','assets-stock/site-05.webp','Zari Hasli Set — traditional gold hasli collar necklace with matching earrings'],
+    ['prod-7','Multicolour Floral Set','Necklace Set','assets-stock/site-09.webp','Multicolour Floral Set — necklace of multicolour floral stones, with matching earrings'],
+    ['prod-8','Pastel Chandeliers','Earrings','assets-stock/site-06.webp','Pastel Chandeliers — pastel chandelier earrings in pink, mint and gold'],
+    ['prod-9','Amethyst Jhumkas','Earrings','assets-stock/site-07.webp','Amethyst Jhumkas — purple amethyst jhumka earrings with gold bells'],
+    ['gold-1','Round Pendant Set','Gold Plated \u00B7 Necklace Set','assets-stock/site-gold-02.webp','Round Pendant Set — round gold pendant necklace with matching earrings'],
+    ['gold-2','Panel Pendant Set','Gold Plated \u00B7 Necklace Set','assets-stock/site-gold-01.webp','Panel Pendant Set — necklace of gold panels on a red mannequin, with matching earrings'],
+    ['gold-3','Stone-Link Chain','Gold Plated \u00B7 Necklace','assets-stock/site-gold-03.webp','Stone-Link Chain — gold chain necklace of stone-set links on a blue velvet bust'],
+    ['turk-1','Royal Purple','Turkish Bracelet','assets-stock/site-turk-01.webp','Royal Purple — Turkish bracelet with purple oval stones in gold druzy cups on red silk'],
+    ['turk-2','Honey Amber','Turkish Bracelet','assets-stock/site-turk-02.webp','Honey Amber — Turkish bracelet with yellow stones in gold druzy cups on red silk'],
+    ['turk-3','Deep Red','Turkish Bracelet','assets-stock/site-turk-03.webp','Deep Red — Turkish bracelet with red oval stones in gold druzy cups on red silk'],
+    ['turk-4','Teal','Turkish Bracelet','assets-stock/site-turk-04.webp','Teal — Turkish bracelet with teal rectangular stones in gold druzy cups on red silk'],
+    ['turk-5','Blush Crystal','Turkish Bracelet','assets-stock/site-turk-05.webp','Blush Crystal — Turkish bracelet with blush mosaic ovals in gold druzy cups on red silk']
+  ];
+
+  var grid = document.querySelector('#catalogue .grid'); if(!grid) return;
+  var shown = 0;
+
+  /* catalogue cards: show only the ones in this category */
+  grid.querySelectorAll('.prod').forEach(function(card){
+    var meta = card.querySelector('.meta p');
+    var ok = meta && cat.test(meta.textContent.trim());
+    card.style.display = ok ? '' : 'none';
+    if(ok) shown++;
+  });
+
+  /* home pieces: build a card for each one in this category */
+  HOME.forEach(function(h){
+    if(!cat.test(h[2])) return;
+    var art = document.createElement('article');
+    art.className = 'prod rv in'; art.id = h[0];
+    var btn = (h[0] === 'prod-6')
+      ? '<button type="button" class="ord-btn" disabled>Out of stock</button>'
+      : '<button type="button" class="ord-btn" data-order="' + h[0] + '">Order</button>';
+    var ph = document.createElement('div');
+    ph.className = 'ph'; ph.setAttribute('data-preview', h[0]);
+    var img = document.createElement('img');
+    img.src = h[3]; img.alt = h[4]; img.loading = 'lazy'; img.decoding = 'async';
+    ph.appendChild(img);
+    var meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.innerHTML = '<h3>' + h[1] + '</h3><p>' + h[2] + '</p>' + btn;
+    art.appendChild(ph); art.appendChild(meta);
+    grid.appendChild(art);
+    shown++;
+  });
+
+  /* heading: category name + count + the way back to everything */
+  var h1 = document.querySelector('#catalogue .sec-title');
+  if(h1) h1.textContent = cat.title;
+  var note = document.querySelector('#catalogue .sec-note');
+  if(note) note.textContent = shown + (shown === 1 ? ' piece' : ' pieces');
+  var sub = document.querySelector('#catalogue .ex-sub');
+  if(sub) sub.innerHTML = 'You are seeing only the ' + cat.title + '. <a href="explore.html"><strong>See all pieces \u2192</strong></a>';
+  document.title = cat.title + ' \u2014 Noor Maison by Saba';
+})();
+</script>
+<script>
 /* website ordering — the home page's order script, unchanged */
 (function(){
   var sheet = document.getElementById('ordSheet'), listSheet = document.getElementById('myOrders');
@@ -590,6 +720,109 @@
       location.href = 'product.html?p=' + ph.dataset.preview;
     });
   });
+})();
+</script>
+
+<script>
+/* GooeyNav ball — vanilla port of React Bits' GooeyNav (see the CSS
+   note for the mechanism + credit). The ball rests under the active
+   link (.on); hovering/focusing another link springs it across, the
+   trailing blob melting into it via the #nm-goo SVG filter, and a
+   burst of gold droplets fires when it lands or is tapped.
+   Decorative only: .goo has pointer-events:none and navigation is
+   unchanged. prefers-reduced-motion: static rest position, no
+   glide, no particles. */
+(function(){
+  var nav = document.querySelector('[data-goo-nav]');
+  if(!nav) return;
+  var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+  var goo = nav.querySelector('.goo'), ball = nav.querySelector('.goo-ball'), blob = nav.querySelector('.goo-blob');
+  if(!links.length || !goo || !ball || !blob) return;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BW = 104, BH = 32; /* ball layout size from the CSS — all sizing is transform scale */
+  var active = 0;
+  links.forEach(function(a, i){ if(a.classList.contains('on')) active = i; });
+  var rest = active, target = active, ready = false, landed = true;
+  var cx = 0, cy = 0, sx = 1, sy = 1, vx = 0, vy = 0, vsx = 0, vsy = 0;
+  var tx = 0, ty = 0, tsx = 1, tsy = 1, bcx = 0, bvx = 0;
+  var raf = 0, last = 0;
+
+  function box(i){
+    var a = links[i];
+    return { x: a.offsetLeft + a.offsetWidth / 2, y: a.offsetTop + a.offsetHeight / 2,
+             sx: (a.offsetWidth + 18) / BW, sy: (a.offsetHeight + 10) / BH };
+  }
+  function paint(){
+    ball.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ')';
+    var sp = Math.min(1, Math.abs(vx) / 2400);
+    blob.style.transform = 'translate(' + bcx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + (1 + sp * 1.5).toFixed(3) + ',' + (1 + sp * 0.8).toFixed(3) + ')';
+  }
+  function aim(i, snap){
+    var b = box(i);
+    tx = b.x; ty = b.y; tsx = b.sx; tsy = b.sy;
+    if(snap){ cx = tx; cy = ty; sx = tsx; sy = tsy; bcx = tx; vx = vy = vsx = vsy = bvx = 0; paint(); }
+  }
+  var SHADES = ['#e6c87c', '#c9a24a', '#a37f2c', '#7c5a1e', '#ffedbe'];
+  function burst(x, y){
+    if(reduced) return;
+    for(var i = 0; i < 12; i++){
+      var p = document.createElement('span');
+      p.className = 'goo-p';
+      var s = 3 + Math.random() * 4;
+      p.style.width = s + 'px'; p.style.height = s + 'px';
+      p.style.margin = (-s / 2) + 'px 0 0 ' + (-s / 2) + 'px';
+      p.style.background = SHADES[i % SHADES.length];
+      goo.appendChild(p);
+      var ang = Math.random() * Math.PI * 2, dist = 16 + Math.random() * 30;
+      var dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist * 0.7 - 6;
+      var anim = p.animate([
+        { transform: 'translate(' + x + 'px,' + y + 'px)', opacity: 1 },
+        { transform: 'translate(' + (x + dx).toFixed(1) + 'px,' + (y + dy + 14).toFixed(1) + 'px)', opacity: 0 }
+      ], { duration: 480 + Math.random() * 320, easing: 'cubic-bezier(.17,.67,.35,1)' });
+      anim.onfinish = (function(el){ return function(){ el.remove(); }; })(p);
+    }
+  }
+  function frame(now){
+    raf = 0;
+    var dt = Math.min(0.032, (now - last) / 1000 || 0.016); last = now;
+    var h = dt / 2, n;
+    for(n = 0; n < 2; n++){
+      vx += ((tx - cx) * 170 - vx * 19) * h; cx += vx * h;
+      vy += ((ty - cy) * 170 - vy * 19) * h; cy += vy * h;
+      vsx += ((tsx - sx) * 210 - vsx * 17) * h; sx += vsx * h;
+      vsy += ((tsy - sy) * 210 - vsy * 17) * h; sy += vsy * h;
+      bvx += ((cx - bcx) * 60 - bvx * 11) * h; bcx += bvx * h;
+    }
+    paint();
+    var settled = Math.abs(tx - cx) < 0.4 && Math.abs(vx) < 25 && Math.abs(tsx - sx) < 0.01 && Math.abs(cx - bcx) < 0.6;
+    if(Math.abs(tx - cx) > 6) landed = false;
+    if(settled && !landed){ landed = true; burst(cx, cy); }
+    if(!settled) raf = requestAnimationFrame(frame);
+  }
+  function wake(){ if(!raf && !reduced){ last = performance.now(); raf = requestAnimationFrame(frame); } }
+  function go(i){
+    target = i;
+    links.forEach(function(a, k){ a.classList.toggle('goo-on', k === i); });
+    aim(i, reduced || !ready);
+    if(!reduced && ready) wake();
+  }
+  function place(){
+    if(!nav.getBoundingClientRect().width) return; /* centre links hidden in this layout — nothing to do */
+    ready = true;
+    links.forEach(function(a, k){ a.classList.toggle('goo-on', k === target); });
+    aim(target, true);
+  }
+  links.forEach(function(a, i){
+    a.addEventListener('pointerover', function(){ go(i); });
+    a.addEventListener('focus', function(){ go(i); });
+    a.addEventListener('click', function(){ rest = i; var b = box(i); burst(b.x, b.y); });
+  });
+  nav.addEventListener('pointerleave', function(){ go(rest); });
+  nav.addEventListener('focusout', function(e){ if(!nav.contains(e.relatedTarget)) go(rest); });
+  window.addEventListener('resize', place);
+  window.addEventListener('load', place);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+  place();
 })();
 </script>
 </body>
