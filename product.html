@@ -207,6 +207,10 @@
   .sim-card{flex:0 0 128px;text-decoration:none;color:var(--paper-ink)}
   .sim-card img{width:128px;height:150px;object-fit:cover;border-radius:12px;display:block;background:#efe6cf}
   .sim-card span{display:block;margin-top:5px;font-size:13px;font-weight:600;line-height:1.35}
+  .sim-card .sim-price{font-weight:400;font-size:13px;margin-top:2px}
+  .sim-card .sim-price b{font-weight:800}
+  .sim-card .sim-price s{color:var(--paper-mut)}
+  .sim-card .sim-price em{font-style:normal;color:#1a7f37;font-weight:700}
 
   /* sticky bottom bar (the Flipkart signature): light TALK TO SABA in the
      Add-to-Cart slot, solid ORDER in the Buy-Now slot. It replaces BOTH
@@ -1080,6 +1084,21 @@ var PRODUCTS = {
     var sp = document.createElement('span');
     sp.textContent = r.querySelector('h3').textContent;
     a.appendChild(im); a.appendChild(sp);
+    /* listing pattern (2026-11-27): a price under the name, but ONLY
+       when Saba's real price for the piece is in NM_PAY — plain
+       price alone, or struck MRP + % off when a genuine MRP exists */
+    var sv = (window.NM_PAY && NM_PAY.prices && NM_PAY.prices[k]);
+    if (sv){
+      var sPrice = (typeof sv === 'number') ? sv : sv.price;
+      var sMrp = (typeof sv === 'object') ? sv.mrp : null;
+      if (sPrice){
+        var pr = document.createElement('span');
+        pr.className = 'sim-price';
+        pr.innerHTML = '<b>\u20B9' + Number(sPrice).toLocaleString('en-IN') + '</b>' +
+          ((sMrp && sMrp > sPrice) ? ' <s>\u20B9' + Number(sMrp).toLocaleString('en-IN') + '</s> <em>' + Math.round((1 - sPrice / sMrp) * 100) + '% off</em>' : '');
+        a.appendChild(pr);
+      }
+    }
     sim.appendChild(a);
   });
 
