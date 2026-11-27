@@ -557,21 +557,44 @@
   .sm-inputrow, .sm-row{border-color:rgba(58,42,18,.14)}
   /* footer hairline */
   .foot{border-top:1px solid rgba(58,42,18,.22)}
-/* ---- phone bottom tab bar (Apple/iOS style, user 2026-11-26) ---- */
+/* ---- phone bottom tab bar (Flipkart pattern, gold skin) ----
+   Redesigned 2026-11-27; the identical component lives on home,
+   explore and nails (edit all three together). A clean light bar
+   fixed to the bottom edge with five EQUAL tabs — icon over a small,
+   always-visible label. The old bar was a floating gold pill whose
+   first tab was a wide logo blob (a script "S" + the NOOR MAISON
+   wordmark crammed into the pill); the wordmark already lives in the
+   top navbar, so Home is a normal home-icon tab now and every tab
+   gets the same width and rhythm.
+   Anatomy: cream bar (#fffdf6), hairline top border, soft upward
+   shadow. Bar height = 62px + the phone's safe-area inset (the inset
+   sits in the bar's bottom padding, so the visible bar is 62px on
+   every phone). The Talk to Saba FAB parks at one fixed offset above
+   it — 63px bar (62 + its 1px hairline border) + 14px gap = 77px —
+   on all three pages, and no
+   longer drops down when the bar auto-hides (body.bar-hide, in the
+   scroll-behaviour block further down, slides the bar away only).
+   Active tab = the page you are on: gold-FILLED icon, deep-gold bold
+   label, faint gold wash behind the tab; inactive tabs are muted
+   bronze outlines. Cart's badge counts this visitor's saved orders
+   (localStorage nm_orders) — see the tab-bar script. */
   .tabbar{display:none}
   .set-sheet{display:none}
   @media (max-width:760px){
-    body{padding-bottom:calc(128px + env(safe-area-inset-bottom))}
-    .foot{padding-bottom:calc(116px + env(safe-area-inset-bottom))}
-    .talk-fab{bottom:calc(82px + env(safe-area-inset-bottom))}
-    .tabbar{display:flex;position:fixed;left:12px;right:12px;bottom:calc(8px + env(safe-area-inset-bottom));z-index:80;background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);border:1px solid rgba(58,42,18,.28);border-radius:999px;box-shadow:0 14px 34px rgba(58,42,18,.25);padding:5px}
-    .tabbar .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;padding:5px 0 3px;border-radius:999px;color:rgba(58,42,18,.62);text-decoration:none;font-family:'Manrope',sans-serif;-webkit-tap-highlight-color:transparent;cursor:pointer;background:none;border:none}
-    .tabbar .tab svg{width:24px;height:24px;display:block}
-    .tabbar .tab .tl{font-size:10px;font-weight:600;letter-spacing:.02em;line-height:1.1}
-    .tabbar .tab.on{color:#2e2010;background:rgba(255,248,230,.48)}
-    .tabbar .tab[data-tab="home"] .tl{font-family:'Italiana',serif;font-size:12.5px;letter-spacing:.05em;font-weight:400}
-    .tabbar .tab .sym{font-family:'Great Vibes',cursive;font-size:28px;line-height:24px;height:24px;background:linear-gradient(100deg,#54401e,#7c5a1e 45%,#a37f2c 60%,#54401e);-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 2px}
-    .tabbar .tab:not(.on) .sym{opacity:.45}
+    body{padding-bottom:calc(80px + env(safe-area-inset-bottom))}
+    .foot{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+    .talk-fab{bottom:calc(77px + env(safe-area-inset-bottom))}
+    .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:80;background:#fffdf6;border-top:1px solid rgba(58,42,18,.16);box-shadow:0 -8px 28px rgba(58,42,18,.12);padding:6px 2px calc(6px + env(safe-area-inset-bottom));transition:transform .38s cubic-bezier(.22,1,.36,1)}
+    body.bar-hide .tabbar{transform:translateY(calc(100% + 16px))}
+    .tabbar .tab{flex:1 1 0;min-width:0;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 0 3px;border-radius:12px;color:rgba(58,42,18,.55);text-decoration:none;font-family:'Manrope',sans-serif;-webkit-tap-highlight-color:transparent;cursor:pointer;background:none;border:none}
+    .tabbar .tab .tic{position:relative;display:block;line-height:0}
+    .tabbar .tab svg{width:23px;height:23px;display:block}
+    .tabbar .tab .tl{font-size:10.5px;font-weight:600;letter-spacing:.01em;line-height:1.15;white-space:nowrap}
+    .tabbar .tab.on{color:#8a6420;background:rgba(201,162,74,.14)}
+    .tabbar .tab.on svg{fill:#c9a24a}
+    .tabbar .tab.on .tl{font-weight:800;color:#8a6420}
+    .tabbar .tab .bdg{position:absolute;top:-5px;right:-10px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;background:#c9a24a;color:#2e2010;border:1.5px solid #fffdf6;font-size:9.5px;font-weight:800;line-height:13px;text-align:center}
+    .tabbar .tab .bdg[hidden]{display:none}
     .set-sheet{display:block;position:fixed;inset:0;z-index:120;pointer-events:none}
     .set-sheet .scrim{position:absolute;inset:0;background:rgba(12,10,7,.45);opacity:0;transition:opacity .32s ease}
     .set-sheet .panel{position:absolute;left:0;right:0;bottom:0;background:#faf6ee;border-radius:22px 22px 0 0;padding:12px 18px calc(16px + env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .38s cubic-bezier(.22,1,.36,1);color:#1a1712}
@@ -650,7 +673,7 @@
 
   /* ---- footer: portfolio ending (user, 2026-11-26) ---- */
   .foot{text-align:center;background:transparent;border-top:none;box-shadow:none;padding:34px 20px 44px}
-  @media (max-width:760px){ .foot{padding-bottom:calc(116px + env(safe-area-inset-bottom))} }
+  @media (max-width:760px){ .foot{padding-bottom:calc(88px + env(safe-area-inset-bottom))} }
   .foot .foot-c{font-size:14px;color:#6d5836}
   .foot .foot-l{margin-top:10px;font-size:14px;color:#6d5836}
   .foot .foot-l a{color:inherit;text-decoration:none}
@@ -813,13 +836,12 @@
     .offer-slide.prize-gift::after{animation:none}
   }
 
-  /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ---- */
-  @media (max-width:760px){
-    .tabbar{transition:transform .38s cubic-bezier(.22,1,.36,1)}
-    body.bar-hide .tabbar{transform:translateY(calc(100% + 18px + env(safe-area-inset-bottom)))}
-    .talk-fab{transition:bottom .38s cubic-bezier(.22,1,.36,1)}
-    body.bar-hide .talk-fab{bottom:calc(18px + env(safe-area-inset-bottom))}
-  }
+  /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ----
+     The transform itself lives with the tab bar component above
+     (body.bar-hide .tabbar). The FAB used to drop to the bottom when
+     the bar hid; since the 2026-11-27 redesign it keeps its one fixed
+     offset above the bar's place, so it never jumps or lands on a
+     card's Order button. */
 
   .endpanel{background:linear-gradient(180deg,#d6bf95,#c8ae84 34%,#c8ae84);position:relative}
   .endpanel .foot-c{color:#57431f}
@@ -952,8 +974,8 @@
       <div class="tile" id="tileT">
         <div class="t-in">
           <div class="rule t-line"></div>
-          <h3 class="t-line">Crafted to sparkle,<br>made to last.</h3>
-          <p class="t-line">92.5 sterling silver with Swarovski stones.<span class="opt"> Made for daily wear — in water too.</span> Never turns black.</p>
+          <h3 class="t-line">Korean imported,<br>hand-picked pieces.</h3>
+          <p class="t-line">Every piece, hand-picked.<span class="opt"> Anti-tarnish shine</span> that stays bright.</p>
         </div>
       </div>
       <div class="tile" id="tileD"><div class="inner"><img src="assets-stock/tile-d.webp" alt="Paisley pearl necklace set on royal blue velvet"></div></div>
@@ -970,9 +992,9 @@
       <div class="tile" id="tileP2"><div class="inner"><img src="assets-stock/tile-p2.webp" alt="Mint leaf and pearl necklace set on emerald velvet"></div></div>
       <div class="tile" id="tileG">
         <div class="g-in">
-          <div class="g-big">925</div>
-          <h4>Hallmarked sterling silver</h4>
-          <p>Never turns black. Wear it in water — wear it every day.</p>
+          <div class="g-big">24/7</div>
+          <h4>Anti-tarnish shine</h4>
+          <p>Stays bright — wear it every day.</p>
         </div>
       </div>
       <div class="tile" id="tileW"><div class="inner"><img src="assets-stock/tile-d.webp" alt="Paisley pearl necklace set as a display backdrop"></div>
@@ -1647,14 +1669,17 @@
   });
 })();
 </script>
-<!-- phone bottom tab bar -->
+<!-- phone bottom tab bar (Flipkart pattern, gold skin — redesigned
+     2026-11-27): five equal icon+label tabs; the old logo-blob first
+     tab is gone (the wordmark lives in the top navbar). The .on tab
+     is this page. Cart's badge counts saved orders (nm_orders) and
+     is painted by the tab-bar script. -->
   <nav class="tabbar" aria-label="Bottom">
-    <a class="tab on" data-tab="home" href="#stage"><span class="sym" aria-hidden="true">S</span><span class="tl">Noor Maison</span></a>
-    <a class="tab" data-tab="explore" href="explore.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M15.6 8.4l-2.1 4.9-4.9 2.1 2.1-4.9z"/></svg><span class="tl">Explore</span></a>
-    <!-- Nails tab (added 2026-11-27): nails.html is a shell for now; products later. -->
-    <a class="tab" data-tab="nails" href="nails.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5h4V9h-4z"/><path d="M9.4 9h5.2c1 1.3 1.6 2.8 1.6 4.4V18a2.9 2.9 0 0 1-2.9 2.9h-2.6A2.9 2.9 0 0 1 7.8 18v-4.6c0-1.6.6-3.1 1.6-4.4z"/></svg><span class="tl">Nails</span></a>
-    <button type="button" class="tab" data-tab="cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 8h13.6l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H8.1a1.8 1.8 0 0 1-1.8-1.6z"/><path d="M8.6 10V6.8a3.4 3.4 0 0 1 6.8 0V10"/></svg><span class="tl">Cart</span></button>
-    <button class="tab" data-tab="settings" type="button" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 8h8.4M18.8 8H20M4 16h2.6M13 16h7"/><circle cx="15.4" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg><span class="tl">Settings</span></button>
+    <a class="tab on" data-tab="home" href="#stage"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.6 11.4 12 4.9l7.4 6.5"/><path d="M6.3 9.9V19a1 1 0 0 0 1 1h9.4a1 1 0 0 0 1-1V9.9"/><path d="M9.9 20v-4.5h4.2V20"/></svg></span><span class="tl">Home</span></a>
+    <a class="tab" data-tab="explore" href="explore.html"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.6"/><path d="M15.6 8.4l-2.1 4.9-4.9 2.1 2.1-4.9z"/></svg></span><span class="tl">Explore</span></a>
+    <a class="tab" data-tab="nails" href="nails.html"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5h4V9h-4z"/><path d="M9.4 9h5.2c1 1.3 1.6 2.8 1.6 4.4V18a2.9 2.9 0 0 1-2.9 2.9h-2.6A2.9 2.9 0 0 1 7.8 18v-4.6c0-1.6.6-3.1 1.6-4.4z"/></svg></span><span class="tl">Nails</span></a>
+    <button type="button" class="tab" data-tab="cart"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.2 8h13.6l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H8.1a1.8 1.8 0 0 1-1.8-1.6z"/><path d="M8.6 10V6.8a3.4 3.4 0 0 1 6.8 0V10"/></svg><span class="bdg" hidden>0</span></span><span class="tl">Cart</span></button>
+    <button class="tab" data-tab="settings" type="button" aria-haspopup="dialog"><span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 8h8.4M18.8 8H20M4 16h2.6M13 16h7"/><circle cx="15.4" cy="8" r="2.3"/><circle cx="9.6" cy="16" r="2.3"/></svg></span><span class="tl">Settings</span></button>
   </nav>
   <div class="set-sheet" id="setSheet" role="dialog" aria-modal="true" aria-label="Settings">
     <div class="scrim" data-close></div>
@@ -1956,31 +1981,38 @@
   })();
   </script>
   <script>
+  /* Phone tab bar wiring: Settings opens its sheet, Cart opens the
+     saved-orders sheet; the link tabs simply navigate. The active
+     tab is fixed by the page (the .on class in the markup — Home
+     here). The old scroll-spy that lit "Explore" over the Collection
+     section went away in the 2026-11-27 redesign: the Explore tab
+     navigates to another page, so lighting it on this one read as a
+     bug, and the Flipkart pattern this bar follows marks the PAGE.
+     Cart badge: counts this visitor's saved orders (localStorage
+     nm_orders), painted on load; the order script calls
+     window.__nmCartBadge() right after it writes nm_orders, so the
+     count is live the moment an order is placed on this page.
+     Hidden at zero — an empty badge would just be noise. */
   (function(){
     var bar = document.querySelector('.tabbar'); if(!bar) return;
-    var tabs = bar.querySelectorAll('.tab');
     var sheet = document.getElementById('setSheet');
-    function setOn(name){ tabs.forEach(function(x){ x.classList.toggle('on', x.dataset.tab === name); }); }
-    tabs.forEach(function(x){
+    bar.querySelectorAll('.tab').forEach(function(x){
       x.addEventListener('click', function(){
         if(x.dataset.tab === 'settings'){ sheet.classList.add('open'); }
         else if(x.dataset.tab === 'cart'){ if(window.__openOrders) window.__openOrders(); }
-        else setOn(x.dataset.tab);
       });
     });
     sheet.querySelector('[data-close]').addEventListener('click', function(){ sheet.classList.remove('open'); });
-    var secs = [['explore', document.getElementById('collection')], ['home', document.getElementById('stage')]];
-    var ticking = false;
-    window.addEventListener('scroll', function(){
-      if(ticking) return; ticking = true;
-      requestAnimationFrame(function(){
-        ticking = false;
-        if(sheet.classList.contains('open')) return;
-        var y = window.scrollY + window.innerHeight * 0.4, name = 'home';
-        for(var i = 0; i < secs.length; i++){ var el = secs[i][1]; if(el && el.offsetTop <= y) { name = secs[i][0]; break; } }
-        setOn(name);
-      });
-    }, {passive: true});
+    var bdg = bar.querySelector('.bdg');
+    function paintBadge(){
+      if(!bdg) return;
+      var n = 0;
+      try { n = JSON.parse(localStorage.getItem('nm_orders') || '[]').length; } catch(e){}
+      bdg.textContent = n;
+      bdg.hidden = !n;
+    }
+    window.__nmCartBadge = paintBadge;
+    paintBadge();
   })();
   </script>
 
@@ -2047,6 +2079,7 @@
     var all = orders();
     all.unshift({ oid: oid, pid: cur.id, name: cur.name, qty: qty, cname: name, phone: phone, addr: addr, note: note, when: new Date().toISOString() });
     try { localStorage.setItem('nm_orders', JSON.stringify(all)); } catch(e){}
+    if(window.__nmCartBadge) window.__nmCartBadge(); /* refresh the tab-bar Cart badge */
     document.getElementById('ordIdOut').textContent = oid;
     document.getElementById('ordSummary').textContent = cur.name + ' \u00d7 ' + qty + ' \u2014 for ' + name + ', ' + phone + '.';
     document.getElementById('ordForm').hidden = true;
