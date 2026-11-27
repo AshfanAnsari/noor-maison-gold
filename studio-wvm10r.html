@@ -84,10 +84,10 @@
   .bar-actions{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center}
 
   /* ---------- overview strip ---------- */
-  .overview{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; margin:1.15rem 0}
-  @media (min-width:640px){ .overview{gap:.85rem} }
+  .overview{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; margin:1.15rem 0}
+  @media (min-width:640px){ .overview{grid-template-columns:repeat(4,minmax(0,1fr)); gap:.85rem} }
   .overview-card{display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:.2rem;
-    min-height:44px; padding:.75rem .65rem; background:var(--panel); border:1px solid var(--border); border-radius:14px;
+    min-height:44px; padding:.75rem .65rem; background:var(--panel); border:1px solid var(--border); border-radius:16px;
     box-shadow:0 2px 10px rgba(138,100,32,.05); color:var(--ink); font-family:inherit; text-align:left; cursor:pointer;
     transition:border-color .18s ease,background-color .18s ease}
   @media (min-width:640px){ .overview-card{padding:.95rem 1.15rem} }
@@ -98,16 +98,17 @@
   @media (min-width:640px){ .overview-label{font-size:.85rem} }
 
   /* ---------- tabs (dashboard pills) ---------- */
-  .tabs{display:flex; gap:.5rem; margin:1.1rem 0; flex-wrap:wrap}
-  .tab{min-height:44px; background:var(--panel); color:var(--ink); border:1px solid var(--gold-mid); border-radius:999px;
-    padding:.55rem 1.2rem; font-weight:500; font-size:1rem; transition:background-color .18s ease,color .18s ease,border-color .18s ease}
-  .tab:hover{border-color:var(--gold); background:#fff}
-  .tab.on{background:var(--gold); color:#fff; border-color:var(--gold)}
+  .tabs{display:inline-flex; gap:2px; margin:1.1rem 0; flex-wrap:wrap; background:#fff;
+    border:1px solid var(--border); border-radius:999px; padding:4px; box-shadow:0 2px 10px rgba(138,100,32,.05)}
+  .tab{min-height:44px; background:transparent; color:var(--ink); border:none; border-radius:999px;
+    padding:.55rem 1.15rem; font-weight:500; font-size:1rem; transition:background-color .18s ease,color .18s ease}
+  .tab:hover{background:var(--bg)}
+  .tab.on{background:var(--gold); color:#fff}
   .tab .n{background:var(--danger); color:#fff; border-radius:999px; font-size:12px; padding:1px 7px; margin-left:5px; vertical-align:2px}
   .tab.on .n{background:#fff; color:var(--danger)}
 
   /* ---------- cards ---------- */
-  .card{background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:1.1rem 1.15rem;
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:1.1rem 1.15rem;
     margin:.85rem 0; box-shadow:0 2px 10px rgba(138,100,32,.05)}
   @media (min-width:640px){ .card{padding:1.25rem 1.35rem} }
   .card h3{font-family:'Cormorant Garamond',Georgia,serif; color:var(--gold); font-size:1.35rem; font-weight:600;
@@ -186,10 +187,11 @@
       <button class="overview-card" type="button" data-goto="products"><span class="overview-num" id="c-products">–</span><span class="overview-label">Pieces on your website</span></button>
       <button class="overview-card" type="button" data-goto="enquiries"><span class="overview-num" id="c-enq">–</span><span class="overview-label">New questions</span></button>
       <button class="overview-card" type="button" data-goto="orders"><span class="overview-num" id="c-ord">–</span><span class="overview-label">New orders</span></button>
+      <button class="overview-card" type="button" data-goto="products"><span class="overview-num" id="c-low">–</span><span class="overview-label">Pieces running low</span></button>
     </div>
 
     <nav class="tabs">
-      <button class="tab on" data-tab="home" type="button">Home</button>
+      <button class="tab on" data-tab="home" type="button">Overview</button>
       <button class="tab" data-tab="products" type="button">Pieces</button>
       <button class="tab" data-tab="enquiries" type="button">Questions<span class="n hide" id="n-enq"></span></button>
       <button class="tab" data-tab="orders" type="button">Orders<span class="n hide" id="n-ord"></span></button>
@@ -198,7 +200,8 @@
     <!-- HOME -->
     <section id="tab-home">
       <div class="card">
-        <h3>Welcome, Saba</h3>
+        <h3>Welcome back, Saba</h3>
+        <p id="greet-line" style="color:var(--ink); font-weight:500"></p>
         <p>
           <b>Pieces</b> — change a price, add photos, mark a piece finished, or add a new piece.<br>
           <b>Questions</b> — messages customers sent from the website.<br>
@@ -449,6 +452,15 @@ function renderCounts(){
   $('c-products').textContent = live;
   $('c-enq').textContent = newE;
   $('c-ord').textContent = newO;
+  var low = PRODUCTS.filter(function(p){ return p.stock != null && p.stock >= 1 && p.stock <= 4; }).length;
+  if($('c-low')) $('c-low').textContent = low;
+  if($('greet-line')){
+    var day = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long' });
+    var bits = [];
+    if(newO) bits.push(newO + (newO === 1 ? ' new order' : ' new orders'));
+    if(newE) bits.push(newE + (newE === 1 ? ' new question' : ' new questions'));
+    $('greet-line').textContent = 'Today is ' + day + '.' + (bits.length ? ' You have ' + bits.join(' and ') + '.' : ' Nothing new today — all quiet.');
+  }
   $('n-enq').textContent = newE; $('n-enq').classList.toggle('hide', newE === 0);
   $('n-ord').textContent = newO; $('n-ord').classList.toggle('hide', newO === 0);
 }
