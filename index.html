@@ -653,9 +653,9 @@
      STYLE NOTES: cream card + foil-gold accents reuse the order-sheet
      palette (#faf6ee panel, #8a6420 / #a37f2c golds, #3a2a12 ink).
      z-index 130 sits above the sheets (120) and tab bar (80); the
-     loader (200) is already gone when this opens. On phones (<=560px)
-     a card's photo becomes a band across its top so text never
-     squeezes. */
+     loader (200) is already gone when this opens. The two gift cards
+     are full-bleed PHOTO cards (see the "prize cards" CSS block below
+     .offer-foot); the other three cards are text-only. */
   .offer-pop{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center;padding:16px}
   .offer-pop.open{display:flex}
   .offer-scrim{position:absolute;inset:0;background:rgba(20,14,6,.55);backdrop-filter:blur(3px)}
@@ -682,12 +682,54 @@
   .offer-dot{width:7px;height:10px;border-radius:99px;border:none;padding:0;background:rgba(138,100,32,.32);cursor:pointer;transition:width .35s ease,background .35s ease}
   .offer-dot.on{width:22px;background:linear-gradient(90deg,#a37f2c,#e0c078)}
   .offer-foot{background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#2e2010;text-align:center;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;padding:11px 12px}
+  /* -- prize cards (FREE MIRROR + SURPRISE GIFT, upgraded 2026-11-27):
+     full-bleed photo faces, a level above the three text cards. Her
+     own Instagram offer-post photos fill the whole slide edge-to-edge
+     (assets/offer-mirror.webp / assets/offer-gift.webp, web-weight
+     crops of the masters in assets-src/); headline + threshold sit at
+     the bottom over a dark-gold scrim, and her logo rides at the top
+     over the photo — while a prize card is active the script toggles
+     .pz-on on .offer-card, which fades the shared header logo out so
+     the on-photo logo takes over. MIRROR gets a slow diagonal light
+     sweep (a shine pass every 4.8s). GIFT rests veiled (blur + gold
+     haze) and "unwraps" — sharpens over 1s — every time the carousel
+     lands on it (the script re-adds .revealing), with faint drifting
+     gold sparkles and a soft pulsing edge glow. Animations are
+     transform/opacity/filter only. Reduced-motion visitors get the
+     plain static photo: no sweep, sparkles, glow or veil. */
+  .offer-card .offer-logo{transition:opacity .35s ease}
+  .offer-card.pz-on .offer-logo{opacity:0}
+  .offer-slide.prize{position:relative;display:block;overflow:hidden;min-height:340px;background:#241a0c}
+  .prize-photo{position:absolute;inset:0}
+  .prize-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .prize-shade{position:absolute;inset:0;z-index:2;background:linear-gradient(180deg,rgba(26,18,6,.42) 0%,rgba(26,18,6,0) 30%,rgba(26,18,6,0) 48%,rgba(24,16,4,.52) 76%,rgba(20,13,3,.85) 100%)}
+  .prize-logowrap{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:5;padding:10px 22px 8px;border-radius:50%;background:radial-gradient(closest-side,rgba(28,19,5,.46),rgba(28,19,5,0) 74%)}
+  .prize-logo{width:104px;height:auto;display:block}
+  .prize-text{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:18px 26px 20px;text-align:center}
+  .prize-text .offer-h{color:#faf3e3;text-shadow:0 2px 14px rgba(20,13,3,.45)}
+  .prize-text .offer-rule{margin-left:auto;margin-right:auto;background:linear-gradient(90deg,transparent,#e6c87c,transparent)}
+  .prize-text .offer-line{color:#f1e5c8}
+  .prize-text .offer-line b{color:#e6c87c}
+  .prize-sweep{position:absolute;top:-12%;bottom:-12%;left:0;width:52%;z-index:3;pointer-events:none;background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,252,240,.16) 38%,rgba(255,252,240,.42) 50%,rgba(255,252,240,.16) 62%,rgba(255,255,255,0) 100%);transform:translateX(-130%) skewX(-16deg);animation:prizeSweep 4.8s ease-in-out infinite}
+  @keyframes prizeSweep{0%{transform:translateX(-130%) skewX(-16deg)}26%{transform:translateX(240%) skewX(-16deg)}100%{transform:translateX(240%) skewX(-16deg)}}
+  .prize-haze{position:absolute;inset:0;z-index:1;background:radial-gradient(120% 95% at 50% 38%,rgba(230,200,124,.4),rgba(163,127,44,.16) 55%,rgba(20,13,3,0) 82%)}
+  .offer-slide.prize-gift .prize-photo{filter:blur(13px) brightness(1.1) saturate(.94);transform:scale(1.05)}
+  .offer-slide.prize-gift.revealing .prize-photo{filter:blur(0) brightness(1) saturate(1);transform:scale(1);transition:filter 1s ease,transform 1s ease}
+  .offer-slide.prize-gift.revealing .prize-haze{opacity:0;transition:opacity 1s ease}
+  .offer-slide.prize-gift::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;box-shadow:inset 0 0 0 2px rgba(230,200,124,.5),inset 0 0 36px rgba(230,200,124,.22);animation:prizeGlow 2.8s ease-in-out infinite}
+  @keyframes prizeGlow{0%,100%{box-shadow:inset 0 0 0 2px rgba(230,200,124,.38),inset 0 0 26px rgba(230,200,124,.14)}50%{box-shadow:inset 0 0 0 2px rgba(230,200,124,.65),inset 0 0 44px rgba(230,200,124,.3)}}
+  .prize-sparkles{position:absolute;inset:0;z-index:3;pointer-events:none}
+  .sp{position:absolute;width:5px;height:5px;border-radius:50%;background:radial-gradient(circle,#ffe9ad 0%,rgba(230,200,124,.85) 45%,rgba(230,200,124,0) 72%);opacity:0;animation:spDrift 5.2s ease-in-out infinite}
+  @keyframes spDrift{0%{transform:translateY(10px) scale(.7);opacity:0}35%{opacity:.85}70%{opacity:.5}100%{transform:translateY(-26px) scale(1.05);opacity:0}}
   @media (max-width:560px){
     .offer-slide{flex-direction:column}
     .offer-visual{order:-1;flex:0 0 118px}
     .offer-main{padding:16px 20px 18px}
     .offer-logo{width:118px}
     .offer-head{padding-top:18px}
+    .offer-slide.prize{min-height:308px}
+    .prize-logo{width:88px}
+    .prize-text{padding:14px 20px 16px}
   }
   @media (max-height:500px){
     .offer-logo{width:96px}
@@ -697,6 +739,13 @@
   @media (prefers-reduced-motion: reduce){
     .offer-card{animation:none}
     .offer-track{transition:none}
+    .offer-card .offer-logo{transition:none}
+    .prize-sweep{display:none}
+    .sp{display:none}
+    .prize-haze{display:none}
+    .offer-slide.prize-gift .prize-photo{filter:none;transform:none}
+    .offer-slide.prize-gift.revealing .prize-photo{transition:none}
+    .offer-slide.prize-gift::after{animation:none}
   }
 
   /* ---- tab bar: hide on scroll down, show on scroll up (user via WhatsApp, 2026-11-26) ---- */
@@ -1562,9 +1611,19 @@
        the .offer-dot count in step. The seamless-loop clone of the
        first card is added by the script — never add it in markup.
        Photos: assets/logo-mark-sm.webp is a web-weight copy of
-       logo/logo-mark.png and assets/gift-box.webp of her gift-box photo
-       (masters untouched); both ship automatically through the assets/
-       pipeline in deploy/build_standalone.py. -->
+       logo/logo-mark.png (masters untouched); it ships automatically
+       through the assets/ pipeline in deploy/build_standalone.py.
+       PRIZE CARDS (upgraded 2026-11-27): the FREE MIRROR and SURPRISE
+       GIFT cards are full-bleed photo cards using Saba's own Instagram
+       offer post of 2026-11-20 (the carousel @noormaison_by_saba
+       published for this very offer). assets/offer-mirror.webp is the
+       post's hero graphic (the three pearl hand mirrors + her &#8377;999
+       badge); assets/offer-gift.webp is the post's gift-box photo (a
+       mirror being placed into its gift box — the post is entirely
+       about the mirror gift, so this is its only gift-box image; the
+       &#8377;1,499 gift itself is a surprise and is not pictured).
+       Masters sit untouched in assets-src/ (post-slide0/2.jpg); the
+       webp files are crop-to-fit + web-weight copies only. -->
   <div class="offer-pop" id="offerCards" role="dialog" aria-modal="true" aria-label="Current offers">
     <div class="offer-scrim" data-offer-close></div>
     <div class="offer-card">
@@ -1582,21 +1641,38 @@
               <p class="offer-line">On all orders above <b>&#8377;499</b></p>
             </div>
           </section>
-          <section class="offer-slide">
-            <div class="offer-main">
+          <section class="offer-slide prize prize-mirror">
+            <div class="prize-photo"><img src="assets/offer-mirror.webp" alt=""></div>
+            <div class="prize-shade" aria-hidden="true"></div>
+            <span class="prize-sweep" aria-hidden="true"></span>
+            <div class="prize-logowrap" aria-hidden="true"><img class="prize-logo" src="assets/logo-mark-sm.webp" alt=""></div>
+            <div class="prize-text">
               <h2 class="offer-h">FREE MIRROR</h2>
               <span class="offer-rule" aria-hidden="true"></span>
               <p class="offer-line">On orders above <b>&#8377;999</b></p>
             </div>
-            <div class="offer-visual"><img src="assets/gift-box.webp" alt="" style="object-position:50% 25%"></div>
           </section>
-          <section class="offer-slide">
-            <div class="offer-main">
+          <section class="offer-slide prize prize-gift">
+            <div class="prize-photo"><img src="assets/offer-gift.webp" alt=""></div>
+            <div class="prize-haze" aria-hidden="true"></div>
+            <div class="prize-shade" aria-hidden="true"></div>
+            <div class="prize-sparkles" aria-hidden="true">
+              <span class="sp" style="left:12%;top:62%"></span>
+              <span class="sp" style="left:24%;top:78%;animation-delay:.7s;animation-duration:5.8s"></span>
+              <span class="sp" style="left:38%;top:55%;animation-delay:1.5s;animation-duration:4.9s"></span>
+              <span class="sp" style="left:52%;top:72%;animation-delay:.3s;animation-duration:5.5s"></span>
+              <span class="sp" style="left:63%;top:58%;animation-delay:2s;animation-duration:6.1s"></span>
+              <span class="sp" style="left:74%;top:80%;animation-delay:1.1s;animation-duration:5s"></span>
+              <span class="sp" style="left:85%;top:60%;animation-delay:2.6s;animation-duration:5.7s"></span>
+              <span class="sp" style="left:44%;top:84%;animation-delay:3.1s;animation-duration:5.3s"></span>
+              <span class="sp" style="left:68%;top:38%;animation-delay:1.8s;animation-duration:6.4s"></span>
+            </div>
+            <div class="prize-logowrap" aria-hidden="true"><img class="prize-logo" src="assets/logo-mark-sm.webp" alt=""></div>
+            <div class="prize-text">
               <h2 class="offer-h">A SURPRISE GIFT</h2>
               <span class="offer-rule" aria-hidden="true"></span>
               <p class="offer-line">On orders above <b>&#8377;1,499</b></p>
             </div>
-            <div class="offer-visual"><img src="assets/gift-box.webp" alt="" style="object-position:50% 72%"></div>
           </section>
           <section class="offer-slide">
             <div class="offer-main">
@@ -1660,6 +1736,9 @@
     var clone = track.children[0].cloneNode(true);
     clone.setAttribute('aria-hidden', 'true');
     track.appendChild(clone);
+    var card = pop.querySelector('.offer-card');
+    var giftSlide = track.querySelector('.prize-gift');
+    var lastReal = 0;
     var idx = 0, timer = null, dragging = false, snapPending = false;
     var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function seen(){ try { return !!sessionStorage.getItem(FLAG); } catch(e){ return false; } }
@@ -1668,6 +1747,22 @@
       track.style.transform = 'translateX(' + (-idx * 100) + '%)';
       var real = ((idx % N) + N) % N;
       dots.forEach(function(d, i){ d.classList.toggle('on', i === real); });
+      /* prize cards (FREE MIRROR = 1, SURPRISE GIFT = 2): while one is
+         active, .pz-on fades the shared header logo out so the logo
+         riding on the photo takes over. Landing on the gift card
+         replays its "unwrap": dropping .revealing snaps the photo
+         back to veiled (no transition in the resting state), then
+         re-adding it transitions to sharp over 1s. lastReal stops a
+         drag that settles back onto the same card from re-firing it.
+         Reduced-motion visitors never get the veil (CSS) or the
+         replay (this check). */
+      card.classList.toggle('pz-on', real === 1 || real === 2);
+      if (giftSlide && real === 2 && lastReal !== 2 && !reduceMotion){
+        giftSlide.classList.remove('revealing');
+        void giftSlide.offsetWidth;
+        giftSlide.classList.add('revealing');
+      }
+      lastReal = real;
     }
     function snapHome(){ /* sitting on the clone: jump to real card 1 */
       track.classList.add('noanim'); idx = 0; paint();
