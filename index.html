@@ -834,8 +834,9 @@
   /* -- prize cards (FREE MIRROR + SURPRISE GIFT, upgraded 2026-11-27):
      full-bleed photo faces, a level above the three text cards. Her
      own Instagram offer-post photos fill the whole slide edge-to-edge
-     (assets/offer-mirror.webp / assets/offer-gift.webp, web-weight
-     crops of the masters in assets-src/); headline + threshold sit at
+     (assets/offer-mirror.webp for the mirror card; the gift card uses
+     assets/offer-gift-closed.webp — the same packing scene with the
+     box CLOSED, so the surprise stays a surprise); headline + threshold sit at
      the bottom over a dark-gold scrim, and her logo rides at the top
      over the photo — while a prize card is active the script toggles
      .pz-on on .offer-card, which collapses the shared header band to
@@ -1890,12 +1891,12 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
        offer post of 2026-11-20 (the carousel @noormaison_by_saba
        published for this very offer). assets/offer-mirror.webp is the
        post's hero graphic (the three pearl hand mirrors + her &#8377;999
-       badge); assets/offer-gift.webp is the post's gift-box photo (a
-       mirror being placed into its gift box — the post is entirely
-       about the mirror gift, so this is its only gift-box image; the
-       &#8377;1,499 gift itself is a surprise and is not pictured).
-       Masters sit untouched in assets-src/ (post-slide0/2.jpg); the
-       webp files are crop-to-fit + web-weight copies only. -->
+       badge); the SURPRISE GIFT card shows assets/offer-gift-closed.webp
+       — her packing scene re-shot with the box CLOSED and ribbon tied
+       (user, 2026-11-27: a surprise gift must not show what's inside;
+       the post's open-box photo, assets/offer-gift.webp, is NOT used
+       on the gift card anymore). Masters sit untouched in assets-src/
+       (post-slide0/2.jpg); the webp files are web-weight copies only. -->
   <div class="offer-pop" id="offerCards" role="dialog" aria-modal="true" aria-label="Current offers">
     <div class="offer-scrim" data-offer-close></div>
     <div class="offer-card">
