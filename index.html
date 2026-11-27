@@ -555,6 +555,24 @@
   .sm-overlay{background:rgba(46,32,16,.5)}
   .sm-panel{background:#f8eed6;border-color:rgba(58,42,18,.22);box-shadow:0 30px 80px rgba(46,32,16,.4)}
   .sm-inputrow, .sm-row{border-color:rgba(58,42,18,.14)}
+  /* search modal contrast pass (2026-11-27): the light panel kept the dark
+     theme's text colours (--ink is near-white), so typed text, chips and
+     hints were invisible on cream. All modal text is now explicit bronze
+     tones on the cream panel — gold family, readable at a glance. */
+  .sm-inputrow svg{color:#8a6420}
+  .sm-inputrow input{color:#3a2a12;caret-color:#8a6420}
+  .sm-inputrow input::placeholder{color:#7a6748}
+  .sm-inputrow kbd{color:#6d5836;border-color:rgba(58,42,18,.35)}
+  .sm-tag{color:#6d5836;border-color:rgba(58,42,18,.35)}
+  .sm-tag.on{background:#8a6420;color:#fff8ea;border-color:#8a6420}
+  .sm-group{color:#6d5836}
+  .sm-row{color:#3a2a12}
+  .sm-row.active{background:rgba(58,42,18,.09)}
+  .sm-row .mt{color:#7a6748}
+  .sm-row .mt .oos{color:#b0503f}
+  .sm-row .mt .low{color:#8a6420}
+  .sm-empty{color:#6d5836}
+  .sm-foot{color:#6d5836}
   /* footer hairline */
   .foot{border-top:1px solid rgba(58,42,18,.22)}
 /* ---- phone bottom tab bar (Flipkart pattern, gold skin) ----
