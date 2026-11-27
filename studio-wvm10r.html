@@ -148,6 +148,21 @@
           <b>Questions</b> — messages customers sent from the website.<br>
           <b>Orders</b> — orders customers placed. Change the order step as you pack and send.
         </p>
+        <button class="btn btn-line btn-small" id="pw-open" type="button" style="margin-top:12px">Set or change my password</button>
+      </div>
+      <div class="card hide" id="pw-card">
+        <h3 style="margin:0 0 6px">Set your password</h3>
+        <p style="margin:0 0 12px; color:var(--muted); font-size:14.5px">Choose a password for this page. Next time, open your studio with your email and this password.</p>
+        <div class="msg" id="pw-msg"></div>
+        <div class="field">
+          <label for="pw-1">New password</label>
+          <input id="pw-1" type="password" autocomplete="new-password" placeholder="At least 6 characters">
+        </div>
+        <div class="field">
+          <label for="pw-2">Type it again</label>
+          <input id="pw-2" type="password" autocomplete="new-password" placeholder="Same password again">
+        </div>
+        <button class="btn btn-gold" id="pw-btn" type="button">Save my password</button>
       </div>
     </section>
 
@@ -278,12 +293,44 @@ $('login-form').addEventListener('submit', function(ev){
 });
 $('signout').addEventListener('click', function(){ sb.auth.signOut(); });
 
+/* -------- password setting (invite / recovery landings + manual) --------
+   An invited user has NO password until she sets one here: the email link
+   signs her in once, and this card turns that one-time sign-in into a
+   password she can log in with forever. Shown automatically when the
+   email link says type=invite or type=recovery, and any time via the
+   "Set or change my password" button on Home. */
+var NM_HASH = location.hash || '';
+var NM_NEED_PW = /type=(invite|recovery)/.test(NM_HASH);
+if (/error_code=otp_expired|error=access_denied/.test(NM_HASH)) {
+  showMsg($('login-msg'), 'That email link is old or has expired. Please use the newest email we sent you. If you already set your password, just log in below.', false);
+}
+function nmShowPwCard(){
+  $('pw-card').classList.remove('hide');
+  $('pw-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(function(){ $('pw-1').focus(); }, 350);
+}
+$('pw-open').addEventListener('click', nmShowPwCard);
+$('pw-btn').addEventListener('click', function(){
+  var p1 = $('pw-1').value, p2 = $('pw-2').value;
+  if (p1.length < 6) { showMsg($('pw-msg'), 'Please choose a password with at least 6 characters.', false); return; }
+  if (p1 !== p2) { showMsg($('pw-msg'), 'The two passwords are not the same. Please type them again.', false); return; }
+  var btn = $('pw-btn'); btn.disabled = true; btn.textContent = 'Saving…';
+  sb.auth.updateUser({ password: p1 }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Save my password';
+    if (res.error) { showMsg($('pw-msg'), 'Something went wrong. Please try again.', false); return; }
+    NM_NEED_PW = false;
+    showMsg($('pw-msg'), 'Your password is saved. Next time, log in with your email and this password.', true);
+    setTimeout(function(){ $('pw-card').classList.add('hide'); }, 3000);
+  });
+});
+
 sb.auth.onAuthStateChange(function(_ev, session){
   if(session && session.user){
     $('view-login').classList.add('hide');
     $('view-app').classList.remove('hide');
     $('who').textContent = session.user.email;
     loadAll();
+    if (NM_NEED_PW) nmShowPwCard();
   } else {
     $('view-app').classList.add('hide');
     $('view-login').classList.remove('hide');
