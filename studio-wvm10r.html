@@ -154,6 +154,16 @@
       <input id="li-pass" type="password" autocomplete="current-password" required placeholder="Your password">
     </div>
     <button class="btn wide" type="submit" id="login-btn">Open my studio</button>
+    <p class="back-link" style="margin-top:.35rem"><a href="#" id="forgot-link">Forgot your password?</a></p>
+    <div id="reset-box" class="hide">
+      <p class="login-note" style="margin:1rem 0 .75rem">We will email you a link. Open the link in the email and set a new password.</p>
+      <div class="msg" id="reset-msg"></div>
+      <div class="field">
+        <label for="rs-email">Your email</label>
+        <input id="rs-email" type="email" placeholder="you@example.com">
+      </div>
+      <button class="btn wide" type="button" id="reset-btn">Email me the link</button>
+    </div>
     <p class="back-link"><a href="./">← Back to the shop</a></p>
   </form>
 </main>
@@ -340,6 +350,26 @@ $('login-form').addEventListener('submit', function(ev){
     });
 });
 $('signout').addEventListener('click', function(){ sb.auth.signOut(); });
+
+/* -------- forgot password (reset email) --------
+   Needed because an invited account has no password until one is
+   set: the recovery link lands back here with type=recovery and
+   the set-password card takes over (see NM_NEED_PW below). */
+$('forgot-link').addEventListener('click', function(ev){
+  ev.preventDefault();
+  $('reset-box').classList.toggle('hide');
+  if(!$('rs-email').value) $('rs-email').value = $('li-email').value;
+});
+$('reset-btn').addEventListener('click', function(){
+  var email = $('rs-email').value.trim();
+  if(!email){ showMsg($('reset-msg'), 'Please type your email first.', false); return; }
+  var btn = $('reset-btn'); btn.disabled = true; btn.textContent = 'Sending\u2026';
+  sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://noormaisonbysaba.com/studio-wvm10r' }).then(function(res){
+    btn.disabled = false; btn.textContent = 'Email me the link';
+    if(res.error){ showMsg($('reset-msg'), 'Something went wrong. Please try again.', false); return; }
+    showMsg($('reset-msg'), 'Email sent. Please check your inbox and open the newest email \u2014 it has your link.', true);
+  });
+});
 
 /* -------- password setting (invite / recovery landings + manual) --------
    An invited user has NO password until she sets one here: the email link
