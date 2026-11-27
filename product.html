@@ -330,6 +330,9 @@
   .ord-fine{margin-top:12px;font-size:12.5px;line-height:1.55;color:#6d6252}
   .ord-done-id{font-size:16px;margin-top:8px}
   .ord-done-sum{font-size:14px;line-height:1.55;color:#3d382e;margin-top:6px}
+  .ord-place.ord-ig{background:linear-gradient(100deg,#8a6420,#c9a24a);color:#fff8e6;text-decoration:none;display:block;text-align:center}
+  .ord-ig-note{font-size:12.5px;color:#6d6252;margin-top:8px;line-height:1.5;text-align:center}
+  .ord-ig-link{display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:#8a6420}
   .ord-item{padding:10px 0;border-top:.5px solid rgba(26,23,18,.12)}
   .ord-item b{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600}
   .ord-item p{font-size:13px;color:#6d6252;margin-top:2px;line-height:1.5}
@@ -702,7 +705,9 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
         <p class="ord-fine" id="ordPayNote"></p>
       </div>
       <p class="ord-fine">Saba will confirm your order, then you pay by UPI. Your order is saved under Cart &rarr; Your Orders.</p>
-      <button type="button" class="ord-place" id="ordDoneBtn">Done</button>
+      <a class="ord-place ord-ig" id="ordIgBtn" href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Send this order to Saba on Instagram</a>
+        <p class="ord-ig-note">Tap the button above — your order details are copied for you. Just paste them in the Instagram chat and press send.</p>
+        <button type="button" class="ord-place" id="ordDoneBtn">Done</button>
     </div>
   </div>
 </div>
@@ -1417,6 +1422,7 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
     /* live copy for Saba's Orders list (her database) — the phone
        copy above stays the fallback if this cannot send */
     if(window.NM_LIVE_POST) window.NM_LIVE_POST({ order_code: oid, product_id: cur.id, product_name: cur.name, qty: qty, amount: amt || null, name: name, phone: phone, address: addr + (note ? ' (Note: ' + note + ')' : '') });
+    igCopy({ oid: oid, name: cur.name, qty: qty, cname: name, phone: phone, addr: addr, note: note, amount: amt });
     document.getElementById('ordIdOut').textContent = oid;
     document.getElementById('ordSummary').textContent = cur.name + ' \u00d7 ' + qty + ' \u2014 for ' + name + ', ' + phone + '.';
     document.getElementById('ordForm').hidden = true;
@@ -1432,10 +1438,23 @@ if(window.__nmExtra){ for(var __k in window.__nmExtra){ PRODUCTS[__k] = window._
     } else { payBox.hidden = true; }
     document.getElementById('ordDone').hidden = false;
   });
+  /* Order -> Instagram: copy the order text, then the button/link
+     opens Saba's DM (Instagram cannot pre-fill a message). */
+  function igText(o){
+    var t = 'Hello Saba, I just placed an order on your website.\n\nOrder ID: ' + o.oid + '\nPiece: ' + o.name + ' x ' + o.qty;
+    if(o.amount) t += '\nAmount: ' + inr(o.amount);
+    t += '\n\nMy details:\nName: ' + (o.cname || '') + '\nPhone: ' + (o.phone || '') + '\nAddress: ' + (o.addr || '');
+    if(o.note) t += '\nNote: ' + o.note;
+    return t;
+  }
+  function igCopy(o){ try { if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(igText(o)); } catch(e){} }
+  var igBtn = document.getElementById('ordIgBtn');
+  if(igBtn) igBtn.addEventListener('click', function(){ var all = orders(); if(all.length) igCopy(all[0]); });
   window.__openOrders = function(){
     var box = document.getElementById('ordList'); var all = orders();
     if(!all.length){ box.innerHTML = '<p class="ord-empty">No orders yet. Pick a piece from the Catalogue and tap Order.</p>'; }
-    else { box.innerHTML = all.map(function(o){ return '<div class="ord-item"><b>' + o.name + ' \u00d7 ' + o.qty + '</b><p>Order ID ' + o.oid + ' \u00b7 ' + new Date(o.when).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) + (o.amount ? ' \u00B7 ' + inr(o.amount) : '') + '<br>Status: Waiting for Saba to confirm</p></div>'; }).join(''); }
+    else { box.innerHTML = all.map(function(o){ return '<div class="ord-item"><b>' + o.name + ' \u00d7 ' + o.qty + '</b><p>Order ID ' + o.oid + ' \u00b7 ' + new Date(o.when).toLocaleDateString('en-IN', {day:'numeric', month:'short'}) + (o.amount ? ' \u00B7 ' + inr(o.amount) : '') + '<br>Status: Waiting for Saba to confirm</p><a class="ord-ig-link" href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener" data-oid="' + o.oid + '">Send this order to Saba on Instagram</a></div>'; }).join('');
+    box.querySelectorAll('.ord-ig-link').forEach(function(a){ a.addEventListener('click', function(){ var hit = orders().filter(function(x){ return x.oid === a.getAttribute('data-oid'); })[0]; if(hit) igCopy(hit); }); }); }
     listSheet.classList.add('open');
   };
 })();
