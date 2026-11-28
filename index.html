@@ -964,6 +964,39 @@
   .faq-a p{margin:0;padding:0 40px 16px 4px;font-size:15px;line-height:1.65;color:#57431f;max-width:640px}
   .faq-item.open .faq-a{grid-template-rows:1fr}
   .cta{position:relative;overflow:hidden;text-align:center;padding:64px 20px 56px}
+  /* ---- closing arc section (2026-11-28, approved design) ---- */
+  .arc-sec{padding:30px 16px 14px}
+  .arc-stage{position:relative;max-width:1180px;margin:0 auto;height:820px;border-radius:36px;background:radial-gradient(130% 105% at 50% 0%,#fdf8ec 0%,#f8edd4 62%,rgba(248,237,212,.25) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 24px 50px rgba(58,42,18,.10)}
+  .arc-card{position:absolute;width:196px;aspect-ratio:4/5;padding:9px;border-radius:22px;background:var(--tint);box-shadow:0 18px 34px rgba(58,42,18,.20),inset 0 1px 0 rgba(255,255,255,.5);transform:rotate(var(--r));transition:opacity .8s ease var(--d,0s),transform .9s cubic-bezier(.22,.8,.3,1) var(--d,0s);z-index:1;text-decoration:none}
+  .arc-stage.pre .arc-card{opacity:0;transform:rotate(var(--r)) translateY(26px)}
+  .arc-stage.pre.in .arc-card{opacity:1;transform:rotate(var(--r)) translateY(0)}
+  .arc-stage.in .arc-card:hover{transform:rotate(var(--r)) translateY(-5px)}
+  .arc-ph{display:block;width:100%;height:100%;border-radius:14px;overflow:hidden;background:#eee2c8}
+  .arc-ph img{width:100%;height:100%;object-fit:cover;display:block}
+  .arc-centre{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:min(600px,86%);text-align:center;z-index:3}
+  .arc-eyebrow{font-family:'Manrope',sans-serif;font-size:12px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:#8a6420;margin:0}
+  .arc-h{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,6vw,64px);font-weight:600;line-height:1.05;color:#3a2a12;margin:14px 0 12px}
+  .arc-sub{font-family:'Manrope',sans-serif;font-size:16.5px;font-weight:500;line-height:1.55;color:rgba(58,42,18,.78);max-width:46ch;margin:0 auto}
+  .arc-btn{display:inline-block;margin-top:26px;padding:16px 42px;border-radius:999px;background:linear-gradient(100deg,#a37f2c,#e6c87c 50%,#a37f2c);color:#fff;font-family:'Manrope',sans-serif;font-size:16px;font-weight:700;letter-spacing:.02em;text-decoration:none;box-shadow:0 14px 30px rgba(163,127,44,.35)}
+  .arc-alt{margin:14px 0 0;font-family:'Manrope',sans-serif;font-size:13.5px;color:rgba(58,42,18,.62)}
+  .arc-alt a{color:#8a6420;font-weight:600}
+  .arc-card.a1{left:3.5%;top:5%}.arc-card.a2{left:26%;top:0}.arc-card.a3{left:55%;top:0}
+  .arc-card.a4{left:79%;top:5%}.arc-card.a5{left:83%;top:45%}.arc-card.a6{left:1%;top:45%}
+  @media (max-width:1100px){ .arc-card{width:168px} }
+  @media (max-width:860px){
+    .arc-stage{height:730px;border-radius:28px}
+    .arc-card{width:31%;padding:6px;border-radius:16px}
+    .arc-ph{border-radius:11px}
+    .arc-card.a1{left:0;top:1%}.arc-card.a2{left:34.5%;top:0}.arc-card.a3{left:68%;top:1%}
+    .arc-card.a4{left:35%;top:69%}.arc-card.a5{left:70%;top:63%}.arc-card.a6{left:0;top:63%}
+    .arc-centre{top:25%;transform:translateX(-50%);width:88%}
+    .arc-eyebrow{font-size:10.5px;letter-spacing:.24em}
+    .arc-h{font-size:42px}
+    .arc-sub{font-size:15px}
+    .arc-btn{padding:14px 34px;font-size:15px}
+  }
+  @media (prefers-reduced-motion: reduce){ .arc-card{transition:none} }
+
   .cta-arc{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
   .cta-h{position:relative;font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(40px,6.6vw,64px);line-height:1.06;color:#3a2a12;margin:12px 0 14px}
   .cta-sub{position:relative;font-size:16px;line-height:1.6;color:#57431f;max-width:520px;margin:0 auto 24px}
@@ -1300,18 +1333,25 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
     </div>
   </div>
 </section>
-<section class="cta" id="visit">
-  <svg class="cta-arc" viewBox="0 0 1200 260" preserveAspectRatio="none" aria-hidden="true">
-    <path id="ctaPath" d="M-20,214 C300,64 820,24 1150,92" fill="none" stroke="rgba(109,88,54,.45)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="0.1 10"/>
-    <g id="ctaSpark" opacity="0">
-      <path d="M0,-11 C1.6,-3.2 3.2,-1.6 11,0 C3.2,1.6 1.6,3.2 0,11 C-1.6,3.2 -3.2,1.6 -11,0 C-3.2,-1.6 -1.6,-3.2 0,-11 Z" fill="#a37f2c"/>
-    </g>
-  </svg>
-  <p class="cta-eyebrow rv">Noor Maison · By Saba</p>
-  <h2 class="cta-h rv">Find the piece that<br>feels like <em>you.</em></h2>
-  <p class="cta-sub rv">Every piece is ready to order — or talk to Saba first; she is happy to help you choose.</p>
-  <a class="cta-btn rv" href="#collection">See the Collection</a>
-  <p class="cta-alt rv">or <a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">talk to Saba on Instagram</a></p>
+<section class="cta arc-sec" id="visit">
+  <!-- Closing arc (approved design, 2026-11-28): real pieces on pastel
+       cards fanning around the closing words. One closing flow — this
+       replaced the old headline + sparkle-arc block. -->
+  <div class="arc-stage">
+    <a class="arc-card a1" style="--r:-11deg;--tint:#a9b49b;--d:.00s" href="product?p=cat-4" aria-label="Gold Leaf Set"><span class="arc-ph"><img src="catalogue/web/prod04.webp" alt="Gold Leaf Set" loading="lazy"></span></a>
+    <a class="arc-card a2" style="--r:-3deg;--tint:#efdfae;--d:.07s" href="product?p=cat-10" aria-label="Square Cushion Pendant"><span class="arc-ph"><img src="catalogue/web/prod10.webp" alt="Square Cushion Pendant" loading="lazy"></span></a>
+    <a class="arc-card a3" style="--r:4deg;--tint:#c3bed6;--d:.14s" href="product?p=prod-1" aria-label="The Clover Ring"><span class="arc-ph"><img src="assets-stock/site-01-real.webp" alt="The Clover Ring" loading="lazy"></span></a>
+    <a class="arc-card a4" style="--r:11deg;--tint:#e4d5bd;--d:.21s" href="product?p=cat-27" aria-label="Purple Druzy Bangle"><span class="arc-ph"><img src="catalogue/web/prod27-copper.webp" alt="Purple Druzy Bangle" loading="lazy"></span></a>
+    <a class="arc-card a5" style="--r:8deg;--tint:#7fa3a1;--d:.28s" href="product?p=cat-1" aria-label="Magenta Teal Chandeliers"><span class="arc-ph"><img src="catalogue/web/prod01.webp" alt="Magenta Teal Chandeliers" loading="lazy"></span></a>
+    <a class="arc-card a6" style="--r:-8deg;--tint:#eccfc9;--d:.35s" href="product?p=cat-18" aria-label="Green Clover Bracelet"><span class="arc-ph"><img src="catalogue/web/prod18.webp" alt="Green Clover Bracelet" loading="lazy"></span></a>
+    <div class="arc-centre">
+      <p class="arc-eyebrow">Korean-Imported · Anti-Tarnish</p>
+      <h2 class="arc-h">Made to Stay Gold</h2>
+      <p class="arc-sub">Imported from Korea with an anti-tarnish finish — shine that stays, every single day.</p>
+      <a class="arc-btn" href="explore">Shop the collection</a>
+      <p class="arc-alt">or <a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">talk to Saba on Instagram</a></p>
+    </div>
+  </div>
 </section>
 <footer class="foot">
     <p class="foot-c">© 2026 Noor Maison by Saba</p>
@@ -2844,33 +2884,23 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 })();
 </script>
 
+
 <script>
-/* Closing CTA: the sparkle rides the dotted arc on SCROLL (user order
-   2026-11-28 — the scroll-scrubbed motion-path from his portfolio,
-   replacing the old free-running 7s SMIL loop). Progress = how far the
-   section has travelled through the viewport; the position comes from
-   the path's own geometry (getPointAtLength), so the sparkle can never
-   leave the arc. */
+/* Closing arc: cards settle in once as the stage scrolls into view.
+   The stage starts visible; this script arms the hidden state only
+   when motion is welcome, then reveals on first view. Nothing loops. */
 (function(){
-  var sec = document.getElementById('visit'), path = document.getElementById('ctaPath'),
-      spark = document.getElementById('ctaSpark');
-  if(!sec || !path || !spark) return;
+  var st = document.querySelector('.arc-stage');
+  if(!st) return;
   if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var L = path.getTotalLength(), ticking = false;
-  function place(){
-    ticking = false;
-    var r = sec.getBoundingClientRect(), vh = window.innerHeight || 800;
-    var p = (vh - r.top) / (vh + r.height);            /* 0 = entering, 1 = leaving */
-    p = Math.min(1, Math.max(0, (p - 0.12) / 0.76));   /* the ride happens mid-pass */
-    var pt = path.getPointAtLength(p * L);
-    spark.setAttribute('transform', 'translate(' + pt.x + ',' + pt.y + ')');
-    spark.setAttribute('opacity', (p <= 0 || p >= 1) ? 0 :
-      (p < 0.1 ? p * 10 : (p > 0.9 ? (1 - p) * 10 : 1)));
-  }
-  function ask(){ if(!ticking){ ticking = true; requestAnimationFrame(place); } }
-  window.addEventListener('scroll', ask, { passive: true });
-  window.addEventListener('resize', ask);
-  place(); setTimeout(place, 600);
+  st.classList.add('pre');
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    if(!('IntersectionObserver' in window)){ st.classList.add('in'); return; }
+    var io = new IntersectionObserver(function(es){
+      if(es[0].isIntersecting){ st.classList.add('in'); io.disconnect(); }
+    }, { threshold: .2 });
+    io.observe(st);
+  });});
 })();
 </script>
 </body>
