@@ -422,6 +422,28 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 .ph img.nm-in, .cc-ph img.nm-in{opacity:1}
 @keyframes nmShimmer{from{background-position:180% 0}to{background-position:-80% 0}}
 </style>
+<style>
+  /* Customer account (Settings panel) — filled by the NM_AUTH script */
+  .acct-note{font-size:13.5px;line-height:1.6;color:rgba(58,42,18,.72);margin:12px 0 0}
+  .acct-dim{color:rgba(58,42,18,.5);font-size:12.5px}
+  .acct-gbtn{margin-top:6px;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:13px;border:1px solid rgba(58,42,18,.28);border-radius:999px;background:#fff;color:#262019;font-family:'Manrope',sans-serif;font-size:15px;font-weight:600;cursor:pointer}
+  .acct-head{display:flex;align-items:center;gap:12px;margin-top:4px}
+  .acct-ava{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#e9dcbc;flex:none}
+  .acct-ava-fb{display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;color:#7c5a1e}
+  .acct-name{font-size:16px;font-weight:700;color:#262019}
+  .acct-mail{font-size:13px;color:rgba(58,42,18,.6)}
+  .acct-f{display:block;font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#8a6420;margin-top:13px}
+  .acct-f input,.acct-f textarea{display:block;width:100%;margin-top:7px;padding:12px 13px;border:1px solid rgba(26,23,18,.25);border-radius:12px;background:#fff;font-family:'Manrope',sans-serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:#262019;box-sizing:border-box}
+  .acct-save{margin-top:14px;width:100%;padding:13px 0;border:none;border-radius:999px;background:#2e2010;color:#fdf6dd;font-family:'Manrope',sans-serif;font-size:14px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+  .acct-out{margin-top:10px;width:100%;padding:11px 0;border:1px solid rgba(58,42,18,.3);border-radius:999px;background:transparent;color:#57431f;font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+  .acct-msg{margin-top:11px;font-size:13.5px;line-height:1.5}
+  .acct-msg.ok{color:#1a7f37}
+  .acct-msg.err{color:#b3261e}
+  .acct-orders{margin-top:18px;border-top:1px solid rgba(58,42,18,.14);padding-top:12px}
+  .acct-h{font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#8a6420;margin-bottom:8px}
+  .acct-orow{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:#262019;padding:5px 0}
+  .acct-oid{color:rgba(58,42,18,.55);font-size:12.5px}
+</style>
 </head>
 <body>
   <!-- SVG goo filter for the GooeyNav ball (see the GooeyNav CSS note):
@@ -542,7 +564,7 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
 <footer class="foot">
     <p class="foot-c">&copy; 2026 Noor Maison by Saba</p>
     <p class="foot-l">Noor Maison by Saba · <a href="https://www.google.com/maps/search/?api=1&query=Noor+Maison+by+Saba+Noorkhan+Bazar+Hyderabad" target="_blank" rel="noopener">22-1-809 Noorkhan Bazar, Hyderabad 500024</a><span class="dot" aria-hidden="true">&middot;</span><a href="tel:+91-8686690764">Call 86866 90764</a></p>
-    <p class="foot-l"><a href="./">Home</a><span class="dot" aria-hidden="true">&middot;</span><a href="./#collection">The Collection</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://www.instagram.com/noormaison_by_saba" target="_blank" rel="noopener">Instagram @noormaison_by_saba</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a></p>
+    <p class="foot-l"><a href="./">Home</a><span class="dot" aria-hidden="true">&middot;</span><a href="./#collection">The Collection</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://www.instagram.com/noormaison_by_saba" target="_blank" rel="noopener">Instagram @noormaison_by_saba</a><span class="dot" aria-hidden="true">&middot;</span><a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">Talk to Saba</a><span class="dot" aria-hidden="true">·</span><a href="privacy">Privacy</a><span class="dot" aria-hidden="true">·</span><a href="terms">Terms</a></p>
   </footer>
 </div>
 
@@ -628,10 +650,11 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
   <div class="scrim" data-close></div>
   <div class="panel">
     <div class="grab" aria-hidden="true"></div>
-    <h3>Settings</h3>
-    <div class="row"><p class="k">About</p><p class="v">Noor Maison by Saba — fine jewellery, pieces made to be worn, loved and kept.</p></div>
-    <div class="row"><p class="k">Contact</p><p class="v">DM Saba on Instagram — <a href="https://ig.me/m/noormaison_by_saba" target="_blank" rel="noopener">@noormaison_by_saba</a></p></div>
-    <div class="row"><p class="k">Orders &amp; Policies</p><p class="v">Orders are placed on this website, with UPI payment. Every order is confirmed before it is sent.</p></div>
+        <h3>Settings</h3>
+    <!-- Customer account lives here now (2026-11-28): the NM_AUTH
+         script at the end of the page fills #acctBody — sign-in
+         button for guests, profile settings when signed in. -->
+    <div id="acctBody"><p class="acct-note">Checking your sign-in&hellip;</p></div>
   </div>
 </div>
 
@@ -1455,5 +1478,145 @@ window.NM_PAY = { upiId: '', upiName: '', prices: {} };
   window.NM_ARM_IMG = arm; /* FULLY LIVE: live-built card photos fade in too */
 })();
 </script>
+
+<script>
+/* NM_AUTH — customer accounts: Google sign-in via Supabase Auth,
+   raw GoTrue/PostgREST calls (same no-library pattern as NM_LIVE).
+   The session lives in localStorage. Sign-in is OPTIONAL — guest
+   ordering works exactly as before. The profile holds only a phone
+   number and a delivery address, saved to public.profiles, which is
+   owner-scoped by row-level security: a customer can only ever read
+   or write their own row. */
+(function(){
+  var BASE = 'https://iysracetedbkjfpsizah.supabase.co';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5c3JhY2V0ZWRia2pmcHNpemFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3NzIzOTUsImV4cCI6MjExMTM0ODM5NX0._r5U_dDLzlI161_NYlrsNlLEdDKoI8i1exlBeHguHe4';
+  var LS = 'nm_session_v1';
+  function sess(){ try { return JSON.parse(localStorage.getItem(LS)); } catch(e){ return null; } }
+  function setSess(s){ try { if (s) { localStorage.setItem(LS, JSON.stringify(s)); } else { localStorage.removeItem(LS); } } catch(e){} window.NM_SESSION = s; }
+  /* OAuth return: the tokens arrive in the URL hash — capture them,
+     then clean the address bar so they are never shared or bookmarked. */
+  if (location.hash && location.hash.indexOf('access_token=') > -1) {
+    var hp = new URLSearchParams(location.hash.substring(1));
+    if (hp.get('access_token')) {
+      setSess({ access_token: hp.get('access_token'), refresh_token: hp.get('refresh_token'),
+        expires_at: Date.now() + (parseInt(hp.get('expires_in') || '3600', 10) * 1000) });
+      try { history.replaceState(null, '', location.pathname + location.search); } catch(e){}
+    }
+  }
+  window.NM_SESSION = sess();
+  var USER = null, PROFILE = null, DONE = false;
+  function esc(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function call(path, method, body, tok){
+    var h = { 'apikey': KEY, 'Authorization': 'Bearer ' + (tok || KEY), 'Content-Type': 'application/json' };
+    return fetch(BASE + path, { method: method || 'GET', headers: h, body: body ? JSON.stringify(body) : undefined });
+  }
+  function refresh(s){
+    return call('/auth/v1/token?grant_type=refresh_token', 'POST', { refresh_token: s.refresh_token }, KEY)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if (j && j.access_token) { setSess({ access_token: j.access_token, refresh_token: j.refresh_token || s.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000 }); return sess(); }
+        setSess(null); return null;
+      }).catch(function(){ return null; });
+  }
+  function ensure(){
+    var s = sess();
+    if (!s) return Promise.resolve(null);
+    if (s.expires_at && s.expires_at - Date.now() < 60000 && s.refresh_token) return refresh(s);
+    return Promise.resolve(s);
+  }
+  var GSVG = '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34.3 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>';
+  function render(){
+    var box = document.getElementById('acctBody');
+    if (!box) return;
+    if (!USER) {
+      if (!DONE && sess()) { box.innerHTML = '<p class="acct-note">Checking your sign-in&hellip;</p>'; return; }
+      box.innerHTML = '<button type="button" class="acct-gbtn" id="acctGoogle">' + GSVG + '<span>Sign in with Google</span></button>'
+        + '<p class="acct-note">Sign in to order faster &mdash; your details and your orders stay in one place.</p>'
+        + '<p class="acct-note acct-dim">No account? No problem &mdash; you can always order as a guest.</p>';
+      document.getElementById('acctGoogle').addEventListener('click', signIn);
+      return;
+    }
+    var md = USER.user_metadata || {};
+    var name = md.full_name || md.name || USER.email || 'Your account';
+    var pic = md.avatar_url || md.picture || '';
+    var orders = [];
+    try { orders = JSON.parse(localStorage.getItem('nm_orders') || '[]'); } catch(e){}
+    var oh = '';
+    if (orders.length) {
+      oh = '<div class="acct-orders"><p class="acct-h">Your orders on this phone</p>' + orders.slice().reverse().slice(0, 6).map(function(o){
+        return '<div class="acct-orow"><span>' + esc(o.name || 'Order') + (o.qty > 1 ? ' &times;' + o.qty : '') + '</span><span class="acct-oid">' + esc(o.oid || '') + '</span></div>';
+      }).join('') + '</div>';
+    }
+    box.innerHTML =
+      '<div class="acct-head">' + (pic ? '<img class="acct-ava" s' + 'rc="' + esc(pic) + '" alt="" referrerpolicy="no-referrer">' : '<span class="acct-ava acct-ava-fb">' + esc(String(name).charAt(0).toUpperCase()) + '</span>')
+      + '<div><p class="acct-name">' + esc(name) + '</p><p class="acct-mail">' + esc(USER.email || '') + '</p></div></div>'
+      + '<label class="acct-f">Phone (WhatsApp)<input id="acctPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit number" value="' + esc((PROFILE && PROFILE.phone) || '') + '"></label>'
+      + '<label class="acct-f">Delivery address<textarea id="acctAddr" rows="3" placeholder="House, street, city, PIN code">' + esc((PROFILE && PROFILE.address) || '') + '</textarea></label>'
+      + '<p class="acct-msg" id="acctMsg" hidden></p>'
+      + '<button type="button" class="acct-save" id="acctSave">Save my details</button>'
+      + oh
+      + '<button type="button" class="acct-out" id="acctOut">Sign out</button>';
+    document.getElementById('acctSave').addEventListener('click', saveProfile);
+    document.getElementById('acctOut').addEventListener('click', signOut);
+  }
+  function signIn(){
+    location.href = BASE + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(location.origin + location.pathname);
+  }
+  function signOut(){
+    var s = sess();
+    if (s) { call('/auth/v1/logout', 'POST', null, s.access_token).catch(function(){}); }
+    setSess(null); USER = null; PROFILE = null; DONE = true; render();
+  }
+  function saveProfile(){
+    var msg = document.getElementById('acctMsg');
+    var phone = (document.getElementById('acctPhone').value || '').replace(/\D/g, '');
+    var addr = (document.getElementById('acctAddr').value || '').trim();
+    function show(t, ok){ if (msg) { msg.hidden = false; msg.textContent = t; msg.className = 'acct-msg ' + (ok ? 'ok' : 'err'); } }
+    if (phone && phone.length !== 10) { show('Please enter a 10-digit phone number.', false); return; }
+    show('Saving\u2026', true);
+    ensure().then(function(s){
+      if (!s) { show('Please sign in again.', false); return; }
+      var h = { 'apikey': KEY, 'Authorization': 'Bearer ' + s.access_token, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' };
+      fetch(BASE + '/rest/v1/profiles', { method: 'POST', headers: h, body: JSON.stringify({ id: USER.id, phone: phone || null, address: addr || null, updated_at: new Date().toISOString() }) })
+        .then(function(r){
+          if (r.ok) { PROFILE = { phone: phone || null, address: addr || null }; show('Saved \u2713 Your details will be filled in when you order.', true); prefill(); }
+          else { show('Could not save. Please check your internet and try again.', false); }
+        }).catch(function(){ show('Could not save. Please check your internet and try again.', false); });
+    });
+  }
+  /* Checkout prefill: fill the order sheet's fields from the account
+     (only into fields the customer has not typed in herself). */
+  function prefill(){
+    if (!USER) return;
+    var md = USER.user_metadata || {};
+    var vals = { fName: md.full_name || md.name || '', fPhone: (PROFILE && PROFILE.phone) || '', fAddr: (PROFILE && PROFILE.address) || '' };
+    for (var id in vals) { var el = document.getElementById(id); if (el && !el.value && vals[id]) el.value = vals[id]; }
+  }
+  /* Orders placed while signed in are linked to the account in the
+     database (orders.user_id); guests' orders are unchanged. */
+  if (window.NM_LIVE_POST) {
+    var _post = window.NM_LIVE_POST;
+    window.NM_LIVE_POST = function(o){ if (USER) { o.user_id = USER.id; } return _post(o); };
+  }
+  window.NM_AUTH = { user: function(){ return USER; }, signIn: signIn, signOut: signOut };
+  render();
+  ensure().then(function(s){
+    if (!s) { DONE = true; render(); return null; }
+    return call('/auth/v1/user', 'GET', null, s.access_token).then(function(r){
+      if (!r.ok) { setSess(null); return null; }
+      return r.json();
+    }).catch(function(){ return null; });
+  }).then(function(u){
+    USER = u; DONE = true;
+    if (!u) { render(); return; }
+    var s = sess();
+    call('/rest/v1/profiles?id=eq.' + u.id + '&select=phone,address', 'GET', null, s ? s.access_token : null)
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(rows){ PROFILE = (rows && rows[0]) || null; render(); prefill(); })
+      .catch(function(){ render(); });
+  });
+})();
+</script>
+
 </body>
 </html>
