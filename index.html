@@ -959,6 +959,7 @@
   .arc-card.a8{left:10.5%;top:72.5%}
   .arc-card.a9{left:87.5%;top:79.5%}
   .arc-stage.pre .arc-card{opacity:0;transform:translate(-50%,-50%) rotate(var(--r)) translateY(26px)}
+  .arc-stage.pre.in .arc-card{opacity:1;transform:translate(-50%,-50%) rotate(var(--r)) translateY(0)}
   .arc-centre{position:absolute;left:50%;top:53%;transform:translate(-50%,-50%);width:min(560px,86%);text-align:center;z-index:3}
   .arc-eyebrow{font-family:'Manrope',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.34em;text-transform:uppercase;color:#8a6420;margin:0 0 14px}
   .arc-h{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(38px,4.6vw,58px);line-height:1.08;color:#3a2a12;margin:0}
@@ -981,6 +982,23 @@
     .arc-sub{font-size:14px}
     .arc-foot{font-size:8.5px;letter-spacing:.13em;padding:0 6px;white-space:nowrap}
   }
+/* ---------- offers marquee bar (all pages, added 2026-11-27) ----------
+     A thin ink bar at the very top of every page, repeating the current
+     offers in a seamless leftward loop. It is the FIRST element in <body>
+     (in-flow, not fixed) so it can never cover the floating pill navbar —
+     it simply scrolls away with the page. The track holds TWO identical
+     .mq-seq spans and animates to -50%, so the wrap point is invisible.
+     Style: ink bar + foil-gold text — a gold bar would blur into the
+     foil navbar below it (sub-pages) and the light-gold hero (home).
+     TO CHANGE THE OFFERS: edit the text inside BOTH .mq-seq spans in the
+     markup (keep them identical) — no CSS or JS change is needed.
+     Reduced-motion visitors get a still bar. */
+  .mq{background:#241a0c;color:#e6c87c;overflow:hidden;height:32px;display:flex;align-items:center;position:relative;z-index:55}
+  .mq-track{display:flex;flex:none;white-space:nowrap;will-change:transform;animation:mqScroll 28s linear infinite}
+  .mq-seq{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
+  .mq-seq i{font-style:normal;color:#a37f2c;padding:0 .9em}
+  @keyframes mqScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media (prefers-reduced-motion: reduce){ .mq-track{animation:none} }
 </style>
 <script>
 /* PAYMENT CONFIG — the ONE place to fill when Saba's details arrive.
